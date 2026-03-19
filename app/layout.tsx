@@ -21,8 +21,8 @@ const notoSansJp = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "QUESTORIA AI（仮）",
-  description: "AIスキル診断 QUESTORIA（仮）",
+  title: "QUESTORIA | AIスキル診断",
+  description: "AIを活用して課題を定義し、設計し、判断する思考力を診断する。あなたのAIスキルを、証明せよ。",
 };
 
 export default function RootLayout({

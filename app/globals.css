@@ -30,30 +30,37 @@ body {
 
 /* STEP 1b: GlitchText */
 @keyframes glitch {
-  0%, 88%, 100% {
+  0%, 70%, 100% {
     transform: none;
     clip-path: none;
     opacity: 1;
   }
-  90% {
+  72% {
     transform: translateX(-4px);
     clip-path: inset(20% 0 60% 0);
     opacity: 0.85;
-    color: #00E5FF;
   }
-  92% {
+  74% {
     transform: translateX(4px);
     clip-path: inset(60% 0 20% 0);
     opacity: 0.85;
-    color: #FFD700;
   }
-  94% {
+  76% {
     transform: translateX(-2px);
     clip-path: inset(40% 0 40% 0);
     opacity: 0.9;
   }
+  78% {
+    transform: translateX(3px);
+    clip-path: inset(10% 0 70% 0);
+    opacity: 0.85;
+  }
+  80% {
+    transform: none;
+    clip-path: none;
+    opacity: 1;
+  }
 }
-
 /* STEP 1b: ParticleField */
 @keyframes float-particle {
   0% {
@@ -88,4 +95,9 @@ body {
     transform: translateX(120%);
     opacity: 0;
   }
+}
+
+@keyframes scanBar {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(700%); }
 }

@@ -6,7 +6,7 @@ type Props = {
 };
 
 export default function GlitchText({ children, className }: Props) {
-  const durationSec = 8;
+  const durationSec = 4; // 8→4で頻度2倍
 
   return (
     <span className={`relative inline-block ${className ?? ""}`}>
@@ -20,7 +20,7 @@ export default function GlitchText({ children, className }: Props) {
         {children}
       </span>
       <span
-        className="absolute inset-0 translate-x-[1px] text-[#00E5FF] opacity-20"
+        className="absolute inset-0 translate-x-[1px] text-[#FFD700] opacity-20"
         style={{
           animation: `glitch ${durationSec}s infinite`,
           willChange: "transform, clip-path, opacity",
