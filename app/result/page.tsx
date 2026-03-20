@@ -71,8 +71,8 @@ export default function ResultPage() {
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
   const questLabel = result.questType === "business" ? "BUSINESS QUEST" : "DAILY QUEST";
 
-  const shareTextInviteFriends = `QUESTORIAのAIスキル診断やってみた。\n私は「${typeData.nameJa}」。\nあなたは何タイプ？\n#QUESTORIA #AIスキル診断\nquestoria.app`;
-
+  const shareTextInviteFriends = `QUESTORIAのAIスキル診断やってみた。\n私は「${typeData.nameJa}」。\nあなたは何タイプ？\n#QUESTORIA #AIスキル診断\nhttps://questoria-liart.vercel.app`;
+  
   return (
     <main
       className="min-h-[100svh] w-full bg-[#0A0A0F] text-white"
