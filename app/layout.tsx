@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "QUESTORIA",
     images: [
       {
-        url: "https://questoria.app/og-default.png",
+        url: "https://questoria-liart.vercel.app/og-default.png",
         width: 1200,
         height: 630,
         alt: "QUESTORIA AIスキル診断",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "QUESTORIA | AIスキル診断",
     description: "あなたのAIスキルタイプを診断する。勇者？賢者？それとも狂戦士？",
-    images: ["https://questoria.app/og-default.png"],
+    images: ["https://questoria-liart.vercel.app/og-default.png"],
   },
 };
 
