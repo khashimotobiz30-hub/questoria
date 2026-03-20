@@ -147,9 +147,7 @@ export default function QuestSelectPage() {
               ▶ このクエストで進む
             </button>
           )}
-          <p className="mt-3 text-center font-[var(--font-share-tech)] text-[10px] tracking-[0.28em] text-white/40">
-            ※ この先の診断ページは別STEPで実装します
-          </p>
+          
         </div>
       </div>
     </main>

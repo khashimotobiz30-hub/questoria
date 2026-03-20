@@ -140,7 +140,6 @@ export default function ResultPage() {
               <span className="font-mono text-[10px] tracking-[0.2em] text-white/50 border border-white/20 px-2 py-0.5 rounded-sm bg-black/40">
                 {questLabel}
               </span>
-              <span className="text-[10px] text-white/40">{questLabelJa}</span>
             </div>
             <p className="font-mono text-[11px] tracking-[0.28em] text-cyan-300/90 mb-2"
               style={{ textShadow:"0 0 8px rgba(0,229,255,0.6)" }}>
