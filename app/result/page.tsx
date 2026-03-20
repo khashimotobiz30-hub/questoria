@@ -26,11 +26,6 @@ const ALL_TYPES: ResultType[] = [
   "artisan","wizard","pioneer","origin"
 ];
 
-const typeNameMap: Record<ResultType, string> = {
-  hero: "勇者", sage: "賢者", berserker: "狂戦士", oracle: "占い師",
-  artisan: "鍛冶師", wizard: "魔法使い", pioneer: "冒険者", origin: "はじまりの者",
-};
-
 function openXShare(text: string) {
   const encoded = encodeURIComponent(text);
   const url = `https://twitter.com/intent/tweet?text=${encoded}`;
@@ -51,7 +46,6 @@ export default function ResultPage() {
     try {
       const parsed = JSON.parse(raw) as DiagnosisResult;
       setResult(parsed);
-      // 自分以外からランダム4タイプ
       const others = ALL_TYPES
         .filter(t => t !== parsed.resultType)
         .sort(() => Math.random() - 0.5)
@@ -76,7 +70,6 @@ export default function ResultPage() {
   const typeData = typeMaster[result.resultType];
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
   const questLabel = result.questType === "business" ? "BUSINESS QUEST" : "DAILY QUEST";
-  const questLabelJa = result.questType === "business" ? "ビジネスクエスト" : "日常クエスト";
 
   const shareTextInviteFriends = `QUESTORIAのAIスキル診断やってみた。\n私は「${typeData.nameJa}」。\nあなたは何タイプ？\n#QUESTORIA #AIスキル診断\nquestoria.app`;
 
@@ -103,7 +96,6 @@ export default function ResultPage() {
 
         {/* ── ヒーローセクション ── */}
         <div className="relative w-full overflow-hidden" style={{ height: "75svh" }}>
-
           <Image
             src={imageSrc}
             alt={typeData.nameJa}
@@ -113,30 +105,25 @@ export default function ResultPage() {
             style={{ objectPosition: "center 15%", filter: "brightness(1.3)" }}
             priority
           />
-
-          {/* 上部グラデーション */}
           <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
-          {/* 下部グラデーション */}
           <div className="absolute inset-x-0 bottom-0 pointer-events-none"
             style={{ height:"60%", background:"linear-gradient(to top, #0A0A0F 20%, rgba(10,10,15,0.6) 55%, transparent 100%)" }} />
 
-          {/* 上部バー：ロゴ＋バッジ */}
+          {/* 上部バー */}
           <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-4 z-10">
-           
             <span className="font-mono text-xs tracking-[0.3em] text-[#FFD700]"
               style={{ textShadow:"0 0 10px rgba(255,215,0,0.9), 0 0 20px rgba(255,215,0,0.4)" }}>
               QUESTORIA
             </span>
             <span className="font-mono text-[10px] tracking-[0.2em] text-cyan-300 px-2 py-0.5 bg-black/60 backdrop-blur-sm"
-              style={{ border:"1px solid rgba(0,229,255,0.7)", boxShadow:"0 0 10px rgba(0,229,255,0.3), inset 0 0 8px rgba(0,229,255,0.05)" }}>
+              style={{ border:"1px solid rgba(0,229,255,0.7)", boxShadow:"0 0 10px rgba(0,229,255,0.3)" }}>
               QUEST COMPLETE
             </span>
           </div>
 
           {/* タイプ名オーバーレイ */}
           <div className="absolute inset-x-0 bottom-0 px-4 pb-6 z-10">
-            {/* クエスト種別バッジ */}
-            <div className="mb-2 inline-flex items-center gap-1.5">
+            <div className="mb-2">
               <span className="font-mono text-[10px] tracking-[0.2em] text-white/50 border border-white/20 px-2 py-0.5 rounded-sm bg-black/40">
                 {questLabel}
               </span>
@@ -175,25 +162,37 @@ export default function ResultPage() {
             </div>
           </div>
 
-          {/* 説明文 */}
+          {/* 説明文：差別化 */}
           <div className="space-y-3">
-            <div className="rounded-xl border border-[#FFD700]/25 bg-gradient-to-b from-[#FFD700]/8 to-[#FFD700]/3 p-4 shadow-[0_0_20px_rgba(255,215,0,0.05)]">
-              <p className="font-mono text-xs tracking-[0.24em] text-[#FFD700] mb-2"
-                style={{ textShadow:"0 0 8px rgba(255,215,0,0.5)" }}>ESSENCE</p>
+            {/* ESSENCE：ゴールド・左ボーダー強め */}
+            <div className="rounded-xl border-l-2 border-t border-r border-b border-l-[#FFD700]/70 border-t-[#FFD700]/20 border-r-[#FFD700]/20 border-b-[#FFD700]/20 bg-gradient-to-b from-[#FFD700]/8 to-[#FFD700]/3 p-4 shadow-[0_0_20px_rgba(255,215,0,0.05)]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[#FFD700]">◆</span>
+                <p className="font-mono text-xs tracking-[0.24em] text-[#FFD700]"
+                  style={{ textShadow:"0 0 8px rgba(255,215,0,0.5)" }}>ESSENCE</p>
+              </div>
               <p className="text-sm leading-relaxed text-white/80">{typeData.description.essence}</p>
             </div>
-            <div className="rounded-xl border border-cyan-300/25 bg-gradient-to-b from-cyan-300/8 to-cyan-300/3 p-4 shadow-[0_0_20px_rgba(0,229,255,0.05)]">
-              <p className="font-mono text-xs tracking-[0.24em] text-cyan-300 mb-2"
-                style={{ textShadow:"0 0 8px rgba(0,229,255,0.5)" }}>STRENGTH</p>
+
+            {/* STRENGTH：シアン・左ボーダー */}
+            <div className="rounded-xl border-l-2 border-t border-r border-b border-l-cyan-400/70 border-t-cyan-300/20 border-r-cyan-300/20 border-b-cyan-300/20 bg-gradient-to-b from-cyan-300/8 to-cyan-300/3 p-4 shadow-[0_0_20px_rgba(0,229,255,0.05)]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-cyan-300">▶</span>
+                <p className="font-mono text-xs tracking-[0.24em] text-cyan-300"
+                  style={{ textShadow:"0 0 8px rgba(0,229,255,0.5)" }}>STRENGTH</p>
+              </div>
               <p className="text-sm leading-relaxed text-white/80">{typeData.description.strength}</p>
             </div>
-            <div className="rounded-xl border border-white/15 bg-gradient-to-b from-white/6 to-white/2 p-4">
-              <p className="font-mono text-xs tracking-[0.24em] text-white/70 mb-2">GROWTH</p>
+
+            {/* GROWTH：白・点線ボーダー */}
+            <div className="rounded-xl border border-dashed border-white/20 bg-gradient-to-b from-white/4 to-transparent p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-white/50">↑</span>
+                <p className="font-mono text-xs tracking-[0.24em] text-white/60">GROWTH</p>
+              </div>
               <p className="text-sm leading-relaxed text-white/80">{typeData.description.growth}</p>
             </div>
           </div>
-
-         
 
           {/* COMPARE */}
           <div className="rounded-2xl border border-[#FFD700]/20 bg-gradient-to-b from-[#FFD700]/8 to-transparent p-5 shadow-[0_0_30px_rgba(255,215,0,0.05)]">
@@ -213,41 +212,40 @@ export default function ResultPage() {
             </button>
           </div>
 
- {/* 他タイプちら見せ */}
- <div className="rounded-2xl border border-white/20 bg-gradient-to-b from-white/4 to-transparent p-5">
+          {/* OTHER TYPES */}
+          <div className="rounded-2xl border border-white/20 bg-gradient-to-b from-white/4 to-transparent p-5">
             <p className="font-mono text-[11px] tracking-[0.28em] text-white/50 mb-4">
               // OTHER TYPES //
             </p>
             <div className="grid grid-cols-4 gap-2">
               {otherTypes.map(type => (
-                <div key={type} className="flex flex-col items-center gap-1.5 group cursor-pointer"
-                  onClick={() => router.push("/")}>
-                  <div className="relative w-full aspect-square overflow-hidden rounded-lg border border-white/10 group-hover:border-cyan-300/40 transition">
+                <div key={type} className="flex flex-col items-center gap-1.5">
+                  <div className="relative w-full aspect-square overflow-hidden rounded-lg border border-white/10 transition">
                     <Image
                       src={typeImageMap[type]}
-                      alt={typeNameMap[type]}
+                      alt={type}
                       fill
                       className="object-cover object-top"
                       style={{ filter:"brightness(1.0) grayscale(0.1)" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   </div>
-                  <span className="text-[10px] text-white/75 group-hover:text-white/100 transition text-center leading-tight">
-                    {typeNameMap[type]}
+                  {/* ✅ 英語表記・uppercase */}
+                  <span className="font-mono text-[9px] tracking-wider text-white/70 text-center leading-tight uppercase">
+                    {type}
                   </span>
                 </div>
               ))}
             </div>
-          <button
-  type="button"
-  className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-[#FFD700]/40 bg-black/50 px-4 py-3 text-sm font-semibold text-[#FFD700] shadow-[0_0_20px_rgba(255,215,0,0.1)] transition hover:border-[#FFD700]/70 hover:shadow-[0_0_30px_rgba(255,215,0,0.2)]"
-  style={{ textShadow:"0 0 10px rgba(255,215,0,0.5)" }}
-  onClick={() => router.push("/")}
->
-  他のタイプが気になる？<br />クリックしてもう一度診断してみよう！
-</button>
+            {/* ✅ 控えめなスタイルに変更 */}
+            <button
+              type="button"
+              className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm font-semibold text-white/70 transition hover:border-white/35 hover:text-white/90"
+              onClick={() => router.push("/")}
+            >
+              他のタイプが気になる？<br />クリックしてもう一度診断してみよう！
+            </button>
           </div>
-          
 
         </div>
       </div>
@@ -279,7 +277,8 @@ function SkillBar({ label, score, level }: { label: string; score: number; level
           {score}
         </span>
       </div>
-      <div className="relative h-[6px] w-full rounded-full bg-white/10 overflow-hidden">
+      {/* ✅ h-[8px] に太く */}
+      <div className="relative h-[10px] w-full rounded-full bg-white/10 overflow-hidden">
         <div className="absolute inset-0 rounded-full"
           style={{ background:"linear-gradient(90deg, rgba(255,215,0,0.05), transparent)" }} />
         <div
