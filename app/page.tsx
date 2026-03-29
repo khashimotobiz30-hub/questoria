@@ -60,13 +60,13 @@ export default function Home() {
 
           {/* CTAボタン → 枠線スタイル */}
           <div className="mt-8 flex justify-center">
-            <Link
-              href="/quest"
-              className="inline-flex items-center justify-center border border-[#FFD700]/70 bg-black/40 px-8 py-4 font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#FFD700] backdrop-blur-sm transition hover:border-[#FFD700] hover:bg-[#FFD700]/10 hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] focus-visible:outline-none"
-              style={{ boxShadow:"0 0 15px rgba(255,215,0,0.1)" }}
-            >
-              ▶ クエストを始める
-            </Link>
+          <Link
+  href="/play"
+  className="inline-flex items-center justify-center border border-[#FFD700]/70 bg-black/40 px-8 py-4 font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#FFD700] backdrop-blur-sm transition hover:border-[#FFD700] hover:bg-[#FFD700]/10 hover:shadow-[0_0_30px_rgba(255,215,0,0.3)] focus-visible:outline-none"
+  style={{ boxShadow:"0 0 15px rgba(255,215,0,0.1)" }}
+>
+  ▶ クエストを始める
+</Link>
           </div>
 
         </div>

@@ -16,7 +16,7 @@ export default function StatusPanel() {
     >
       {/* ヘッダー */}
       <p className="font-mono text-[11px] tracking-[0.28em] text-white/75 mb-4">
-  // SKILL STATUS //
+      {"// SKILL STATUS //"}
 </p>
 
       <div className="flex flex-col gap-4">

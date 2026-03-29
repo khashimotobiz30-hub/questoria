@@ -1,5 +1,3 @@
-export type QuestType = "daily" | "business";
-
 export type ResultType =
   | "hero"
   | "sage"
@@ -12,10 +10,12 @@ export type ResultType =
 
 export type OptionKey = "A" | "B" | "C" | "D";
 
+export type AxisKey = "purpose" | "design" | "decision";
+
 export type AxisScores = {
-  purpose: number; // 目的定義力
-  design: number; // 設計力
-  decision: number; // 自律判断力
+  purpose: number;
+  design: number;
+  decision: number;
 };
 
 export type AxisLevels = {
@@ -25,39 +25,38 @@ export type AxisLevels = {
 };
 
 export type AnswerRecord = {
-  questionId: string; // "{questType}_q{n}" 例: business_q1
+  questionId: string; // "q1"〜"q12"
   selectedOption: OptionKey;
-  scores: AxisScores;
+  score: number; // 0 / 0.5 / 1.0 / 1.5 / 2.0
 };
 
 export type DiagnosisResult = {
-  questType: QuestType;
   answers: AnswerRecord[];
-  totalScores: AxisScores;
+  rawScores: AxisScores;
   normalizedScores: AxisScores;
   levels: AxisLevels;
   resultType: ResultType;
 };
 
 export type QuestionOption = {
-  key: OptionKey;
+  label: OptionKey;
   text: string;
-  scores: AxisScores;
+  score: number;
+  correct: boolean;
 };
 
 export type Question = {
-  questionId: string; // "{questType}_q{n}"
-  questType: QuestType;
-  chapter: number; // 1〜5
-  questionText: string;
+  id: string; // "q1"〜"q12"
+  axis: AxisKey;
+  theme: string;
+  question: string[];
   options: QuestionOption[];
 };
 
-// MVP: pattern1 / pattern2 / pattern3 / friends（STEP 5b で活用）
 export type SharePatternId = "pattern1" | "pattern2" | "pattern3" | "friends";
 
 export type SharePattern = {
   id: SharePatternId;
   label: string;
-  template: string; // {タイプ名} と {一言コピー} をプレースホルダーとして使用
+  template: string;
 };
