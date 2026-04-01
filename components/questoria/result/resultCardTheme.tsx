@@ -1,0 +1,57 @@
+import React from "react";
+
+export type ResultCardVariant = "default" | "subtle" | "action" | "emphasis";
+
+/** 結果画面メインカード共通：角丸・枠・ベースグラデ・基本グロー */
+export function resultCardShellClass(
+  variant: ResultCardVariant = "default",
+  extra?: string,
+): string {
+  const shell =
+    "relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b shadow-[0_0_28px_rgba(255,215,0,0.055)] transition-all duration-200";
+  const stops: Record<ResultCardVariant, string> = {
+    default: "from-[#FFD700]/8 via-white/[0.04] to-black/35",
+    subtle: "from-[#FFD700]/7 via-white/[0.03] to-black/[0.32]",
+    action: "from-[#FFD700]/9 via-cyan-300/[0.04] to-black/35",
+    emphasis: "from-[#FFD700]/8 via-white/[0.045] to-black/35",
+  };
+  return [shell, stops[variant], extra].filter(Boolean).join(" ");
+}
+
+/** アコーディオン等：開いた状態の共通リング＋グロー */
+export const resultCardExpandedClass =
+  "shadow-[0_0_36px_rgba(255,215,0,0.09)] ring-1 ring-[#FFD700]/16";
+
+/** セクション見出し左の // LABEL // 系 */
+export const sectionLabelClass =
+  "font-mono text-[11px] tracking-[0.28em] text-[#FFD700]/70 [text-shadow:0_0_10px_rgba(255,215,0,0.18)]";
+
+/** ネストカード（STEP、ダッシュ枠など） */
+export const resultCardNestedClass =
+  "rounded-xl border border-white/10 bg-black/35 backdrop-blur-sm";
+
+export function ResultCardDecor({ withRail = true }: { withRail?: boolean }) {
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-10 opacity-[0.78]"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(255,215,0,0.12), rgba(0,229,255,0.06), transparent)",
+        }}
+        aria-hidden="true"
+      />
+      {withRail ? (
+        <div
+          className="pointer-events-none absolute inset-y-3 left-0 w-0.5 rounded-full opacity-100"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,215,0,0.0), rgba(255,215,0,0.65), rgba(0,229,255,0.2), rgba(255,215,0,0.0))",
+            boxShadow: "0 0 16px rgba(255,215,0,0.2)",
+          }}
+          aria-hidden="true"
+        />
+      ) : null}
+    </>
+  );
+}

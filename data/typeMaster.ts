@@ -243,7 +243,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "origin",
     nameJa: "はじまりの者",
     nameEn: "ORIGIN",
-    tagline: "すべての冒険は、ここから始まる。",
+    tagline: "まだ力は眠っている。\nだが、すべての冒険はここから始まる。",
     description: {
       essence:
         "あなたは今、AI活用の入口に立っています。まだ力は眠っている状態ですが、ここから始まる伸びしろは誰よりも大きい。",

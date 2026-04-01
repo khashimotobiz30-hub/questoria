@@ -1,6 +1,8 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { ResultCardDecor, resultCardShellClass, sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+
 type Level = "HIGH" | "MID" | "LOW";
 
 type Props = {
@@ -12,6 +14,7 @@ type Props = {
   scores: { purpose: number; design: number; decision: number };
   levels: { purpose: Level; design: Level; decision: Level };
   overallComment?: string;
+  disableOverallClamp?: boolean;
 };
 
 function SkillBar({ label, score, level }: { label: string; score: number; level: Level }) {
@@ -67,6 +70,7 @@ export function ResultHeroSection({
   scores,
   levels,
   overallComment,
+  disableOverallClamp,
 }: Props) {
   const tint = `${colors.primary}18`;
 
@@ -135,26 +139,31 @@ export function ResultHeroSection({
             <p className="mt-2 font-mono text-sm tracking-[0.3em] text-white/50">
               — {typeNameEn} —
             </p>
-            <p className="mt-3 border-l-2 border-cyan-400/60 pl-3 text-sm leading-relaxed text-white/80">
+            <p className="mt-3 whitespace-pre-line border-l-2 border-cyan-400/60 pl-3 text-sm leading-relaxed text-white/80">
               {tagline}
             </p>
           </div>
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur">
-            <p className="mb-4 font-mono text-[11px] tracking-[0.28em] text-white/75">
-              {"// SKILL STATUS //"}
-            </p>
-            <div className="space-y-4">
-              <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
-              <SkillBar label="設計力" score={scores.design} level={levels.design} />
-              <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
-            </div>
+          <div className={resultCardShellClass("default")}>
+            <ResultCardDecor withRail />
+            <div className="relative z-[1] p-4">
+              <p className={sectionLabelClass}>{"// SKILL STATUS //"}</p>
+              <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
+                <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
+                <SkillBar label="設計力" score={scores.design} level={levels.design} />
+                <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
+              </div>
 
-            <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-white/65">
-              {overallComment ?? "TODO: overallComment を他タイプにも追加"}
-            </p>
+              <p
+                className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
+                  disableOverallClamp ? "pb-0.5" : "line-clamp-4"
+                }`}
+              >
+                {overallComment ?? "TODO: overallComment を他タイプにも追加"}
+              </p>
+            </div>
           </div>
         </div>
       </div>

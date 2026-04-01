@@ -1,102 +1,103 @@
 import Image from "next/image";
 import React from "react";
 
-import type { ResultType } from "@/types";
+import { ResultCardDecor, resultCardShellClass, sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+import type { ResultType, ShareCompareCopy } from "@/types";
 
 export function ShareSection({
   otherTypes,
   typeImageMap,
+  typeNameJaByResultType,
+  copy,
   onShareX,
   onInviteFriends,
   onRerun,
 }: {
   otherTypes: ResultType[];
   typeImageMap: Record<ResultType, string>;
+  typeNameJaByResultType: Record<ResultType, string>;
+  copy: ShareCompareCopy;
   onShareX: () => void;
   onInviteFriends: () => void;
   onRerun: () => void;
 }) {
   return (
-    <section className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-b from-white/6 to-transparent p-5 shadow-[0_0_40px_rgba(0,229,255,0.05)]">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-10"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(0,229,255,0.08), transparent)",
-            opacity: 0.7,
-          }}
-        />
-        <p className="font-mono text-[11px] tracking-[0.28em] text-white/60">
-          {"// SHARE / COMPARE //"}
-        </p>
-        <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
-          シェアして比べる
-        </h2>
-        <p className="mt-1 text-sm leading-relaxed text-white/70">
-          友達と結果を見比べると、強みの使い方が一気にわかります。
-        </p>
+    <section className="space-y-5">
+      <div className={resultCardShellClass("emphasis")}>
+        <ResultCardDecor withRail />
+        <div className="relative z-[1] space-y-4 p-5">
+          <div>
+            <p className={sectionLabelClass}>{"// SHARE / COMPARE //"}</p>
+            <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
+              シェアして比べる
+            </h2>
+          </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#FFD700]/22 bg-gradient-to-b from-[#FFD700]/12 to-black/50 px-4 py-3 text-sm font-semibold tracking-wide text-white/92 shadow-[0_0_34px_rgba(255,215,0,0.10)] transition hover:border-[#FFD700]/32 hover:bg-black/60"
-            onClick={onInviteFriends}
-          >
-            <span aria-hidden="true">▶</span>
-            友達にも診断
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-300/22 bg-black/40 px-4 py-3 text-sm font-semibold tracking-wide text-white/80 shadow-[0_0_18px_rgba(0,229,255,0.06)] transition hover:border-cyan-300/40 hover:bg-black/50 hover:text-white/92"
-            onClick={onShareX}
-          >
-            <span aria-hidden="true">▶</span>
-            Xでシェア
-          </button>
+          <div className="space-y-2 border-t border-white/10 pt-4">
+            <p className="text-sm leading-relaxed text-white/72">{copy.lead}</p>
+            <p className="text-[13px] leading-relaxed text-white/58">{copy.compareHint}</p>
+          </div>
+
+          <div className="flex flex-col gap-2.5 border-t border-white/10 pt-4">
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/14 to-black/55 px-4 py-3.5 text-sm font-semibold tracking-wide text-white/92 shadow-[0_0_28px_rgba(255,215,0,0.10)] transition hover:border-[#FFD700]/38 hover:bg-black/60"
+              onClick={onInviteFriends}
+            >
+              友達にも診断してもらう
+            </button>
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-300/18 bg-black/35 px-4 py-3 text-[13px] font-semibold tracking-wide text-white/78 transition hover:border-cyan-300/35 hover:bg-black/45 hover:text-white/88"
+              onClick={onShareX}
+            >
+              Xでシェア
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-1">
+      <div className="flex items-center gap-3 px-0.5">
         <div className="h-px flex-1 bg-white/10" />
-        <p className="font-mono text-[10px] tracking-[0.28em] text-white/45">COMPARE</p>
+        <p className="font-mono text-[10px] tracking-[0.24em] text-white/40">OTHER TYPES</p>
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/4 to-transparent p-5">
-        <p className="mb-4 font-mono text-[11px] tracking-[0.28em] text-white/50">
-          {"// OTHER TYPES //"}
-        </p>
-        <div className="grid grid-cols-4 gap-2.5">
-          {otherTypes.map((type) => (
-            <div key={type} className="flex flex-col items-center gap-1.5">
-              <div className="relative aspect-square w-[92%] overflow-hidden rounded-xl border border-white/10 bg-black/25 shadow-[0_0_18px_rgba(255,255,255,0.04)]">
-                <Image
-                  src={typeImageMap[type]}
-                  alt={type}
-                  fill
-                  className="object-cover object-top"
-                  style={{ filter: "brightness(1.05) grayscale(0.08)" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className={resultCardShellClass("subtle")}>
+        <ResultCardDecor withRail={false} />
+        <div className="relative z-[1] p-4">
+          <p className="mb-3 text-center text-[11px] leading-relaxed text-white/48">
+            別タイプの雰囲気だけ、軽く把握しておくと比較の材料になります。
+          </p>
+          <div className="grid grid-cols-4 gap-2">
+            {otherTypes.map((type) => (
+              <div key={type} className="flex flex-col items-center gap-1">
+                <div className="relative aspect-square w-full max-w-[4.5rem] overflow-hidden rounded-lg border border-white/10 bg-black/30">
+                  <Image
+                    src={typeImageMap[type]}
+                    alt={typeNameJaByResultType[type] ?? type}
+                    fill
+                    className="object-cover object-top"
+                    style={{ filter: "brightness(0.95) saturate(0.92)" }}
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                </div>
+                <span className="w-full truncate text-center text-[9px] leading-tight text-white/58">
+                  {typeNameJaByResultType[type] ?? type}
+                </span>
               </div>
-              <span className="text-center font-mono text-[9px] uppercase leading-tight tracking-wider text-white/70">
-                {type}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <button
-          type="button"
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/14 bg-black/35 px-4 py-2.5 text-[13px] font-semibold text-white/75 transition hover:border-white/25 hover:bg-black/45 hover:text-white/90"
-          onClick={onRerun}
-        >
-          <span aria-hidden="true">↻</span>
-          他のタイプも気になる？ もう一度診断してみよう。
-        </button>
+          <button
+            type="button"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-xl border border-white/12 bg-black/30 px-4 py-2.5 text-[13px] font-medium text-white/70 transition hover:border-white/20 hover:bg-black/40 hover:text-white/85"
+            onClick={onRerun}
+          >
+            もう一度診断する
+          </button>
+        </div>
       </div>
     </section>
   );
 }
-

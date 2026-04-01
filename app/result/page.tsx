@@ -1,18 +1,98 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
+import { DeeperGuideSection } from "@/components/questoria/result/DeeperGuideSection";
 import { NextActionSection } from "@/components/questoria/result/NextActionSection";
-import { ResultBackplate } from "@/components/questoria/result/ResultBackplate";
 import { ResultHeroSection } from "@/components/questoria/result/ResultHeroSection";
 import { ShareSection } from "@/components/questoria/result/ShareSection";
-import { ThinkingProfileSection } from "@/components/questoria/result/ThinkingProfileSection";
 import { TypeAnalysisSection } from "@/components/questoria/result/TypeAnalysisSection";
+import { WhyThisTypeSection } from "@/components/questoria/result/WhyThisTypeSection";
+import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
-import type { DiagnosisResult, ResultType } from "@/types";
+import type {
+  DiagnosisResult,
+  DeeperGuideCopy,
+  ResultType,
+  ShareCompareCopy,
+  TypeAnalysisCopy,
+} from "@/types";
 
 const SESSION_KEY_RESULT = "questoria_result";
+
+const TYPE_ANALYSIS_PLACEHOLDER =
+  "この項目の解説は準備中です。次の画面改修で本文を追記予定です。";
+
+const ALL_RESULT_TYPES: ResultType[] = [
+  "hero",
+  "sage",
+  "berserker",
+  "oracle",
+  "artisan",
+  "wizard",
+  "pioneer",
+  "origin",
+];
+
+function getOtherTypes(current: ResultType): ResultType[] {
+  return ALL_RESULT_TYPES.filter((t) => t !== current);
+}
+
+function pickString(...candidates: (string | undefined)[]): string {
+  for (const c of candidates) {
+    const v = c?.trim();
+    if (v) return v;
+  }
+  return "";
+}
+
+function buildTypeAnalysisCopy(
+  typeData: (typeof typeMaster)[ResultType],
+  detail: (typeof typeDetailMaster)[ResultType] | undefined,
+): TypeAnalysisCopy {
+  return {
+    essence:
+      pickString(detail?.essence, typeData.description.essence) || TYPE_ANALYSIS_PLACEHOLDER,
+    strength:
+      pickString(detail?.strength, typeData.description.strength) || TYPE_ANALYSIS_PLACEHOLDER,
+    growth: pickString(detail?.growth, typeData.description.growth) || TYPE_ANALYSIS_PLACEHOLDER,
+    thinkingPattern:
+      pickString(detail?.thinkingPattern, typeData.thinkingPattern) || TYPE_ANALYSIS_PLACEHOLDER,
+    workStyle: pickString(detail?.workStyle, typeData.workStyle) || TYPE_ANALYSIS_PLACEHOLDER,
+    riskPoint: pickString(detail?.riskPoint, typeData.riskPoint) || TYPE_ANALYSIS_PLACEHOLDER,
+  };
+}
+
+function buildDeeperGuideCopy(
+  detail: (typeof typeDetailMaster)[ResultType] | undefined,
+): DeeperGuideCopy {
+  const foot = detail?.lineWelcomeSummary?.trim();
+  return {
+    title: pickString(detail?.deeperGuideTitle, "さらに詳しく知る"),
+    description: pickString(
+      detail?.deeperGuideText,
+      "画面に収まりきらない深掘りや、状況別のヒントを、読み物としてまとめています。",
+    ),
+    buttonLabel: pickString(detail?.deeperGuideLabel, "詳細レポートを受け取る"),
+    footnote: foot || undefined,
+  };
+}
+
+function buildShareCompareCopy(
+  detail: (typeof typeDetailMaster)[ResultType] | undefined,
+): ShareCompareCopy {
+  return {
+    lead: pickString(
+      detail?.shareLead,
+      "スタート地点は人それぞれです。友達や同僚の結果と見比べると、立ち位置が整理されやすくなります。",
+    ),
+    compareHint: pickString(
+      detail?.shareText,
+      "まずは診断リンクを送り、感想を交換してみるのがおすすめです。",
+    ),
+  };
+}
 
 const typeImageMap: Record<ResultType, string> = {
   hero: "/top/hero.jpg",
@@ -24,12 +104,6 @@ const typeImageMap: Record<ResultType, string> = {
   pioneer: "/top/pioneer.jpg",
   origin: "/top/origin.jpg",
 };
-
-function openXShare(text: string) {
-  const encoded = encodeURIComponent(text);
-  const url = `https://twitter.com/intent/tweet?text=${encoded}`;
-  window.open(url, "_blank", "noopener,noreferrer");
-}
 
 function readResultSession(): DiagnosisResult | null {
   if (typeof window === "undefined") return null;
@@ -57,23 +131,6 @@ export default function ResultPage() {
   const [loaded, setLoaded] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const isReady = mounted && loaded && result !== null;
-
-  const otherTypes = useMemo(() => {
-    if (!result) return [];
-
-    const otherTypeMap: Record<ResultType, ResultType[]> = {
-      hero: ["sage", "berserker", "artisan", "wizard"],
-      sage: ["hero", "oracle", "wizard", "artisan"],
-      berserker: ["hero", "pioneer", "artisan", "oracle"],
-      oracle: ["sage", "hero", "wizard", "origin"],
-      artisan: ["hero", "wizard", "berserker", "sage"],
-      wizard: ["sage", "artisan", "oracle", "hero"],
-      pioneer: ["berserker", "hero", "origin", "artisan"],
-      origin: ["oracle", "pioneer", "wizard", "sage"],
-    };
-
-    return otherTypeMap[result.resultType];
-  }, [result]);
 
   const [glitchClearing, setGlitchClearing] = useState(true);
   const [glitchIntensity, setGlitchIntensity] = useState(1);
@@ -117,16 +174,63 @@ export default function ResultPage() {
   const typeData = typeMaster[result.resultType];
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
 
-  const shareTextInviteFriends = `QUESTORIAのAIスキル診断やってみた。
-私は「${typeData.nameJa}」。
-あなたは何タイプ？
-#QUESTORIA #AIスキル診断
-https://questoria-liart.vercel.app`;
+  const detail = typeDetailMaster[result.resultType];
+  const typeAnalysisCopy = buildTypeAnalysisCopy(typeData, detail);
+  const deeperGuideCopy = buildDeeperGuideCopy(detail);
+  const shareCompareCopy = buildShareCompareCopy(detail);
+  const lineDeeperUrl = pickString(
+    typeof process.env.NEXT_PUBLIC_LINE_DEEPER_GUIDE_URL === "string"
+      ? process.env.NEXT_PUBLIC_LINE_DEEPER_GUIDE_URL
+      : undefined,
+  );
 
-  const shareTextResult = `QUESTORIAのAIスキル診断 結果：
-私は「${typeData.nameJa}（${typeData.nameEn}）」。
-#QUESTORIA #AIスキル診断
-https://questoria-liart.vercel.app`;
+  const typeNameJaByResultType = ALL_RESULT_TYPES.reduce(
+    (acc, k) => {
+      acc[k] = typeMaster[k].nameJa;
+      return acc;
+    },
+    {} as Record<ResultType, string>,
+  );
+
+  const handleInviteFriends = () => {
+    const url = `${window.location.origin}/`;
+    void (async () => {
+      try {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "QUESTORIA",
+              text: `${typeData.nameJa}タイプの診断結果`,
+              url,
+            });
+            return;
+          } catch (e) {
+            if ((e as Error).name === "AbortError") return;
+          }
+        }
+        await navigator.clipboard.writeText(url);
+      } catch {
+        /* noop */
+      }
+    })();
+  };
+
+  const handleShareX = () => {
+    const url = window.location.origin + "/";
+    const text = `QUESTORIA — ${typeData.nameJa}タイプでした。`;
+    const u = encodeURIComponent(url);
+    const t = encodeURIComponent(text);
+    window.open(`https://twitter.com/intent/tweet?text=${t}&url=${u}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleRerun = () => {
+    try {
+      sessionStorage.removeItem(SESSION_KEY_RESULT);
+    } catch {
+      /* noop */
+    }
+    router.push("/");
+  };
 
   return (
     <main
@@ -164,77 +268,50 @@ https://questoria-liart.vercel.app`;
         <ResultHeroSection
           typeNameJa={typeData.nameJa}
           typeNameEn={typeData.nameEn}
-          tagline={typeData.tagline}
+          tagline={pickString(detail?.tagline, typeData.tagline)}
           imageSrc={imageSrc}
           colors={typeData.colors}
           scores={result.normalizedScores}
           levels={result.levels}
-          overallComment={typeData.overallComment}
+          overallComment={detail?.overallComment ?? typeData.overallComment}
+          disableOverallClamp={detail != null}
         />
 
-        <ResultBackplate>
-          <div className="space-y-8 px-4 pb-12 pt-6">
-            <ThinkingProfileSection
-              axes={[
-                {
-                  key: "purpose",
-                  title: "目的定義力",
-                  description: "何を解くべきかを見極める力",
-                  score: result.normalizedScores.purpose,
-                  level: result.levels.purpose,
-                  comment:
-                    result.levels.purpose === "HIGH"
-                      ? "論点を早めに言語化でき、迷いを減らしやすいです。"
-                      : result.levels.purpose === "MID"
-                        ? "短い言語化を挟むと、精度が上がります。"
-                        : "最初の1文が曖昧だと、ブレやすいです。",
-                },
-                {
-                  key: "design",
-                  title: "設計力",
-                  description: "AI活用の進め方を組み立てる力",
-                  score: result.normalizedScores.design,
-                  level: result.levels.design,
-                  comment:
-                    result.levels.design === "HIGH"
-                      ? "AIの使いどころを分解し、手順化が得意です。"
-                      : result.levels.design === "MID"
-                        ? "迷ったら「入力→出力→検証」で安定します。"
-                        : "最初に一度だけ手順化すると、安定します。",
-                },
-                {
-                  key: "decision",
-                  title: "自律判断力",
-                  description: "情報を鵜呑みにせず自分で決める力",
-                  score: result.normalizedScores.decision,
-                  level: result.levels.decision,
-                  comment:
-                    result.levels.decision === "HIGH"
-                      ? "意思決定を自分で握り、AIを材料にできます。"
-                      : result.levels.decision === "MID"
-                        ? "基準を1つ決めてから見ると、迷いが減ります。"
-                        : "先に“決める軸”を置くと、安定します。",
-                },
-              ]}
-              profileSummary={typeData.profileSummary}
-            />
+        <div className="space-y-8 px-4 pb-12 pt-6">
+          <WhyThisTypeSection
+            judgementReason={detail?.judgementReason}
+            highAxisReason={detail?.highAxisReason}
+            lowAxisReason={detail?.lowAxisReason}
+            combinationInsight={detail?.combinationInsight}
+            profileSummary={detail?.profileSummary ?? typeData.profileSummary}
+          />
 
-            <TypeAnalysisSection typeData={typeData} />
+          <TypeAnalysisSection copy={typeAnalysisCopy} />
 
-            <NextActionSection
-              nextActions={typeData.nextActions}
-              message="3つ全部やる必要はありません。まずは1つだけ、今日の仕事に混ぜてみてください。"
-            />
+          <NextActionSection
+            lead={detail?.nextActionLead}
+            nextActions={
+              detail?.nextActions
+                ? Array.from(detail.nextActions)
+                : typeData.nextActions && typeData.nextActions.length > 0
+                  ? typeData.nextActions
+                  : undefined
+            }
+            note={detail?.nextActionNote}
+          />
 
-            <ShareSection
-              otherTypes={otherTypes}
-              typeImageMap={typeImageMap}
-              onShareX={() => openXShare(shareTextResult)}
-              onInviteFriends={() => openXShare(shareTextInviteFriends)}
-              onRerun={() => router.push("/")}
-            />
-          </div>
-        </ResultBackplate>
+          <DeeperGuideSection copy={deeperGuideCopy} lineUrl={lineDeeperUrl} />
+
+          <ShareSection
+            otherTypes={getOtherTypes(result.resultType)}
+            typeImageMap={typeImageMap}
+            typeNameJaByResultType={typeNameJaByResultType}
+            copy={shareCompareCopy}
+            onInviteFriends={handleInviteFriends}
+            onShareX={handleShareX}
+            onRerun={handleRerun}
+          />
+        </div>
       </div>
     </main>
   );

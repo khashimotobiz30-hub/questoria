@@ -38,6 +38,30 @@ export type DiagnosisResult = {
   resultType: ResultType;
 };
 
+/** TYPE ANALYSIS（Phase 2）— 6項目の表示用コピー */
+export type TypeAnalysisCopy = {
+  essence: string;
+  strength: string;
+  thinkingPattern: string;
+  workStyle: string;
+  riskPoint: string;
+  growth: string;
+};
+
+/** DEEPER GUIDE（Phase 3） */
+export type DeeperGuideCopy = {
+  title: string;
+  description: string;
+  buttonLabel: string;
+  footnote?: string;
+};
+
+/** SHARE / COMPARE 説明コピー（Phase 3） */
+export type ShareCompareCopy = {
+  lead: string;
+  compareHint: string;
+};
+
 export type QuestionOption = {
   label: OptionKey;
   text: string;
