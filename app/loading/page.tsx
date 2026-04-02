@@ -92,7 +92,6 @@ export default function LoadingPage() {
   const [stage, setStage] = useState<Stage>("random");
   const [phase, setPhase] = useState(0);
   const [imgOpacity, setImgOpacity] = useState(1);
-  const [revealScale, setRevealScale] = useState(1.15);
   const [revealOpacity, setRevealOpacity] = useState(0);
 
   const [corruptMsg, setCorruptMsg] = useState<string>(CORRUPT_MSGS[0][0]);
@@ -135,10 +134,14 @@ export default function LoadingPage() {
     if (!isReady) return;
 
     let y = -60;
+    let frame = 0;
     const tick = () => {
-      y += 2.5;
-      if (y > 520) y = -60;
-      setScanY(y);
+      frame += 1;
+      if (frame % 2 === 0) {
+        y += 3;
+        if (y > 520) y = -60;
+        setScanY(y);
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -149,19 +152,18 @@ export default function LoadingPage() {
   const spawnEffects = useCallback(
     (currentPhase: number) => {
       const noiseInterval =
-        currentPhase === 0 ? 400 : currentPhase === 1 ? 180 : 60;
-      const sliceCount = currentPhase === 0 ? 1 : currentPhase === 1 ? 3 : 7;
+        currentPhase === 0 ? 520 : currentPhase === 1 ? 240 : 85;
+      const sliceCount = currentPhase === 0 ? 1 : currentPhase === 1 ? 2 : 4;
 
       const noiseIntervalId = addInterval(() => {
         const id = noiseIdRef.current++;
         const isRed = Math.random() > 0.5;
 
-        setNoiseBlocks((prev) => [
-          ...prev,
-          {
+        setNoiseBlocks((prev) => {
+          const block = {
             id,
             style: {
-              position: "absolute",
+              position: "absolute" as const,
               width: `${Math.random() * 140 + 20}px`,
               height: `${Math.random() * 3 + 1}px`,
               top: `${Math.random() * 100}%`,
@@ -169,10 +171,12 @@ export default function LoadingPage() {
               background: `rgba(${
                 isRed ? "255,0,60" : "0,229,255"
               },${0.08 + Math.random() * 0.18})`,
-              pointerEvents: "none",
-            },
-          },
-        ]);
+              pointerEvents: "none" as const,
+            } satisfies CSSProperties,
+          };
+          const next = [...prev, block];
+          return next.length > 22 ? next.slice(-22) : next;
+        });
 
         window.setTimeout(() => {
           setNoiseBlocks((prev) => prev.filter((block) => block.id !== id));
@@ -207,7 +211,7 @@ export default function LoadingPage() {
         window.setTimeout(() => {
           setGlitchSlices([]);
         }, 80 + Math.random() * 100);
-      }, noiseInterval * 1.5);
+      }, noiseInterval * 1.85);
 
       return () => {
         clearInterval(noiseIntervalId);
@@ -226,8 +230,6 @@ export default function LoadingPage() {
 
     addTimer(() => {
       setRevealOpacity(1);
-      setRevealScale(1.15);
-      addTimer(() => setRevealScale(1), 50);
     }, 300);
 
     addTimer(() => {
@@ -237,9 +239,9 @@ export default function LoadingPage() {
     }, 1200);
 
     addTimer(() => {
-      for (let i = 0; i < 5; i += 1) {
+      for (let i = 0; i < 3; i += 1) {
         addTimer(() => {
-          const slices = Array.from({ length: 10 }, () => {
+          const slices = Array.from({ length: 5 }, () => {
             const id = sliceIdRef.current++;
             return {
               id,
@@ -248,12 +250,12 @@ export default function LoadingPage() {
                 left: 0,
                 right: 0,
                 top: `${Math.random() * 100}%`,
-                height: `${Math.random() * 15 + 3}px`,
-                transform: `translateX(${(Math.random() - 0.5) * 40}px)`,
-                opacity: 0.5 + Math.random() * 0.5,
+                height: `${Math.random() * 12 + 3}px`,
+                transform: `translateX(${(Math.random() - 0.5) * 32}px)`,
+                opacity: 0.45 + Math.random() * 0.45,
                 background: `rgba(${
                   Math.random() > 0.5 ? "255,0,60" : "0,229,255"
-                },0.2)`,
+                },0.18)`,
                 pointerEvents: "none" as const,
               },
             };
@@ -263,8 +265,8 @@ export default function LoadingPage() {
 
           window.setTimeout(() => {
             setGlitchSlices([]);
-          }, 60);
-        }, i * 80);
+          }, 70);
+        }, i * 110);
       }
     }, 1800);
 
@@ -325,56 +327,63 @@ export default function LoadingPage() {
   return (
     <main className="relative min-h-[100svh] w-full overflow-hidden bg-[#0A0A0F]">
       {stage === "random" && randomTypes.length > 0 && (
-        <div
-          className="absolute inset-0 transition-opacity duration-200"
-          style={{ opacity: imgOpacity }}
-        >
-          <Image
-            src={`/top/${randomTypes[Math.min(phase, randomTypes.length - 1)]}.jpg`}
-            alt=""
-            fill
-            className="object-cover object-center"
-            priority
-          />
+        <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
+          <div
+            className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-200 sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
+            style={{ opacity: imgOpacity }}
+          >
+            <Image
+              src={`/top/${randomTypes[Math.min(phase, randomTypes.length - 1)]}.jpg`}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 100vw, 720px"
+              className="object-cover object-[center_24%]"
+              priority
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/38 via-black/18 to-black/48" />
+            <div className="pointer-events-none absolute inset-0 bg-black/14" />
+          </div>
         </div>
       )}
 
       {stage !== "random" && (
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: revealOpacity,
-            transform: `scale(${revealScale})`,
-            transition:
-              "opacity 0.4s ease, transform 1.2s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
-          <Image
-            src={`/top/${resultType}.jpg`}
-            alt=""
-            fill
-            className="object-cover object-center"
-            priority
-          />
+        <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
           <div
-            className="absolute inset-0 pointer-events-none"
+            className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-300 ease-out sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
             style={{
-              background:
-                "radial-gradient(ellipse 50% 50% at 50% 60%, rgba(255,215,0,0.15) 0%, transparent 70%)",
+              opacity: revealOpacity,
             }}
-          />
+          >
+            <Image
+              src={`/top/${resultType}.jpg`}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 100vw, 720px"
+              className="object-cover object-[center_24%]"
+              priority
+            />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 50% 50% at 50% 60%, rgba(255,215,0,0.14) 0%, transparent 72%)",
+              }}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/38 via-black/16 to-black/46" />
+            <div className="pointer-events-none absolute inset-0 bg-black/12" />
+          </div>
         </div>
       )}
 
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 55% 60% at 50% 50%, transparent 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.95) 100%)",
+            "radial-gradient(ellipse 56% 60% at 50% 46%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.48) 52%, rgba(0,0,0,0.86) 100%)",
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/82 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/88 to-transparent" />
 
       <div
         className="absolute inset-0 pointer-events-none"

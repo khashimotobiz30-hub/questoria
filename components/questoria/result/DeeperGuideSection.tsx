@@ -16,8 +16,8 @@ export function DeeperGuideSection({
   lineUrl: string;
   onLineCtaClick?: () => void;
 }) {
-  const btnClass =
-    "inline-flex w-full items-center justify-center rounded-xl border px-4 py-3.5 text-sm font-semibold tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]";
+  const lineCtaClass =
+    "inline-flex min-h-[3.25rem] w-full items-center justify-center rounded-xl border border-[#FFD700]/40 bg-gradient-to-b from-[#FFD700]/17 via-[#FFD700]/7 to-black/48 px-4 py-4 text-sm font-bold tracking-wide text-white shadow-[0_0_32px_rgba(255,215,0,0.13),0_0_72px_rgba(255,215,0,0.05)] transition hover:border-[#FFD700]/52 hover:from-[#FFD700]/21 hover:shadow-[0_0_40px_rgba(255,215,0,0.17),0_0_88px_rgba(255,215,0,0.07)] hover:to-black/44 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]";
 
   return (
     <section className={resultCardShellClass("default")}>
@@ -38,7 +38,7 @@ export function DeeperGuideSection({
               href={lineUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${btnClass} border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/10 to-black/50 text-white/90 shadow-[0_0_24px_rgba(255,215,0,0.08)] hover:border-[#FFD700]/38 hover:bg-black/55`}
+              className={lineCtaClass}
               onClick={() => onLineCtaClick?.()}
             >
               {copy.buttonLabel}

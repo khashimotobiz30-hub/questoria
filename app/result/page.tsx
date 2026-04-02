@@ -37,8 +37,36 @@ const ALL_RESULT_TYPES: ResultType[] = [
   "origin",
 ];
 
-function getOtherTypes(current: ResultType): ResultType[] {
-  return ALL_RESULT_TYPES.filter((t) => t !== current);
+/** purpose / design / decision の High/Low（Play の分類と同一） */
+const RESULT_TYPE_BITS: Record<ResultType, [0 | 1, 0 | 1, 0 | 1]> = {
+  hero: [1, 1, 1],
+  sage: [1, 1, 0],
+  berserker: [1, 0, 1],
+  oracle: [1, 0, 0],
+  artisan: [0, 1, 1],
+  wizard: [0, 1, 0],
+  pioneer: [0, 0, 1],
+  origin: [0, 0, 0],
+};
+
+const BITS_TO_RESULT_TYPE = Object.fromEntries(
+  (Object.entries(RESULT_TYPE_BITS) as [ResultType, [0 | 1, 0 | 1, 0 | 1]][]).map(
+    ([type, bits]) => [bits.join(","), type],
+  ),
+) as Record<string, ResultType>;
+
+function flipBit(v: 0 | 1): 0 | 1 {
+  return v === 1 ? 0 : 1;
+}
+
+/** 比較用に4タイプ：各軸を1つだけ反転させた3件＋3軸すべて反転の対極1件（同一診断ロジック上の近傍＋対比） */
+function getOtherTypesForCompare(current: ResultType): ResultType[] {
+  const [p, d, j] = RESULT_TYPE_BITS[current];
+  const a = BITS_TO_RESULT_TYPE[[flipBit(p), d, j].join(",")];
+  const b = BITS_TO_RESULT_TYPE[[p, flipBit(d), j].join(",")];
+  const c = BITS_TO_RESULT_TYPE[[p, d, flipBit(j)].join(",")];
+  const opposite = BITS_TO_RESULT_TYPE[[flipBit(p), flipBit(d), flipBit(j)].join(",")];
+  return [a, b, c, opposite];
 }
 
 function pickString(...candidates: (string | undefined)[]): string {
@@ -344,7 +372,7 @@ export default function ResultPage() {
           />
 
           <ShareSection
-            otherTypes={getOtherTypes(result.resultType)}
+            otherTypes={getOtherTypesForCompare(result.resultType)}
             typeImageMap={typeImageMap}
             typeNameJaByResultType={typeNameJaByResultType}
             copy={shareCompareCopy}
