@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Orbitron, Share_Tech_Mono } from "next/font/google";
+
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -57,7 +59,10 @@ export default function RootLayout({
       lang="ja"
       className={`${orbitron.variable} ${shareTechMono.variable} ${notoSansJp.variable}`}
     >
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <GoogleAnalytics />
+        {children}
+      </body>
     </html>
   );
 }

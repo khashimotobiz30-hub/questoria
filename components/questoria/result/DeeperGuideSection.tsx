@@ -10,12 +10,12 @@ import type { DeeperGuideCopy } from "@/types";
 export function DeeperGuideSection({
   copy,
   lineUrl,
+  onLineCtaClick,
 }: {
   copy: DeeperGuideCopy;
-  /** 空のときは主ボタンを無効化（URL 未設定時の安全側） */
   lineUrl: string;
+  onLineCtaClick?: () => void;
 }) {
-  const ready = Boolean(lineUrl);
   const btnClass =
     "inline-flex w-full items-center justify-center rounded-xl border px-4 py-3.5 text-sm font-semibold tracking-wide transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]";
 
@@ -34,33 +34,19 @@ export function DeeperGuideSection({
           <p className="whitespace-pre-line text-sm leading-relaxed text-white/72">{copy.description}</p>
 
           <div>
-            {ready ? (
-              <a
-                href={lineUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${btnClass} border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/10 to-black/50 text-white/90 shadow-[0_0_24px_rgba(255,215,0,0.08)] hover:border-[#FFD700]/38 hover:bg-black/55`}
-              >
-                {copy.buttonLabel}
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className={`${btnClass} cursor-not-allowed border-white/10 bg-black/30 text-white/45`}
-                aria-disabled="true"
-              >
-                {copy.buttonLabel}
-              </button>
-            )}
+            <a
+              href={lineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${btnClass} border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/10 to-black/50 text-white/90 shadow-[0_0_24px_rgba(255,215,0,0.08)] hover:border-[#FFD700]/38 hover:bg-black/55`}
+              onClick={() => onLineCtaClick?.()}
+            >
+              {copy.buttonLabel}
+            </a>
           </div>
 
           {copy.footnote ? (
             <p className="text-[12px] leading-relaxed text-white/48">{copy.footnote}</p>
-          ) : null}
-
-          {!ready ? (
-            <p className="text-[11px] leading-relaxed text-white/40">※ 補助導線の接続は準備中です。</p>
           ) : null}
         </div>
       </div>

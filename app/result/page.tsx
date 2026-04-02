@@ -9,8 +9,10 @@ import { ResultHeroSection } from "@/components/questoria/result/ResultHeroSecti
 import { ShareSection } from "@/components/questoria/result/ShareSection";
 import { TypeAnalysisSection } from "@/components/questoria/result/TypeAnalysisSection";
 import { WhyThisTypeSection } from "@/components/questoria/result/WhyThisTypeSection";
+import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
 import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
+import { trackEvent } from "@/lib/analytics";
 import type {
   DiagnosisResult,
   DeeperGuideCopy,
@@ -72,9 +74,9 @@ function buildDeeperGuideCopy(
     title: pickString(detail?.deeperGuideTitle, "さらに詳しく知る"),
     description: pickString(
       detail?.deeperGuideText,
-      "画面に収まりきらない深掘りや、状況別のヒントを、読み物としてまとめています。",
+      "この画面では載せきれない深掘り（つまずきやすい場面の整理、タイプに合わせた進め方、行動を成果につなげるヒントなど）を、LINEで詳細レポートとして受け取れます。友だち追加後は、この診断の続きとして自然に読める体裁でお届けします。",
     ),
-    buttonLabel: pickString(detail?.deeperGuideLabel, "詳細レポートを受け取る"),
+    buttonLabel: pickString(detail?.deeperGuideLabel, "LINEで詳細レポートを受け取る"),
     footnote: foot || undefined,
   };
 }
@@ -167,6 +169,25 @@ export default function ResultPage() {
     };
   }, [isReady]);
 
+  useEffect(() => {
+    if (!mounted || !loaded || result === null) return;
+    const rt = result.resultType;
+    try {
+      const key = `questoria_ga_result_view_${rt}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      /* sessionStorage 不可時は重複送信の可能性あり */
+    }
+    const td = typeMaster[rt];
+    const det = typeDetailMaster[rt];
+    trackEvent("result_view", {
+      type_id: rt,
+      result_type: rt,
+      title: pickString(det?.title, td.nameJa),
+    });
+  }, [mounted, loaded, result]);
+
   // Keep first render stable (server/client). Only render after client has loaded session.
   if (!mounted || !loaded) return null;
   if (!result) return null;
@@ -178,12 +199,6 @@ export default function ResultPage() {
   const typeAnalysisCopy = buildTypeAnalysisCopy(typeData, detail);
   const deeperGuideCopy = buildDeeperGuideCopy(detail);
   const shareCompareCopy = buildShareCompareCopy(detail);
-  const lineDeeperUrl = pickString(
-    typeof process.env.NEXT_PUBLIC_LINE_DEEPER_GUIDE_URL === "string"
-      ? process.env.NEXT_PUBLIC_LINE_DEEPER_GUIDE_URL
-      : undefined,
-  );
-
   const typeNameJaByResultType = ALL_RESULT_TYPES.reduce(
     (acc, k) => {
       acc[k] = typeMaster[k].nameJa;
@@ -193,6 +208,11 @@ export default function ResultPage() {
   );
 
   const handleInviteFriends = () => {
+    trackEvent("click_invite_friend", {
+      type_id: result.resultType,
+      result_type: result.resultType,
+      title: typeData.nameJa,
+    });
     const url = `${window.location.origin}/`;
     void (async () => {
       try {
@@ -216,6 +236,11 @@ export default function ResultPage() {
   };
 
   const handleShareX = () => {
+    trackEvent("click_share_x", {
+      type_id: result.resultType,
+      result_type: result.resultType,
+      title: typeData.nameJa,
+    });
     const url = window.location.origin + "/";
     const text = `QUESTORIA — ${typeData.nameJa}タイプでした。`;
     const u = encodeURIComponent(url);
@@ -224,6 +249,11 @@ export default function ResultPage() {
   };
 
   const handleRerun = () => {
+    trackEvent("click_retry_diagnosis", {
+      type_id: result.resultType,
+      result_type: result.resultType,
+      title: typeData.nameJa,
+    });
     try {
       sessionStorage.removeItem(SESSION_KEY_RESULT);
     } catch {
@@ -300,7 +330,18 @@ export default function ResultPage() {
             note={detail?.nextActionNote}
           />
 
-          <DeeperGuideSection copy={deeperGuideCopy} lineUrl={lineDeeperUrl} />
+          <DeeperGuideSection
+            copy={deeperGuideCopy}
+            lineUrl={LINE_ADD_FRIEND_URL}
+            onLineCtaClick={() =>
+              trackEvent("click_line_deeper_guide", {
+                type_id: result.resultType,
+                result_type: result.resultType,
+                title: typeData.nameJa,
+                source_section: "deeper_guide",
+              })
+            }
+          />
 
           <ShareSection
             otherTypes={getOtherTypes(result.resultType)}
