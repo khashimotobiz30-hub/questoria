@@ -190,18 +190,14 @@ export default function PlayPage() {
     <main className="min-h-[100svh] w-full bg-[#0A0A0F] px-4 py-6 text-white">
       <div className="mx-auto w-full max-w-md">
         <div className="rounded-2xl border border-cyan-400/30 bg-black/30 p-5 shadow-[0_0_30px_rgba(0,229,255,0.08)] backdrop-blur">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => router.push("/")}
               className="inline-flex items-center gap-2 rounded-lg border border-[#00E5FF]/25 bg-[#00E5FF]/5 px-3 py-2 font-[var(--font-share-tech)] text-xs tracking-[0.22em] text-[#00E5FF] transition-colors hover:border-[#00E5FF]/40 hover:bg-[#00E5FF]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
-              ← BACK
+              TOPに戻る
             </button>
-
-            <span className="rounded-lg border border-[#FFD700]/30 bg-[#FFD700]/10 px-3 py-2 font-[var(--font-orbitron)] text-[10px] tracking-[0.18em] text-[#FFD700]">
-              SINGLE FLOW
-            </span>
           </div>
 
           <div className="mt-6">
@@ -211,53 +207,50 @@ export default function PlayPage() {
             <h1 className="mt-2 font-orbitron text-2xl tracking-wide text-[#FFD700]">
               QUESTORIA
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
-              全12問・4択。知識量ではなく、課題定義・設計・判断の筋道を問う診断。
-              クエスト選択は不要。単一フローで審査まで進みます。
-            </p>
           </div>
 
           {!hasStarted ? (
             <>
-              <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="font-orbitron text-sm tracking-wide text-cyan-200">
-                    RUNE
-                  </p>
-                  <p className="font-mono text-[11px] tracking-[0.25em] text-[#FFD700]">
-                    GUIDE
-                  </p>
-                </div>
+              <div className="mt-5 rounded-xl border border-cyan-300/25 bg-gradient-to-b from-cyan-400/[0.055] via-black/[0.41] to-black/[0.44] p-4 shadow-[0_0_28px_rgba(0,229,255,0.075)]">
+                <p className="font-orbitron text-sm tracking-wide text-cyan-100 [text-shadow:0_0_14px_rgba(0,229,255,0.22)]">
+                  GUIDE
+                </p>
 
                 <div className="mt-3 space-y-3 text-sm leading-7 text-white/85">
+                  <p>この診断は、知識を競うためのものではありません。</p>
                   <p>
-                    ようこそ、挑戦者よ。ここから先に待つのは、知識を問う試験ではない。
+                    見るのは、
+                    <br />
+                    課題に向き合ったときに何を重視し、
+                    <br />
+                    どう組み立て、どう判断するか。
                   </p>
                   <p>
-                    問われるのは、「何をやるべきか」「どう進めるべきか」「最後にどう判断するか」。
-                  </p>
-                  <p>
-                    お前の思考の軌跡は、すべてギルドマスターが見届ける。
+                    12の設問を通して、
+                    <br />
+                    あなたのAI活用スタイルと
+                    <br />
+                    思考の強みを診断します。
                   </p>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
+              <div className="mt-6 rounded-xl border border-white/[0.11] bg-black/40 p-4">
                 <h2 className="font-orbitron text-sm tracking-wide text-cyan-200">
-                  RULES
+                  INFO
                 </h2>
                 <ul className="mt-3 space-y-2 text-sm text-white/80">
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
-                    <span>TRIAL 1〜12 を順番に進行します。</span>
+                    <span>全12問・4択で進みます</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
-                    <span>各設問は4択です。テンポ重視で進みます。</span>
+                    <span>所要時間は約1〜2分です</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
-                    <span>Q12完了後に審査へ進み、結果が確定します。</span>
+                    <span>回答後すぐに結果を確認できます</span>
                   </li>
                 </ul>
               </div>
@@ -266,7 +259,7 @@ export default function PlayPage() {
                 <button
                   type="button"
                   onClick={handleStart}
-                  className="w-full rounded-xl border border-cyan-300/60 bg-cyan-400/10 px-4 py-3 font-mono text-sm tracking-wide text-cyan-100 shadow-[0_0_28px_rgba(0,229,255,0.20)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
+                  className="w-full rounded-xl border border-cyan-300/[0.66] bg-cyan-400/[0.12] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(0,229,255,0.24)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
                 >
                   ▶ 診断を開始する
                 </button>
@@ -277,14 +270,9 @@ export default function PlayPage() {
               {!isCompleted && currentQuestion ? (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <p className="font-mono text-xs tracking-wide text-white/70">
-                        TRIAL {currentQuestionIndex + 1} / {totalQuestions}
-                      </p>
-                      <span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-2 py-1 font-mono text-[11px] tracking-wide text-cyan-100">
-                        {currentQuestion.axis.toUpperCase()}
-                      </span>
-                    </div>
+                    <p className="font-mono text-xs tracking-wide text-white/70">
+                      QUESTION {currentQuestionIndex + 1} / {totalQuestions}
+                    </p>
 
                     <div className="grid grid-cols-12 gap-1">
                       {questionMaster.map((question, index) => {
@@ -308,15 +296,10 @@ export default function PlayPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-[#FFD700]/20 bg-black/50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-mono text-[11px] tracking-[0.28em] text-[#FFD700]">
-                        ◆ あなたならどうする？
-                      </p>
-                      <span className="font-mono text-[10px] tracking-[0.2em] text-cyan-300/80">
-                        {currentQuestion.theme}
-                      </span>
-                    </div>
+                  <div className="-mx-3 rounded-xl border border-[#FFD700]/20 bg-gradient-to-b from-[#FFD700]/8 via-[#FFD700]/5 to-[#FFD700]/4 p-4">
+                    <p className="font-mono text-[11px] tracking-[0.28em] text-[#FFD700]">
+                      ◆ 設問
+                    </p>
 
                     <div className="mt-4 space-y-3">
                       {currentQuestion.question.map((line, index) =>
@@ -334,22 +317,15 @@ export default function PlayPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="-mx-3 grid grid-cols-1 gap-3">
                     {currentDisplayOptions.map((option) => (
                       <button
                         key={`${currentQuestion.id}-${option.displayLabel}-${option.text}`}
                         type="button"
                         onClick={() => handleSelectOption(option)}
-                        className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-4 text-left shadow-[0_0_22px_rgba(0,229,255,0.05)] transition hover:border-cyan-300/30 hover:bg-black/35 active:scale-[0.99]"
+                        className="w-full rounded-xl border border-white/[0.22] bg-black/[0.43] px-4 pb-3.5 pt-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34),0_0_26px_rgba(0,229,255,0.048)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-black/44 hover:shadow-[0_6px_28px_rgba(0,0,0,0.45),0_0_26px_rgba(0,229,255,0.13)] active:translate-y-0 active:scale-[0.985] active:border-cyan-300/38 active:bg-black/32 active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_0_16px_rgba(0,229,255,0.06)]"
                       >
-                        <div className="flex gap-3">
-                          <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-cyan-300/40 bg-cyan-400/10 font-mono text-xs text-cyan-100">
-                            {option.displayLabel}
-                          </span>
-                          <span className="text-sm leading-relaxed text-white/85">
-                            {option.text}
-                          </span>
-                        </div>
+                        <span className="block text-sm leading-relaxed text-white/85">{option.text}</span>
                       </button>
                     ))}
                   </div>
@@ -357,13 +333,13 @@ export default function PlayPage() {
               ) : (
                 <div className="rounded-xl border border-[#FFD700]/30 bg-black/40 p-4">
                   <p className="font-mono text-sm text-[#FFD700]/90">
-                    診断完了（12 / 12）
+                    診断完了（12/12）
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-white/80">
-                    クエスト完了だ。お前の判断は、すべて見届けた。
+                    全12問の回答が完了しました。
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-white/80">
-                    ギルドマスターが審査を開始する…
+                    これから結果の判定に進みます。
                   </p>
 
                   <button
@@ -372,7 +348,7 @@ export default function PlayPage() {
                     onClick={handleGoLoading}
                     className="mt-5 w-full rounded-xl border border-cyan-300/60 bg-cyan-400/10 px-4 py-3 font-mono text-sm tracking-wide text-cyan-100 shadow-[0_0_28px_rgba(0,229,255,0.20)] transition hover:bg-cyan-400/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    ▶ 審査へ進む
+                    結果へ進む
                   </button>
                 </div>
               )}
