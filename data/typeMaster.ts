@@ -82,10 +82,10 @@ export const typeMaster: Record<ResultType, TypeData> = {
     colors: { primary: "#9C27B0", secondary: "#C0C0C0" },
     imagePath: "/types/sage.png",
   },
-  berserker: {
-    resultType: "berserker",
-    nameJa: "狂戦士",
-    nameEn: "BERSERKER",
+  hunter: {
+    resultType: "hunter",
+    nameJa: "狩人",
+    nameEn: "HUNTER",
     tagline: "目指すべき場所が見えている。あとは突き進むだけ。",
     description: {
       essence:
@@ -111,12 +111,12 @@ export const typeMaster: Record<ResultType, TypeData> = {
       "次の一手を“5分でできる最小行動”に切る",
     ],
     colors: { primary: "#F44336", secondary: "#212121" },
-    imagePath: "/types/berserker.png",
+    imagePath: "/types/hunter.png",
   },
-  oracle: {
-    resultType: "oracle",
-    nameJa: "占い師",
-    nameEn: "ORACLE",
+  prophet: {
+    resultType: "prophet",
+    nameJa: "預言者",
+    nameEn: "PROPHET",
     tagline: "誰も気づかない課題の本質を、いち早く見抜く。",
     description: {
       essence:
@@ -142,7 +142,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
       "打ち手を“小さく試す→測る→広げる”の3段にする",
     ],
     colors: { primary: "#2196F3", secondary: "#FFD700" },
-    imagePath: "/types/oracle.png",
+    imagePath: "/types/prophet.png",
   },
   artisan: {
     resultType: "artisan",
@@ -241,8 +241,8 @@ export const typeMaster: Record<ResultType, TypeData> = {
   },
   origin: {
     resultType: "origin",
-    nameJa: "はじまりの者",
-    nameEn: "ORIGIN",
+    nameJa: "村人",
+    nameEn: "THE ORIGIN",
     tagline: "まだ力は眠っている。\nだが、すべての冒険はここから始まる。",
     description: {
       essence:

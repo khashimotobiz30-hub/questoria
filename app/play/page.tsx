@@ -73,8 +73,8 @@ function getResultType(normalizedScores: AxisScores): ResultType {
 
   if (p && d && j) return "hero";
   if (p && d && !j) return "sage";
-  if (p && !d && j) return "berserker";
-  if (p && !d && !j) return "oracle";
+  if (p && !d && j) return "hunter";
+  if (p && !d && !j) return "prophet";
   if (!p && d && j) return "artisan";
   if (!p && d && !j) return "wizard";
   if (!p && !d && j) return "pioneer";

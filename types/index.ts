@@ -1,8 +1,8 @@
 export type ResultType =
   | "hero"
   | "sage"
-  | "berserker"
-  | "oracle"
+  | "hunter"
+  | "prophet"
   | "artisan"
   | "wizard"
   | "pioneer"

@@ -27,7 +27,8 @@ export const metadata: Metadata = {
   description: "AIを活用して課題を定義し、設計し、判断する思考力を診断する。あなたのAIスキルを、証明せよ。",
   openGraph: {
     title: "QUESTORIA | AIスキル診断",
-    description: "あなたのAIスキルタイプを診断する。勇者？賢者？それとも狂戦士？",
+    description:
+      "あなたのAIスキルタイプを診断する。勇者・賢者・預言者・狩人・村人など、あなたはどの型か。",
     url: "https://questoria.app",
     siteName: "QUESTORIA",
     images: [
@@ -44,7 +45,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "QUESTORIA | AIスキル診断",
-    description: "あなたのAIスキルタイプを診断する。勇者？賢者？それとも狂戦士？",
+    description:
+      "あなたのAIスキルタイプを診断する。勇者・賢者・預言者・狩人・村人など、あなたはどの型か。",
     images: ["https://questoria-liart.vercel.app/og-default.png"],
   },
 };

@@ -11,15 +11,16 @@ import {
   type CSSProperties,
 } from "react";
 
-import type { DiagnosisResult, ResultType } from "@/types";
+import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
+import type { ResultType } from "@/types";
 
 const SESSION_KEY_RESULT = "questoria_result";
 
 const ALL_TYPES: ResultType[] = [
   "hero",
   "sage",
-  "berserker",
-  "oracle",
+  "hunter",
+  "prophet",
   "artisan",
   "wizard",
   "pioneer",
@@ -62,14 +63,12 @@ function readLoadingSession(): LoadingSessionData | null {
     const raw = sessionStorage.getItem(SESSION_KEY_RESULT);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as DiagnosisResult;
-
-    if (!parsed?.resultType || !parsed?.answers || parsed.answers.length !== 12) {
-      return null;
-    }
+    const parsed = JSON.parse(raw) as unknown;
+    const diagnosis = parseStoredDiagnosisResult(parsed);
+    if (!diagnosis) return null;
 
     return {
-      resultType: parsed.resultType,
+      resultType: diagnosis.resultType,
     };
   } catch {
     return null;

@@ -8,7 +8,7 @@ import {
   RitualTerminalHeader,
 } from "@/components/questoria/RitualPlate";
 
-/** はじまりの者（ORIGIN）結果画面スクショ — ファイル名は後から差し替え可 */
+/** 村人（typeId: origin）結果画面スクショ — ファイル名は後から差し替え可 */
 const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
 
 export default function Home() {
@@ -168,7 +168,7 @@ export default function Home() {
                     8種のアーキタイプ診断
                   </p>
                   <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
-                    勇者、賢者、冒険者、はじまりの者——あなたはどの型か。
+                    勇者、賢者、冒険者、村人——あなたはどの型か。
                   </p>
                 </li>
                 <li className="min-w-0">

@@ -13,6 +13,7 @@ import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
 import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
 import { trackEvent } from "@/lib/analytics";
+import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
 import type {
   DiagnosisResult,
   DeeperGuideCopy,
@@ -29,8 +30,8 @@ const TYPE_ANALYSIS_PLACEHOLDER =
 const ALL_RESULT_TYPES: ResultType[] = [
   "hero",
   "sage",
-  "berserker",
-  "oracle",
+  "hunter",
+  "prophet",
   "artisan",
   "wizard",
   "pioneer",
@@ -41,8 +42,8 @@ const ALL_RESULT_TYPES: ResultType[] = [
 const RESULT_TYPE_BITS: Record<ResultType, [0 | 1, 0 | 1, 0 | 1]> = {
   hero: [1, 1, 1],
   sage: [1, 1, 0],
-  berserker: [1, 0, 1],
-  oracle: [1, 0, 0],
+  hunter: [1, 0, 1],
+  prophet: [1, 0, 0],
   artisan: [0, 1, 1],
   wizard: [0, 1, 0],
   pioneer: [0, 0, 1],
@@ -127,8 +128,8 @@ function buildShareCompareCopy(
 const typeImageMap: Record<ResultType, string> = {
   hero: "/top/hero.jpg",
   sage: "/top/sage.jpg",
-  berserker: "/top/berserker.jpg",
-  oracle: "/top/oracle.jpg",
+  hunter: "/top/hunter.jpg",
+  prophet: "/top/prophet.jpg",
   artisan: "/top/artisan.jpg",
   wizard: "/top/wizard.jpg",
   pioneer: "/top/pioneer.jpg",
@@ -142,12 +143,8 @@ function readResultSession(): DiagnosisResult | null {
     const raw = sessionStorage.getItem(SESSION_KEY_RESULT);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as DiagnosisResult;
-    if (!parsed?.resultType || !parsed?.answers || parsed.answers.length !== 12) {
-      return null;
-    }
-
-    return parsed;
+    const parsed = JSON.parse(raw) as unknown;
+    return parseStoredDiagnosisResult(parsed);
   } catch {
     return null;
   }
