@@ -1,21 +1,15 @@
 import GlitchText from "@/components/questoria/GlitchText";
 import ParticleField from "@/components/questoria/ParticleField";
 import {
+  RitualDummyAxisBars,
   RitualLaunchLink,
   RitualPlate,
-  RitualScanList,
+  RitualResultPhonePreview,
   RitualTerminalHeader,
 } from "@/components/questoria/RitualPlate";
 
-const measureItems = ["目的を定義する力", "構造的に設計する力", "自分で判断する力"];
-
-const questItems = [
-  "全12問の選択式",
-  "実戦型の問いで、3つの力を診断",
-  "約3〜4分で完了",
-  "無料ですぐに試せる",
-  "8種のアーキタイプから、\nあなたの型が明かされる",
-];
+/** はじまりの者（ORIGIN）結果画面スクショ — ファイル名は後から差し替え可 */
+const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
 
 export default function Home() {
   return (
@@ -41,14 +35,14 @@ export default function Home() {
                 <div
                   className="h-px w-10"
                   style={{
-                    background: "linear-gradient(to right, transparent, rgba(0,229,255,0.8))",
+                    background: "linear-gradient(to right, transparent, rgba(64,192,192,0.85))",
                   }}
                 />
                 <p
-                  className="font-mono text-[13px] font-bold tracking-[0.45em] text-cyan-300"
+                  className="font-mono text-[13px] font-bold tracking-[0.45em] text-[#40c0c0]"
                   style={{
                     textShadow:
-                      "0 0 10px rgba(0,229,255,0.9), 0 0 20px rgba(0,229,255,0.5)",
+                      "0 0 10px rgba(64,192,192,0.85), 0 0 20px rgba(64,192,192,0.45)",
                   }}
                 >
                   AI SKILL DIAGNOSIS
@@ -56,38 +50,32 @@ export default function Home() {
                 <div
                   className="h-px w-10"
                   style={{
-                    background: "linear-gradient(to left, transparent, rgba(0,229,255,0.8))",
+                    background: "linear-gradient(to left, transparent, rgba(64,192,192,0.85))",
                   }}
                 />
               </div>
 
               <h1
-                className="mt-3 font-[var(--font-orbitron)] text-[clamp(2.5rem,10vw,5rem)] font-black tracking-[0.18em] text-[#FFD700]"
+                className="mt-3 font-[var(--font-orbitron)] text-[clamp(2.5rem,10vw,5rem)] font-black tracking-[0.18em] text-[#f0c040]"
                 style={{
-                  textShadow: "0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)",
+                  textShadow: "0 0 28px rgba(240,192,64,0.55), 0 0 56px rgba(240,192,64,0.22)",
                 }}
               >
                 <GlitchText>QUESTORIA</GlitchText>
               </h1>
 
-              <p className="mt-2 font-[var(--font-noto)] text-sm font-normal tracking-[1em] text-white">
+              <p className="mt-2 font-[var(--font-noto)] text-sm font-normal tracking-[1em] text-[#b0c0cc]">
                 AIスキル診断
               </p>
 
-              <div className="mt-6 h-px w-36 bg-gradient-to-r from-transparent via-[#FFD700]/50 to-transparent" />
+              <div className="mt-6 h-px w-36 bg-gradient-to-r from-transparent via-[#f0c040]/55 to-transparent" />
 
-              <p className="mt-6 font-[var(--font-orbitron)] text-lg font-bold leading-snug tracking-wide text-white sm:text-xl">
+              <p className="mt-6 font-[var(--font-orbitron)] text-lg font-bold leading-snug tracking-wide text-[#e0e0e0] sm:text-xl">
                 あなたのAI思考力を、証明せよ。
-              </p>
-
-              <p className="mt-4 font-[var(--font-noto)] text-sm leading-relaxed text-white/80">
-                AIを使える人と、使いこなせない人の差は、
-                <br />
-                知識ではなく、課題設定・設計・判断にある。
               </p>
             </div>
 
-            <div className="mt-10 flex justify-center">
+            <div className="mt-12 flex justify-center sm:mt-14">
               <RitualLaunchLink href="/play" variant="primary">
                 ▶ クエストを始める
               </RitualLaunchLink>
@@ -96,22 +84,59 @@ export default function Home() {
         </section>
 
         {/* 2画面目：この診断が測るもの */}
-        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2rem,env(safe-area-inset-bottom))]">
-          <RitualPlate density="compact">
-            <div className="flex flex-col gap-4 sm:gap-[1.05rem]">
+        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-8">
+          <RitualPlate density="tight">
+            <div className="flex flex-col gap-2 sm:gap-2.5">
               <RitualTerminalHeader
+                compactHeader
                 channel="ANALYSIS NODE · CH-02"
                 title="この診断が測るもの"
-                titleClassName="font-[var(--font-orbitron)] text-base font-bold tracking-[0.14em] text-cyan-50/95 sm:text-lg"
+                titleClassName="font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#40c0c0] sm:text-base"
               />
-              <div className="flex flex-col gap-2 sm:gap-2">
-                <p className="font-[var(--font-noto)] text-sm leading-relaxed tracking-wide text-white/78 sm:text-[15px]">
-                  測るのは、知識ではなく思考。
+
+              <div className="space-y-1 font-[var(--font-noto)] text-[11px] leading-snug text-[#b0c0cc] sm:text-xs sm:leading-relaxed">
+                <p>AIを使いこなせる人間と、そうでない人間の差は</p>
+                <p className="text-[#e0e0e0]">
+                  知識量ではない。思考の構造にある。
                 </p>
-                <RitualScanList compact items={measureItems} />
               </div>
 
-              <div className="mt-1 flex justify-center border-t border-cyan-400/14 pt-3 sm:mt-1.5 sm:pt-3.5">
+              <div className="shrink-0 opacity-90 sm:opacity-95">
+                <RitualDummyAxisBars />
+              </div>
+
+              <ul className="mt-0.5 space-y-1.5 border-t border-[#40c0c0]/14 pt-2 sm:space-y-2 sm:pt-2.5">
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    目的を定義する力
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    AIに何を解かせるべきか。問いを立てられるか。
+                  </p>
+                </li>
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    構造的に設計する力
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    複雑な課題を分解し、筋道を組み立てられるか。
+                  </p>
+                </li>
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    自分で判断する力
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    AIの出力を鵜呑みにせず、自ら意思決定できるか。
+                  </p>
+                </li>
+              </ul>
+
+              <p className="pt-0.5 text-center font-mono text-[8px] tracking-[0.16em] text-[#b0c0cc]/80 sm:text-[9px] sm:tracking-[0.2em]">
+                ── 全12問 · 約3〜4分 · 無料 ──
+              </p>
+
+              <div className="flex justify-center border-t border-[#40c0c0]/12 pt-2 sm:pt-2.5">
                 <RitualLaunchLink href="/play" variant="auxiliary">
                   ▶ クエストを始める
                 </RitualLaunchLink>
@@ -120,18 +145,55 @@ export default function Home() {
           </RitualPlate>
         </section>
 
-        {/* 3画面目：クエストの概要 + 再CTA */}
-        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
-          <RitualPlate>
-            <div className="flex flex-col gap-4 sm:gap-5">
+        {/* 3画面目：クエストの報酬 */}
+        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-7">
+          <RitualPlate density="tight">
+            <div className="flex flex-col gap-2 sm:gap-2.5">
               <RitualTerminalHeader
+                compactHeader
                 channel="QUEST BRIEF · CH-03"
-                title="クエストの概要"
-                titleClassName="font-[var(--font-orbitron)] text-base font-bold tracking-[0.14em] text-[#f0dc82]/95 sm:text-lg"
+                title="クエストの報酬"
+                titleClassName="font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#f0c040] sm:text-base"
               />
-              <RitualScanList items={questItems} highlightLast />
 
-              <div className="mt-2 flex justify-center border-t border-cyan-400/18 pt-4 sm:mt-2.5 sm:pt-5">
+              <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} />
+
+              <p className="px-0.5 text-center font-[var(--font-noto)] text-[11px] font-medium leading-snug tracking-wide text-[#e0e0e0] sm:text-xs">
+                12の問いに答えた先に、あなたの「型」が明かされる。
+              </p>
+
+              <ul className="space-y-1.5 border-t border-[#40c0c0]/14 pt-2 sm:space-y-2 sm:pt-2.5">
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    8種のアーキタイプ診断
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    勇者、賢者、冒険者、はじまりの者——あなたはどの型か。
+                  </p>
+                </li>
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    3軸の思考スコア
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    目的定義・設計・判断、それぞれの強度が数値で見える。
+                  </p>
+                </li>
+                <li className="min-w-0">
+                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                    あなたへの処方箋
+                  </p>
+                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                    型に応じた、次に鍛えるべき思考が示される。
+                  </p>
+                </li>
+              </ul>
+
+              <p className="font-[var(--font-noto)] text-[10px] leading-relaxed text-[#b0c0cc]/88 sm:text-[11px]">
+                ※ 結果は8種のアーキタイプに分岐します
+              </p>
+
+              <div className="flex justify-center border-t border-[#40c0c0]/14 pt-2 sm:pt-2.5">
                 <RitualLaunchLink href="/play" variant="secondary">
                   ▶ クエストを始める
                 </RitualLaunchLink>

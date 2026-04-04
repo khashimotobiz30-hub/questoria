@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 function CornerBrackets() {
@@ -19,12 +20,14 @@ export function RitualPlate({
   density = "default",
 }: {
   children: ReactNode;
-  density?: "default" | "compact";
+  density?: "default" | "compact" | "tight";
 }) {
   const pad =
-    density === "compact"
-      ? "px-5 py-5 sm:px-6 sm:py-6"
-      : "px-6 py-7 sm:px-7 sm:py-8";
+    density === "tight"
+      ? "px-4 py-3 sm:px-5 sm:py-3.5"
+      : density === "compact"
+        ? "px-5 py-5 sm:px-6 sm:py-6"
+        : "px-6 py-7 sm:px-7 sm:py-8";
 
   return (
     <div
@@ -68,19 +71,28 @@ export function RitualTerminalHeader({
   channel,
   title,
   titleClassName,
+  compactHeader = false,
 }: {
   channel: string;
   title: string;
   titleClassName: string;
+  /** 2枚目など情報密度が高いパネル用 */
+  compactHeader?: boolean;
 }) {
   return (
-    <header className="space-y-3">
-      <div className="flex items-center gap-3">
-        <p className="whitespace-nowrap font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-cyan-400/75 sm:text-[11px]">
+    <header className={compactHeader ? "space-y-1.5 sm:space-y-2" : "space-y-3"}>
+      <div className={`flex items-center ${compactHeader ? "gap-2" : "gap-3"}`}>
+        <p
+          className={
+            compactHeader
+              ? "whitespace-nowrap font-mono text-[9px] font-semibold uppercase tracking-[0.28em] text-[#40c0c0]/85 sm:text-[10px]"
+              : "whitespace-nowrap font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-cyan-400/75 sm:text-[11px]"
+          }
+        >
           {channel}
         </p>
         <div
-          className="h-px min-w-[1.5rem] flex-1 bg-gradient-to-r from-cyan-400/40 to-transparent"
+          className={`h-px min-w-[1rem] flex-1 bg-gradient-to-r ${compactHeader ? "from-[#40c0c0]/45" : "from-cyan-400/40"} to-transparent`}
           aria-hidden
         />
       </div>
@@ -161,15 +173,88 @@ export function RitualScanList({
   );
 }
 
+/** 2枚目用：診断結果風ダミーバー（長さのみ内部計算・画面上は ??? のみ） */
+export function RitualDummyAxisBars() {
+  const rows = [
+    { id: "def", label: "目的定義力", widthPct: 70 },
+    { id: "design", label: "設計力", widthPct: 55 },
+    { id: "auto", label: "自律判断力", widthPct: 82 },
+  ] as const;
+
+  return (
+    <div
+      className="rounded-sm border border-[#40c0c0]/16 bg-[#0a0e14]/40 px-2 py-1.5 sm:px-2.5 sm:py-2"
+      role="img"
+      aria-label="3軸診断のイメージ。スコアは非表示です。"
+    >
+      <ul className="space-y-1 sm:space-y-1.5">
+        {rows.map((row) => (
+          <li key={row.id} className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-[4.25rem] shrink-0 font-mono text-[8px] leading-tight text-[#b0c0cc]/90 sm:w-[4.75rem] sm:text-[9px]">
+              {row.label}
+            </span>
+            <div className="relative h-[5px] min-w-0 flex-1 overflow-hidden rounded-full bg-[#0a0e14]/90 sm:h-1.5">
+              <span
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#c9a030] to-[#f0c040] shadow-[0_0_10px_rgba(240,192,64,0.35)]"
+                style={{ width: `${row.widthPct}%` }}
+              />
+            </div>
+            <span className="w-7 shrink-0 text-right font-mono text-[9px] tabular-nums text-[#f0c040]/85 sm:w-8 sm:text-[10px]">
+              ???
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** 3枚目用：結果画面スクショをスマホ縦フレーム内に表示（実画像のみ・モックHTMLは使わない） */
+export function RitualResultPhonePreview({
+  src,
+  alt = "診断完了後に表示される結果画面のプレビュー",
+}: {
+  src: string;
+  alt?: string;
+}) {
+  return (
+    <figure className="mx-auto w-full max-w-[200px] shrink-0 sm:max-w-[224px]">
+      <div className="relative aspect-[9/19] w-full overflow-hidden rounded-[1.35rem] border border-[#40c0c0]/28 bg-[#0a0e14] shadow-[0_14px_44px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(240,192,64,0.12),0_0_28px_rgba(64,192,192,0.07)]">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width:640px) 200px, 224px"
+          className="object-cover object-top"
+          priority={false}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-[#0a0e14]/90 via-[#0a0e14]/25 to-transparent"
+          aria-hidden
+        />
+      </div>
+    </figure>
+  );
+}
+
 const launchCorner = "pointer-events-none absolute h-3 w-3 border-[#d4af37]/60 sm:h-3.5 sm:w-3.5";
+const launchCornerPrimary =
+  "pointer-events-none absolute h-3 w-3 border-[#f0c040]/78 sm:h-3.5 sm:w-3.5";
 const launchCornerAux =
   "pointer-events-none absolute h-2 w-2 border-[#a89040]/55 sm:h-2.5 sm:w-2.5";
 
 const ritualLaunchBase =
-  "relative z-0 inline-flex items-center justify-center overflow-hidden font-[var(--font-orbitron)] font-bold tracking-[0.14em] text-[#f0dc82] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/45";
+  "relative z-0 inline-flex items-center justify-center overflow-hidden font-[var(--font-orbitron)] font-bold tracking-[0.14em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40c0c0]/50";
+
+const ritualLaunchGlowPrimary =
+  "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:z-10 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-[#40c0c0]/85 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.06] after:to-transparent";
 
 const ritualLaunchGlow =
-  "before:pointer-events-none before:absolute before:inset-x-5 before:top-0 before:z-10 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-300/75 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.04] after:to-transparent";
+  "before:pointer-events-none before:absolute before:inset-x-5 before:top-0 before:z-10 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#40c0c0]/70 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.04] after:to-transparent";
 
 const ritualLaunchGlowAux =
   "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:z-10 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-300/50 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.025] after:to-transparent";
@@ -188,22 +273,25 @@ export function RitualLaunchLink({
   const sizing = isAux
     ? "border border-[#9a8040]/38 px-5 py-2.5 text-[11px] tracking-[0.11em] text-[#e0d4a8]/90 sm:px-6 sm:py-3 sm:text-xs"
     : variant === "primary"
-      ? "border-2 border-[#c9a227]/55 px-9 py-4 text-[14px] sm:px-10 sm:text-[15px]"
-      : "border-2 border-[#b8962e]/50 px-7 py-3.5 text-sm sm:px-8";
+      ? "border-2 border-[#f0c040]/72 px-10 py-4 text-[15px] text-[#fce98a] sm:px-11 sm:py-[1.15rem] sm:text-[16px]"
+      : "border-2 border-[#b8962e]/50 px-7 py-3.5 text-sm text-[#f0dc82] sm:px-8";
 
   const surface = isAux
     ? "bg-gradient-to-b from-[#0e3038]/85 via-[#081c22]/88 to-[#040e12]/92 shadow-[inset_0_1px_16px_rgba(0,0,0,0.38),0_0_0_1px_rgba(0,229,255,0.05),0_4px_18px_rgba(0,0,0,0.45)]"
     : variant === "primary"
-      ? "bg-gradient-to-b from-[#143e45]/95 via-[#0d282e]/96 to-[#061316]/98 shadow-[inset_0_2px_24px_rgba(0,0,0,0.45),0_0_0_1px_rgba(0,229,255,0.12),0_8px_32px_rgba(0,0,0,0.55),0_0_40px_rgba(201,162,39,0.08)]"
+      ? "bg-gradient-to-b from-[#174550]/97 via-[#0e343c]/98 to-[#071a1f]/99 shadow-[inset_0_2px_28px_rgba(0,0,0,0.5),0_0_0_1px_rgba(64,192,192,0.2),0_10px_42px_rgba(0,0,0,0.6),0_0_56px_rgba(240,192,64,0.16)]"
       : "bg-gradient-to-b from-[#123840]/92 via-[#0b2228]/94 to-[#050f12]/96 shadow-[inset_0_2px_20px_rgba(0,0,0,0.4),0_0_0_1px_rgba(0,229,255,0.1),0_6px_28px_rgba(0,0,0,0.5)]";
 
-  const glowLayer = isAux ? ritualLaunchGlowAux : ritualLaunchGlow;
+  const glowLayer =
+    isAux ? ritualLaunchGlowAux : variant === "primary" ? ritualLaunchGlowPrimary : ritualLaunchGlow;
 
   const hover = isAux
     ? "hover:border-[#b8962e]/48 hover:text-[#f5edd0] hover:shadow-[inset_0_1px_14px_rgba(0,0,0,0.3),0_0_18px_rgba(201,162,39,0.14)]"
-    : "hover:border-[#e8c76a]/65 hover:text-[#fff8e6] hover:shadow-[inset_0_2px_24px_rgba(0,0,0,0.35),0_0_28px_rgba(201,162,39,0.22),0_0_0_1px_rgba(0,229,255,0.2)]";
+    : variant === "primary"
+      ? "hover:border-[#f5d458] hover:text-[#fffce8] hover:shadow-[inset_0_2px_22px_rgba(0,0,0,0.32),0_0_44px_rgba(240,192,64,0.35),0_0_0_1px_rgba(64,192,192,0.28)]"
+      : "hover:border-[#e8c76a]/65 hover:text-[#fff8e6] hover:shadow-[inset_0_2px_24px_rgba(0,0,0,0.35),0_0_28px_rgba(201,162,39,0.22),0_0_0_1px_rgba(64,192,192,0.2)]";
 
-  const C = isAux ? launchCornerAux : launchCorner;
+  const C = isAux ? launchCornerAux : variant === "primary" ? launchCornerPrimary : launchCorner;
   const edgeTL = isAux ? "border-l border-t" : "border-l-2 border-t-2";
   const edgeTR = isAux ? "border-r border-t" : "border-r-2 border-t-2";
   const edgeBL = isAux ? "border-b border-l" : "border-b-2 border-l-2";
