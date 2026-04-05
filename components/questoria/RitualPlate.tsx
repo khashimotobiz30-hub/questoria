@@ -218,14 +218,14 @@ export function RitualResultPhonePreview({
   alt?: string;
 }) {
   return (
-    <figure className="mx-auto w-full max-w-[200px] shrink-0 sm:max-w-[224px]">
-      <div className="relative aspect-[9/19] w-full overflow-hidden rounded-[1.35rem] border border-[#40c0c0]/28 bg-[#0a0e14] shadow-[0_14px_44px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(240,192,64,0.12),0_0_28px_rgba(64,192,192,0.07)]">
+    <figure className="mx-auto w-full max-w-[196px] shrink-0 sm:max-w-[218px]">
+      <div className="relative aspect-[9/17.5] w-full overflow-hidden rounded-[1.35rem] border border-[#40c0c0]/28 bg-[#0a0e14] shadow-[0_14px_44px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(240,192,64,0.12),0_0_28px_rgba(64,192,192,0.07)]">
         <Image
           src={src}
           alt={alt}
           fill
-          sizes="(max-width:640px) 200px, 224px"
-          className="object-cover object-top"
+          sizes="(max-width:640px) 196px, 218px"
+          className="object-cover object-center"
           priority={false}
         />
         <div
@@ -243,15 +243,16 @@ export function RitualResultPhonePreview({
 
 const launchCorner = "pointer-events-none absolute h-3 w-3 border-[#d4af37]/60 sm:h-3.5 sm:w-3.5";
 const launchCornerPrimary =
-  "pointer-events-none absolute h-3 w-3 border-[#f0c040]/78 sm:h-3.5 sm:w-3.5";
+  "pointer-events-none absolute h-2.5 w-2.5 border-[#f0c040]/72 sm:h-3 sm:w-3";
 const launchCornerAux =
   "pointer-events-none absolute h-2 w-2 border-[#a89040]/55 sm:h-2.5 sm:w-2.5";
 
 const ritualLaunchBase =
-  "relative z-0 inline-flex items-center justify-center overflow-hidden font-[var(--font-orbitron)] font-bold tracking-[0.14em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40c0c0]/50";
+  "relative z-0 inline-flex items-center justify-center overflow-hidden font-[var(--font-orbitron)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#40c0c0]/50";
 
+/** ヒーロー primary：黒い起動板。上端はごく弱いハイライト、下端にわずかな暖色（背景の灯りを受けるイメージ） */
 const ritualLaunchGlowPrimary =
-  "before:pointer-events-none before:absolute before:inset-x-4 before:top-0 before:z-10 before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-[#40c0c0]/85 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.06] after:to-transparent";
+  "after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.028] after:via-transparent after:to-[rgba(120,55,20,0.03)]";
 
 const ritualLaunchGlow =
   "before:pointer-events-none before:absolute before:inset-x-5 before:top-0 before:z-10 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#40c0c0]/70 before:to-transparent after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-white/[0.04] after:to-transparent";
@@ -273,13 +274,13 @@ export function RitualLaunchLink({
   const sizing = isAux
     ? "border border-[#9a8040]/38 px-5 py-2.5 text-[11px] tracking-[0.11em] text-[#e0d4a8]/90 sm:px-6 sm:py-3 sm:text-xs"
     : variant === "primary"
-      ? "border-2 border-[#f0c040]/72 px-10 py-4 text-[15px] text-[#fce98a] sm:px-11 sm:py-[1.15rem] sm:text-[16px]"
+      ? "border border-[#f0c040]/72 px-10 py-3.5 text-[14px] font-bold tracking-[0.14em] text-[#f0c040] sm:px-11 sm:py-4 sm:text-[15px]"
       : "border-2 border-[#b8962e]/50 px-7 py-3.5 text-sm text-[#f0dc82] sm:px-8";
 
   const surface = isAux
     ? "bg-gradient-to-b from-[#0e3038]/85 via-[#081c22]/88 to-[#040e12]/92 shadow-[inset_0_1px_16px_rgba(0,0,0,0.38),0_0_0_1px_rgba(0,229,255,0.05),0_4px_18px_rgba(0,0,0,0.45)]"
     : variant === "primary"
-      ? "bg-gradient-to-b from-[#174550]/97 via-[#0e343c]/98 to-[#071a1f]/99 shadow-[inset_0_2px_28px_rgba(0,0,0,0.5),0_0_0_1px_rgba(64,192,192,0.2),0_10px_42px_rgba(0,0,0,0.6),0_0_56px_rgba(240,192,64,0.16)]"
+      ? "bg-gradient-to-b from-[#0a0a0a]/42 via-[#060606]/48 to-[#030303]/54 backdrop-blur-[2px] shadow-[inset_0_1px_10px_rgba(0,0,0,0.22),inset_0_-2px_8px_rgba(90,42,18,0.04),0_4px_14px_rgba(0,0,0,0.2)]"
       : "bg-gradient-to-b from-[#123840]/92 via-[#0b2228]/94 to-[#050f12]/96 shadow-[inset_0_2px_20px_rgba(0,0,0,0.4),0_0_0_1px_rgba(0,229,255,0.1),0_6px_28px_rgba(0,0,0,0.5)]";
 
   const glowLayer =
@@ -288,24 +289,34 @@ export function RitualLaunchLink({
   const hover = isAux
     ? "hover:border-[#b8962e]/48 hover:text-[#f5edd0] hover:shadow-[inset_0_1px_14px_rgba(0,0,0,0.3),0_0_18px_rgba(201,162,39,0.14)]"
     : variant === "primary"
-      ? "hover:border-[#f5d458] hover:text-[#fffce8] hover:shadow-[inset_0_2px_22px_rgba(0,0,0,0.32),0_0_44px_rgba(240,192,64,0.35),0_0_0_1px_rgba(64,192,192,0.28)]"
+      ? "hover:border-[#f2cc50]/82 hover:text-[#f5d35c] hover:shadow-[inset_0_1px_12px_rgba(0,0,0,0.26),inset_0_-2px_8px_rgba(90,42,18,0.055),0_4px_16px_rgba(0,0,0,0.22),0_0_14px_rgba(240,192,64,0.07)]"
       : "hover:border-[#e8c76a]/65 hover:text-[#fff8e6] hover:shadow-[inset_0_2px_24px_rgba(0,0,0,0.35),0_0_28px_rgba(201,162,39,0.22),0_0_0_1px_rgba(64,192,192,0.2)]";
 
   const C = isAux ? launchCornerAux : variant === "primary" ? launchCornerPrimary : launchCorner;
-  const edgeTL = isAux ? "border-l border-t" : "border-l-2 border-t-2";
-  const edgeTR = isAux ? "border-r border-t" : "border-r-2 border-t-2";
-  const edgeBL = isAux ? "border-b border-l" : "border-b-2 border-l-2";
-  const edgeBR = isAux ? "border-b border-r" : "border-b-2 border-r-2";
+  const thickFrame = variant === "secondary";
+  const edgeTL = thickFrame ? "border-l-2 border-t-2" : "border-l border-t";
+  const edgeTR = thickFrame ? "border-r-2 border-t-2" : "border-r border-t";
+  const edgeBL = thickFrame ? "border-b-2 border-l-2" : "border-b border-l";
+  const edgeBR = thickFrame ? "border-b-2 border-r-2" : "border-b border-r";
+
+  const fontClass =
+    variant === "secondary" ? "font-bold tracking-[0.14em]" : variant === "primary" ? "" : "font-semibold";
+
+  const roundClass = variant === "primary" ? "rounded-none" : "rounded-sm";
 
   return (
     <Link
       href={href}
-      className={`rounded-sm ${ritualLaunchBase} ${glowLayer} ${surface} ${sizing} ${hover}`}
+      className={`${roundClass} ${ritualLaunchBase} ${fontClass} ${glowLayer} ${surface} ${sizing} ${hover}`}
     >
-      <span className={`${C} left-1.5 top-1.5 ${edgeTL} sm:left-2 sm:top-2`} aria-hidden />
-      <span className={`${C} right-1.5 top-1.5 ${edgeTR} sm:right-2 sm:top-2`} aria-hidden />
-      <span className={`${C} bottom-1.5 left-1.5 ${edgeBL} sm:bottom-2 sm:left-2`} aria-hidden />
-      <span className={`${C} bottom-1.5 right-1.5 ${edgeBR} sm:bottom-2 sm:right-2`} aria-hidden />
+      {variant !== "primary" ? (
+        <>
+          <span className={`${C} left-1.5 top-1.5 ${edgeTL} sm:left-2 sm:top-2`} aria-hidden />
+          <span className={`${C} right-1.5 top-1.5 ${edgeTR} sm:right-2 sm:top-2`} aria-hidden />
+          <span className={`${C} bottom-1.5 left-1.5 ${edgeBL} sm:bottom-2 sm:left-2`} aria-hidden />
+          <span className={`${C} bottom-1.5 right-1.5 ${edgeBR} sm:bottom-2 sm:right-2`} aria-hidden />
+        </>
+      ) : null}
       <span className="relative z-10">{children}</span>
     </Link>
   );
