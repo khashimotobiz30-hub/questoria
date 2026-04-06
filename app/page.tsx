@@ -1,17 +1,63 @@
+import type { ReactNode } from "react";
+
 import GlitchText from "@/components/questoria/GlitchText";
 import ParticleField from "@/components/questoria/ParticleField";
+import { ResultCardDecor, resultCardShellClass } from "@/components/questoria/result/resultCardTheme";
 import {
   RitualDummyAxisBars,
   RitualLaunchLink,
-  RitualPlate,
   RitualResultPhonePreview,
-  RitualTerminalHeader,
 } from "@/components/questoria/RitualPlate";
 
 /** 村人（typeId: origin）結果画面スクショ — ファイル名は後から差し替え可 */
 const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
 /** FB文言プレビュー用（public/top/result-preview-origin2.png） */
 const RESULT_PREVIEW_ORIGIN2_SRC = "/top/result-preview-origin2.png";
+
+/** LP カード・セクションタイトル：当該画面では最上段の見出し（本文小見出しより一段大きく・同色ゴールド） */
+const homePlateSectionTitleClass =
+  "font-[var(--font-noto)] text-[14px] font-bold leading-snug tracking-[0.1em] text-[#FFD700] sm:text-[16px] sm:tracking-[0.11em] [text-shadow:0_1px_3px_rgba(0,0,0,0.92),0_0_16px_rgba(255,215,0,0.42),0_0_28px_rgba(255,190,0,0.15)]";
+
+/** LP カード本文内の小見出し（ orbitron ）：階層整理のため白ベース */
+const homePlateBodySubheadClass =
+  "font-[var(--font-orbitron)] text-sm font-semibold tracking-wide text-white";
+
+/**
+ * LP：結果カードの枠・デコは共通、中身だけ「タイトル帯」と「本文面」を明確に分離する。
+ * 本文は帯より下をひと続きの黒透過エリアにまとめる（説明文だけ個別ブロックにしない）。
+ */
+function HomeResultStyleCard({ sectionLabel, children }: { sectionLabel: string; children: ReactNode }) {
+  return (
+    <div className="w-full max-w-md" style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.38))" }}>
+      <div className={resultCardShellClass("default")}>
+        <ResultCardDecor withRail subdued />
+        <div className="relative z-[1] flex flex-col">
+          <div className="border-b border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/20 via-[#2a2210]/94 to-[#15120a]/96 px-4 pb-3.5 pt-3.5 shadow-[inset_0_1px_0_rgba(255,215,0,0.14)] sm:pb-4 sm:pt-4">
+            <p className={homePlateSectionTitleClass}>{sectionLabel}</p>
+          </div>
+          <div className="space-y-3 bg-black/50 px-4 pb-4 pt-4 backdrop-blur-[2px] sm:pb-5">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 各スクリーン共通：主役は文言、▶ は控えめな進行補助 */
+function QuestStartCtaLabel() {
+  return (
+    <span className="inline-flex items-center gap-1 text-inherit sm:gap-1.5">
+      <span
+        className="translate-y-[0.06em] select-none text-[0.8em] font-medium leading-none opacity-[0.93]"
+        aria-hidden
+      >
+        ▶
+      </span>
+      <span className="leading-none">クエストを始める</span>
+    </span>
+  );
+}
 
 function HomeScrollCue() {
   return (
@@ -21,10 +67,10 @@ function HomeScrollCue() {
           className="flex flex-col items-center"
           style={{ animation: "questoriaScrollCuePulse 2s ease-in-out infinite" }}
         >
-          <p className="font-mono text-[10px] tracking-[0.3em] text-cyan-400/60">SCROLL</p>
-          <div className="relative mt-1 h-6 w-px overflow-hidden rounded-full bg-cyan-400/20">
+          <p className="font-mono text-[13px] tracking-[0.4em] text-cyan-400/80">SCROLL</p>
+          <div className="relative mt-1 h-7 w-[2px] overflow-hidden rounded-full bg-cyan-400/20">
             <div
-              className="absolute inset-x-0 top-0 h-full w-full origin-top bg-cyan-400/60"
+              className="absolute inset-x-0 top-0 h-full w-full origin-top bg-cyan-400/80"
               style={{ animation: "questoriaScrollLineFlow 1.5s ease-in-out infinite" }}
             />
           </div>
@@ -113,12 +159,7 @@ export default function Home() {
 
             <div className="mt-10 flex justify-center sm:mt-12">
               <RitualLaunchLink href="/play" variant="primary">
-                <span className="inline-flex items-center gap-2 text-inherit sm:gap-2.5">
-                  <span className="text-[0.82em] leading-none" aria-hidden>
-                    ▶
-                  </span>
-                  クエストを始める
-                </span>
+                <QuestStartCtaLabel />
               </RitualLaunchLink>
             </div>
           </div>
@@ -126,82 +167,68 @@ export default function Home() {
         </section>
 
         {/* 2画面目：この診断でわかること */}
-        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-8">
-          <RitualPlate density="tight">
-            <div className="flex flex-col gap-2 sm:gap-2.5">
-              <RitualTerminalHeader
-                compactHeader
-                channel="ANALYSIS NODE · CH-02"
-                title="この診断でわかること"
-                titleClassName="font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#40c0c0] sm:text-base"
-              />
-
-              <div className="space-y-1.5 font-[var(--font-noto)] text-[11px] leading-snug text-[#b0c0cc] sm:text-xs sm:leading-relaxed">
-                <p className="text-[#e0e0e0]">AI活用の差は、知識量だけでは決まりません。</p>
+        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+          <div className="flex w-full max-w-md flex-col items-center">
+            <HomeResultStyleCard sectionLabel="この診断でわかること">
+              <div className="space-y-2 font-[var(--font-noto)] text-sm leading-relaxed text-white/80">
+                <p>AI活用の差は、知識量だけでは決まりません。</p>
                 <p>この診断では、AIを使う上で大切な3つの力を見ていきます。</p>
               </div>
 
-              <div className="shrink-0 opacity-90 sm:opacity-95">
-                <RitualDummyAxisBars />
+              <div className="shrink-0">
+                <RitualDummyAxisBars prominent />
               </div>
 
-              <ul className="mt-0.5 space-y-1.5 border-t border-[#40c0c0]/14 pt-2 sm:space-y-2 sm:pt-2.5">
+              <ul className="space-y-3 border-t border-white/10 pt-3">
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     目的を決める力
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     AIに何をさせるべきかを考えられるか。
                   </p>
                 </li>
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     整理して進める力
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     複雑な課題を分解し、進め方を組み立てられるか。
                   </p>
                 </li>
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     自分で判断する力
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     AIの答えをうのみにせず、自分で良し悪しを判断できるか。
                   </p>
                 </li>
               </ul>
 
-              <p className="pt-0.5 text-center font-mono text-[8px] tracking-[0.16em] text-[#b0c0cc]/80 sm:text-[9px] sm:tracking-[0.2em]">
+              <p className="border-t border-white/10 pt-3 text-center font-mono text-[10px] tracking-[0.16em] text-white/55">
                 全12問　約3〜4分　無料
               </p>
+            </HomeResultStyleCard>
 
-              <div className="flex justify-center border-t border-[#40c0c0]/12 pt-2 sm:pt-2.5">
-                <RitualLaunchLink href="/play" variant="auxiliary">
-                  ▶ クエストを始める
-                </RitualLaunchLink>
-              </div>
+            <div className="mt-10 flex justify-center sm:mt-12">
+              <RitualLaunchLink href="/play" variant="primary">
+                <QuestStartCtaLabel />
+              </RitualLaunchLink>
             </div>
-          </RitualPlate>
+          </div>
           <HomeScrollCue />
         </section>
 
         {/* 3画面目：この診断で受け取れるもの */}
-        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-7">
-          <RitualPlate density="tight">
-            <div className="flex flex-col gap-2 sm:gap-2.5">
-              <RitualTerminalHeader
-                compactHeader
-                channel="QUEST BRIEF · CH-03"
-                title="この診断で受け取れるもの"
-                titleClassName="font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#f0c040] sm:text-base"
-              />
-
-              <div className="flex w-full flex-row flex-wrap items-start justify-center gap-6 pt-1 sm:flex-nowrap sm:pt-1.5">
+        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+          <div className="flex w-full max-w-md flex-col items-center">
+            <HomeResultStyleCard sectionLabel="この診断で受け取れるもの">
+              <div className="flex w-full flex-row flex-wrap items-start justify-center gap-5 pb-6 pt-0.5 sm:flex-nowrap sm:gap-6 sm:pb-7 sm:pt-1">
                 <div className="w-full max-w-[130px] shrink-0 sm:max-w-[145px]">
                   <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} />
                 </div>
-                <div className="w-full max-w-[130px] shrink-0 translate-y-[6px] sm:max-w-[145px]">
+                <div className="w-full max-w-[130px] shrink-0 translate-y-[18px] sm:max-w-[145px] sm:translate-y-[20px]">
                   <RitualResultPhonePreview
                     src={RESULT_PREVIEW_ORIGIN2_SRC}
                     alt="診断完了後に表示されるフィードバック文言のプレビュー"
@@ -209,44 +236,44 @@ export default function Home() {
                 </div>
               </div>
 
-              <ul className="space-y-1.5 border-t border-[#40c0c0]/14 pt-2 sm:space-y-2 sm:pt-2.5">
+              <ul className="space-y-3 border-t border-white/10 pt-3">
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     8つのタイプ診断
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     あなたがどのタイプに近いかがわかります。
                   </p>
                 </li>
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     3つの思考スコア
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     目的設定・設計・判断の強さを数値で確認できます。
                   </p>
                 </li>
                 <li className="min-w-0">
-                  <p className="font-[var(--font-orbitron)] text-[12px] font-bold tracking-wide text-[#e0e0e0] sm:text-sm">
+                  <p className={homePlateBodySubheadClass}>
                     結果に応じたアドバイス
                   </p>
-                  <p className="mt-1 pl-0.5 font-[var(--font-noto)] text-[11px] leading-relaxed text-[#b0c0cc] sm:text-xs">
+                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
                     次に伸ばすべきポイントがわかります。
                   </p>
                 </li>
               </ul>
 
-              <p className="font-[var(--font-noto)] text-[10px] leading-relaxed text-[#b0c0cc]/88 sm:text-[11px]">
+              <p className="border-t border-white/10 pt-3 text-sm leading-relaxed text-white/70">
                 ※ 結果は8タイプのいずれかに分類されます
               </p>
+            </HomeResultStyleCard>
 
-              <div className="flex justify-center border-t border-[#40c0c0]/12 pt-2 sm:pt-2.5">
-                <RitualLaunchLink href="/play" variant="auxiliary">
-                  ▶ クエストを始める
-                </RitualLaunchLink>
-              </div>
+            <div className="mt-10 flex justify-center sm:mt-12">
+              <RitualLaunchLink href="/play" variant="primary">
+                <QuestStartCtaLabel />
+              </RitualLaunchLink>
             </div>
-          </RitualPlate>
+          </div>
         </section>
       </div>
     </main>

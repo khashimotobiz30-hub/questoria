@@ -43,7 +43,40 @@ export const sectionLabelClass =
 export const resultCardNestedClass =
   "rounded-xl border border-white/10 bg-black/35 backdrop-blur-sm";
 
-export function ResultCardDecor({ withRail = true }: { withRail?: boolean }) {
+export function ResultCardDecor({
+  withRail = true,
+  /** LP content プレート等：上スウィープを浅くし「帯が載った」感を抑える */
+  subdued = false,
+}: {
+  withRail?: boolean;
+  subdued?: boolean;
+}) {
+  if (subdued) {
+    return (
+      <>
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-7 opacity-[0.42]"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(255,215,0,0.065), rgba(0,229,255,0.034), transparent)",
+          }}
+          aria-hidden="true"
+        />
+        {withRail ? (
+          <div
+            className="pointer-events-none absolute inset-y-4 left-0 w-0.5 rounded-full opacity-[0.86]"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(255,215,0,0.0), rgba(255,215,0,0.4), rgba(0,229,255,0.12), rgba(255,215,0,0.0))",
+              boxShadow: "0 0 10px rgba(255,215,0,0.11)",
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <>
       <div
