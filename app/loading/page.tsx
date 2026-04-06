@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -16,16 +15,12 @@ import type { ResultType } from "@/types";
 
 const SESSION_KEY_RESULT = "questoria_result";
 
-const ALL_TYPES: ResultType[] = [
-  "hero",
-  "sage",
-  "hunter",
-  "prophet",
-  "artisan",
-  "wizard",
-  "pioneer",
-  "origin",
-];
+/** ローディング演出 phase 0/1/2 で表示する画像（固定） */
+const LOADING_PHASE_IMAGES = [
+  "/top/wizard.jpg",
+  "/top/artisan.jpg",
+  "/top/hero.jpg",
+] as const;
 
 const CORRUPT_MSGS = [
   [
@@ -50,11 +45,6 @@ type Stage = "random" | "reveal" | "done";
 type LoadingSessionData = {
   resultType: ResultType;
 };
-
-function pickRandom3(exclude: ResultType): ResultType[] {
-  const pool = ALL_TYPES.filter((type) => type !== exclude);
-  return [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-}
 
 function readLoadingSession(): LoadingSessionData | null {
   if (typeof window === "undefined") return null;
@@ -82,11 +72,6 @@ export default function LoadingPage() {
 
   const isReady = sessionData !== null;
   const resultType = sessionData?.resultType ?? "hero";
-
-  const randomTypes = useMemo(() => {
-    if (!sessionData) return [];
-    return pickRandom3(sessionData.resultType);
-  }, [sessionData]);
 
   const [stage, setStage] = useState<Stage>("random");
   const [phase, setPhase] = useState(0);
@@ -128,6 +113,24 @@ export default function LoadingPage() {
       router.replace("/");
     }
   }, [sessionData, router]);
+
+  /** 3枚とも先読み（next/image の可視レイヤとは別に link preload を付与） */
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const links = LOADING_PHASE_IMAGES.map((href) => {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = href;
+      document.head.appendChild(link);
+      return link;
+    });
+
+    return () => {
+      links.forEach((el) => el.remove());
+    };
+  }, []);
 
   useEffect(() => {
     if (!isReady) return;
@@ -325,14 +328,31 @@ export default function LoadingPage() {
 
   return (
     <main className="relative min-h-[100svh] w-full overflow-hidden bg-[#0A0A0F]">
-      {stage === "random" && randomTypes.length > 0 && (
+      <div
+        className="pointer-events-none absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
+        aria-hidden
+      >
+        {LOADING_PHASE_IMAGES.map((src) => (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            width={1}
+            height={1}
+            priority
+            sizes="1px"
+          />
+        ))}
+      </div>
+
+      {stage === "random" && (
         <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
           <div
             className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-200 sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
             style={{ opacity: imgOpacity }}
           >
             <Image
-              src={`/top/${randomTypes[Math.min(phase, randomTypes.length - 1)]}.jpg`}
+              src={LOADING_PHASE_IMAGES[phase]}
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, 720px"

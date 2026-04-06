@@ -101,3 +101,26 @@ body {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(700%); }
 }
+
+/* Home top: scroll cue (Screen 1 & 2) */
+@keyframes questoriaScrollCuePulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes questoriaScrollLineFlow {
+  0% {
+    transform: scaleY(0);
+  }
+  70% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}

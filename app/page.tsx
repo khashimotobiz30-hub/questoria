@@ -10,6 +10,29 @@ import {
 
 /** 村人（typeId: origin）結果画面スクショ — ファイル名は後から差し替え可 */
 const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
+/** FB文言プレビュー用（public/top/result-preview-origin2.png） */
+const RESULT_PREVIEW_ORIGIN2_SRC = "/top/result-preview-origin2.png";
+
+function HomeScrollCue() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-8">
+      <div className="pointer-events-none flex flex-col items-center" aria-hidden>
+        <div
+          className="flex flex-col items-center"
+          style={{ animation: "questoriaScrollCuePulse 2s ease-in-out infinite" }}
+        >
+          <p className="font-mono text-[10px] tracking-[0.3em] text-cyan-400/60">SCROLL</p>
+          <div className="relative mt-1 h-6 w-px overflow-hidden rounded-full bg-cyan-400/20">
+            <div
+              className="absolute inset-x-0 top-0 h-full w-full origin-top bg-cyan-400/60"
+              style={{ animation: "questoriaScrollLineFlow 1.5s ease-in-out infinite" }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -28,7 +51,7 @@ export default function Home() {
       {/* 前景：scroll-snap（自然スクロール + セクション単位で停止） */}
       <div className="relative z-10 h-full snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-y-contain">
         {/* 1画面目：HERO */}
-        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
           <div className="w-full max-w-md text-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2.5 sm:gap-3">
@@ -99,10 +122,11 @@ export default function Home() {
               </RitualLaunchLink>
             </div>
           </div>
+          <HomeScrollCue />
         </section>
 
         {/* 2画面目：この診断でわかること */}
-        <section className="flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-8">
+        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:py-8">
           <RitualPlate density="tight">
             <div className="flex flex-col gap-2 sm:gap-2.5">
               <RitualTerminalHeader
@@ -159,6 +183,7 @@ export default function Home() {
               </div>
             </div>
           </RitualPlate>
+          <HomeScrollCue />
         </section>
 
         {/* 3画面目：この診断で受け取れるもの */}
@@ -172,11 +197,16 @@ export default function Home() {
                 titleClassName="font-[var(--font-orbitron)] text-[15px] font-bold tracking-[0.12em] text-[#f0c040] sm:text-base"
               />
 
-              <div className="flex w-full flex-col items-center gap-3 pt-1 sm:gap-3.5 sm:pt-1.5">
-                <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} />
-                <p className="max-w-[min(100%,20rem)] px-0.5 text-center font-[var(--font-noto)] text-[11px] font-medium leading-snug tracking-wide text-[#e0e0e0] sm:text-xs">
-                  12問に答えるだけで、あなたがどのタイプに近いかと、強み・弱みがわかります。
-                </p>
+              <div className="flex w-full flex-row flex-wrap items-start justify-center gap-6 pt-1 sm:flex-nowrap sm:pt-1.5">
+                <div className="w-full max-w-[130px] shrink-0 sm:max-w-[145px]">
+                  <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} />
+                </div>
+                <div className="w-full max-w-[130px] shrink-0 translate-y-[6px] sm:max-w-[145px]">
+                  <RitualResultPhonePreview
+                    src={RESULT_PREVIEW_ORIGIN2_SRC}
+                    alt="診断完了後に表示されるフィードバック文言のプレビュー"
+                  />
+                </div>
               </div>
 
               <ul className="space-y-1.5 border-t border-[#40c0c0]/14 pt-2 sm:space-y-2 sm:pt-2.5">
