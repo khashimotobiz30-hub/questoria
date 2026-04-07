@@ -125,7 +125,7 @@ export function ResultHeroSection({
               className="mb-2 font-mono text-[11px] tracking-[0.28em] text-cyan-300/90"
               style={{ textShadow: "0 0 8px rgba(0,229,255,0.6)" }}
             >
-              {"// YOUR CLASS //"}
+              YOUR CLASS
             </p>
             <h1
               className="font-orbitron text-5xl font-black leading-none tracking-wide text-[#FFD700]"
@@ -149,7 +149,7 @@ export function ResultHeroSection({
           <div className={resultCardShellClass("default")}>
             <ResultCardDecor withRail />
             <div className="relative z-[1] p-4">
-              <p className={sectionLabelClass}>{"// SKILL STATUS //"}</p>
+              <p className={sectionLabelClass}>SKILL STATUS</p>
               <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
                 <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
                 <SkillBar label="設計力" score={scores.design} level={levels.design} />

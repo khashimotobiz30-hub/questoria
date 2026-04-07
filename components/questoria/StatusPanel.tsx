@@ -1,5 +1,7 @@
 "use client";
 
+import { sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+
 type Row = { jp: string; en: string; };
 
 const ROWS: Row[] = [
@@ -15,9 +17,7 @@ export default function StatusPanel() {
       style={{ boxShadow:"0 0 20px rgba(255,215,0,0.08), inset 0 0 20px rgba(0,0,0,0.4)" }}
     >
       {/* ヘッダー */}
-      <p className="font-mono text-[11px] tracking-[0.28em] text-white/75 mb-4">
-      {"// SKILL STATUS //"}
-</p>
+      <p className={`${sectionLabelClass} mb-4`}>SKILL STATUS</p>
 
       <div className="flex flex-col gap-4">
         {ROWS.map((row) => (

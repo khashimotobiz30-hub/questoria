@@ -46,7 +46,7 @@ export function WhyThisTypeSection(props: Props) {
   return (
     <section className="space-y-4">
       <div className="px-0.5">
-        <p className={sectionLabelClass}>{"// WHY THIS TYPE //"}</p>
+        <p className={sectionLabelClass}>WHY THIS TYPE</p>
         <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
           なぜこのタイプなのか
         </h2>
@@ -57,11 +57,11 @@ export function WhyThisTypeSection(props: Props) {
 
       {hasAny ? (
         <div className="space-y-3">
-          <Block label="// JUDGEMENT //" text={props.judgementReason} />
+          <Block label="JUDGEMENT" text={props.judgementReason} />
 
-          <Block label="// INSIGHT //" text={insightText} />
+          <Block label="INSIGHT" text={insightText} />
 
-          <Block label="// SUMMARY //" text={props.profileSummary} />
+          <Block label="SUMMARY" text={props.profileSummary} />
         </div>
       ) : (
         <div className={resultCardShellClass("subtle")}>

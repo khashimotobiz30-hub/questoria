@@ -28,7 +28,7 @@ export function ShareSection({
   otherTypes,
   typeImageMap,
   typeNameJaByResultType,
-  copy,
+  copy: _copy,
   onShareX,
   onInviteFriends,
   onRerun,
@@ -47,15 +47,22 @@ export function ShareSection({
         <ResultCardDecor withRail />
         <div className="relative z-[1] space-y-4 p-5">
           <div>
-            <p className={sectionLabelClass}>{"// SHARE / COMPARE //"}</p>
+            <p className={sectionLabelClass}>SHARE / COMPARE</p>
             <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
               シェアして比べる
             </h2>
           </div>
 
           <div className="space-y-2 border-t border-white/10 pt-4">
-            <p className="text-sm leading-relaxed text-white/72">{copy.lead}</p>
-            <p className="text-[13px] leading-relaxed text-white/58">{copy.compareHint}</p>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-white/72">
+              同じテーマを見ても、着目するポイントは人それぞれです。{"\n"}
+              結果を比べると、考え方や強みの違いが見えてきます。
+            </p>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-white/72">
+              {"\n"}
+              友達とシェアして比べることで、{"\n"}
+              自分の特徴もさらにわかりやすくなります。
+            </p>
           </div>
 
           <div className="flex flex-col gap-3 border-t border-white/10 pt-4">
@@ -79,18 +86,10 @@ export function ShareSection({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-0.5">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-        <p className="font-mono text-[10px] tracking-[0.24em] text-white/55">OTHER TYPES</p>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/14 to-transparent" />
-      </div>
-
       <div className={resultCardShellClass("compare")}>
         <ResultCardDecor withRail />
         <div className="relative z-[1] space-y-3 p-5">
-          <p className="text-center text-[12px] leading-relaxed text-white/62">
-            別タイプの雰囲気だけ、軽く把握しておくと比較の材料になります。
-          </p>
+          <p className={sectionLabelClass}>TRY AGAIN</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-2.5">
             {otherTypes.map((type) => (
               <div key={type} className="flex min-w-0 flex-col items-center gap-1.5">
@@ -111,13 +110,17 @@ export function ShareSection({
             ))}
           </div>
 
+          <p className="text-[12px] leading-relaxed text-white/72">
+            他にもこんなタイプがあります。ぜひチェックしてみてください。
+          </p>
+
           <button
             type="button"
-            className="group mt-4 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-white/17 bg-gradient-to-b from-white/[0.07] to-black/38 px-4 py-3.5 text-sm font-medium tracking-wide text-white/74 transition hover:border-white/26 hover:from-white/[0.09] hover:to-black/44 hover:text-white/84 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/28 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]"
+            className="group mt-4 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-white/22 bg-gradient-to-b from-white/[0.09] to-black/36 px-4 py-3.5 text-sm font-medium tracking-wide text-white/80 shadow-[0_0_18px_rgba(255,255,255,0.06),0_0_22px_rgba(255,215,0,0.06)] transition hover:border-white/30 hover:from-white/[0.11] hover:to-black/42 hover:text-white/88 hover:shadow-[0_0_24px_rgba(255,255,255,0.07),0_0_30px_rgba(255,215,0,0.08)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/28 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]"
             onClick={onRerun}
           >
             <RotateCcw
-              className="size-[13px] shrink-0 text-white/50 transition-colors group-hover:text-white/68"
+              className="size-[13px] shrink-0 text-white/56 transition-colors group-hover:text-white/74"
               strokeWidth={1.5}
               aria-hidden="true"
             />

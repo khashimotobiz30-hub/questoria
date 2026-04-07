@@ -24,7 +24,7 @@ export function DeeperGuideSection({
       <ResultCardDecor withRail />
       <div className="relative z-[1] space-y-4 p-5">
         <div>
-          <p className={sectionLabelClass}>{"// DEEPER GUIDE //"}</p>
+          <p className={sectionLabelClass}>DEEPER GUIDE</p>
           <h2 className="mt-2 font-orbitron text-base font-bold tracking-wide text-white sm:text-lg">
             {copy.title}
           </h2>

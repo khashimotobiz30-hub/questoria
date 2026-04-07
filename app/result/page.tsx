@@ -125,6 +125,15 @@ function buildShareCompareCopy(
   };
 }
 
+function buildUnifiedShareText(typeNameJa: string) {
+  return [
+    "QUESTORIAのAIスキル診断をやってみた。",
+    `私は「${typeNameJa}」タイプ。`,
+    "あなたは何タイプ？",
+    "#QUESTORIA #AIスキル診断",
+  ].join("\n");
+}
+
 const typeImageMap: Record<ResultType, string> = {
   hero: "/top/hero.jpg",
   sage: "/top/sage.jpg",
@@ -219,6 +228,9 @@ export default function ResultPage() {
 
   const typeData = typeMaster[result.resultType];
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
+  const rootUrl = `${window.location.origin}/`;
+  const shareText = buildUnifiedShareText(typeData.nameJa);
+  const shareCopyText = `${shareText}\n${rootUrl}`;
 
   const detail = typeDetailMaster[result.resultType];
   const typeAnalysisCopy = buildTypeAnalysisCopy(typeData, detail);
@@ -238,14 +250,14 @@ export default function ResultPage() {
       result_type: result.resultType,
       title: typeData.nameJa,
     });
-    const url = `${window.location.origin}/`;
+    const url = rootUrl;
     void (async () => {
       try {
         if (navigator.share) {
           try {
             await navigator.share({
               title: "QUESTORIA",
-              text: `${typeData.nameJa}タイプの診断結果`,
+              text: shareText,
               url,
             });
             return;
@@ -253,7 +265,7 @@ export default function ResultPage() {
             if ((e as Error).name === "AbortError") return;
           }
         }
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(shareCopyText);
       } catch {
         /* noop */
       }
@@ -266,8 +278,8 @@ export default function ResultPage() {
       result_type: result.resultType,
       title: typeData.nameJa,
     });
-    const url = window.location.origin + "/";
-    const text = `QUESTORIA — ${typeData.nameJa}タイプでした。`;
+    const url = rootUrl;
+    const text = shareText;
     const u = encodeURIComponent(url);
     const t = encodeURIComponent(text);
     window.open(`https://twitter.com/intent/tweet?text=${t}&url=${u}`, "_blank", "noopener,noreferrer");

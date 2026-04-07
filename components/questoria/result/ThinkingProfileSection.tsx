@@ -1,5 +1,7 @@
 import React from "react";
 
+import { sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+
 type Level = "HIGH" | "MID" | "LOW";
 
 type AxisCard = {
@@ -33,9 +35,7 @@ export function ThinkingProfileSection({
   return (
     <section className="space-y-4">
       <div className="px-0.5">
-        <p className="font-mono text-[11px] tracking-[0.28em] text-white/60">
-          {"// YOUR THINKING PROFILE //"}
-        </p>
+        <p className={sectionLabelClass}>YOUR THINKING PROFILE</p>
         <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
           なぜこのタイプなのか
         </h2>
@@ -93,9 +93,7 @@ export function ThinkingProfileSection({
 
       {profileSummary ? (
         <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-          <p className="font-mono text-[11px] tracking-[0.28em] text-white/50">
-            {"// SUMMARY //"}
-          </p>
+          <p className={sectionLabelClass}>SUMMARY</p>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/75">
             {profileSummary}
           </p>

@@ -191,7 +191,7 @@ export function TypeAnalysisSection({ copy }: { copy: TypeAnalysisCopy }) {
   return (
     <section className="space-y-2.5">
       <header className="px-0.5 pb-0.5">
-        <p className={sectionLabelClass}>{"// TYPE ANALYSIS //"}</p>
+        <p className={sectionLabelClass}>TYPE ANALYSIS</p>
         <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">あなたの傾向</h2>
         <p className="mt-1 text-sm leading-relaxed text-white/70">あなたらしさは、こんな感じです。</p>
       </header>

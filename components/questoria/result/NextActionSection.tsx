@@ -31,7 +31,7 @@ export function NextActionSection({
       <ResultCardDecor withRail />
       <div className="relative z-[1] space-y-4 p-5">
         <div>
-          <p className={sectionLabelClass}>{"// NEXT ACTION //"}</p>
+          <p className={sectionLabelClass}>NEXT ACTION</p>
           <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">次の一歩</h2>
           <p className="mt-1 text-sm leading-relaxed text-white/70">
             {lead ?? "読んで終わりにしないための、今日からできる3ステップ。"}
