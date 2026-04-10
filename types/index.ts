@@ -8,6 +8,8 @@ export type ResultType =
   | "pioneer"
   | "origin";
 
+export type DiagnosisMode = "easy" | "hard";
+
 export type OptionKey = "A" | "B" | "C" | "D";
 
 export type AxisKey = "purpose" | "design" | "decision";
@@ -31,6 +33,7 @@ export type AnswerRecord = {
 };
 
 export type DiagnosisResult = {
+  mode: DiagnosisMode;
   answers: AnswerRecord[];
   rawScores: AxisScores;
   normalizedScores: AxisScores;

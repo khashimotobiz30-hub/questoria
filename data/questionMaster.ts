@@ -1,4 +1,4 @@
-import type { Question } from "@/types";
+import type { DiagnosisMode, Question } from "@/types";
 
 export const questionMaster: Question[] = [
   {
@@ -521,3 +521,159 @@ export const questionMaster: Question[] = [
     ],
   },
 ];
+
+/** Phase 1: EASY/HARD 文言切替用（採点・設問ID・スコアは既存のまま） */
+export type QuestionChoiceV2 = {
+  id: "A" | "B" | "C" | "D";
+  text: Record<DiagnosisMode, string>;
+  score: number;
+  /** 既存の正解情報（ロジックは触らない） */
+  correct: boolean;
+};
+
+export type QuestionItemV2 = {
+  questionId: string; // q1〜q12
+  prompt: Record<DiagnosisMode, string>;
+  choices: QuestionChoiceV2[];
+};
+
+/**
+ * Phase 3: EASY 文言を正式反映。
+ * - HARD には現行文言をそのまま入れる
+ * - EASY は短文化版（採点・ID・スコアは同一）
+ */
+const EASY_TEXT_MASTER: Record<
+  string,
+  { prompt: string; choices: Record<QuestionChoiceV2["id"], string> }
+> = {
+  q1: {
+    prompt: "目的がはっきりしないまま、新しい案を考えてほしいと言われた。最初にどうする？",
+    choices: {
+      A: "AIに案をたくさん出してもらう",
+      B: "市場や流行を調べる",
+      C: "相手に目的や期待を確認する",
+      D: "自分なりの仮説を立てて考え始める",
+    },
+  },
+  q2: {
+    prompt:
+      "目的がはっきりしない資料作りを、今日中に進める必要がある。相手とはすぐ話せない。最初にどうする？",
+    choices: {
+      A: "AIに構成案を出してもらって進める",
+      B: "過去資料や関連情報を整理する",
+      C: "相手に連絡して目的を確認しようとする",
+      D: "過去資料から目的を仮説立てして作り始める",
+    },
+  },
+  q3: {
+    prompt: "問題の原因について情報が多すぎて、何を見るべきか分からない。最初にどうする？",
+    choices: {
+      A: "情報を全部整理して原因を広く洗い出す",
+      B: "よくある原因から先に当たりをつける",
+      C: "AIに原因分析をさせる",
+      D: "何を明らかにしたいか先に決めて情報を絞る",
+    },
+  },
+  q4: {
+    prompt: "時間がほとんどない中で、会議用の内容をまとめる必要がある。最初にどうする？",
+    choices: {
+      A: "過去資料をもとに素早くまとめる",
+      B: "AIに整理させて短時間で作る",
+      C: "今回伝えるべき論点を先に絞る",
+      D: "できるだけ多くの情報を入れる",
+    },
+  },
+  q5: {
+    prompt: "新しいツールをチームに使ってもらいたい。どう進めるのがよい？",
+    choices: {
+      A: "AIを使いながら、その場で対応しつつ進める",
+      B: "理解が低い人から優先してフォローする",
+      C: "現状と目標を整理し、必要な手順を逆算する",
+      D: "他チームの成功例を参考に取り入れる",
+    },
+  },
+  q6: {
+    prompt: "新しい研修をゼロから作る。どう進めるのがよい？",
+    choices: {
+      A: "AIに研修案を出してもらい全体を作る",
+      B: "業務場面を洗い出して必要スキルを並べる",
+      C: "必要スキルと到達点を整理し、分解して設計する",
+      D: "他社や過去の研修を参考に調整する",
+    },
+  },
+  q7: {
+    prompt: "導入した仕組みが思ったように使われていない。どう対応するのがよい？",
+    choices: {
+      A: "今の計画のまま進めて定着を待つ",
+      B: "AIに改善案を出してもらって見直す",
+      C: "課題を整理し、必要なら計画から組み直す",
+      D: "原因を整理し、他チーム例も見て一部調整する",
+    },
+  },
+  q8: {
+    prompt: "改善したいことは多いが、時間も手数も限られている。どう進めるのがよい？",
+    choices: {
+      A: "改善案をできるだけ多く出して選ぶ",
+      B: "AIにデータや声を整理させて要因候補を出す",
+      C: "目的と優先度を整理し、効果が大きい所に絞る",
+      D: "他社の成功例を参考に選ぶ",
+    },
+  },
+  q9: {
+    prompt: "AIが作った内容を、そのまま使ってよいか迷っている。どうする？",
+    choices: {
+      A: "違和感がないのでそのまま使う",
+      B: "軽く確認して大きな問題がなければ使う",
+      C: "数値や説明の根拠を確認する",
+      D: "別の情報源でも同じ内容か確かめる",
+    },
+  },
+  q10: {
+    prompt: "よさそうな提案だが、前提があいまいで少し気になる。どうする？",
+    choices: {
+      A: "納得感があるのでそのまま進める",
+      B: "大枠は採用し、細かい所だけ直す",
+      C: "気になる前提が本当に成り立つか確認する",
+      D: "小さく試して運用上の課題を見ながら判断する",
+    },
+  },
+  q11: {
+    prompt: "複数の情報があり、どれも一理ある。明日までに方向性を決める必要がある。どうする？",
+    choices: {
+      A: "一番信頼できそうな情報を選ぶ",
+      B: "支持が多い意見を選ぶ",
+      C: "それぞれの前提を整理し、自分たちに合う案を選ぶ",
+      D: "前提を踏まえて自分なりの仮説で決める",
+    },
+  },
+  q12: {
+    prompt: "情報はある程度あるが、不確定な点も残っている。待つと機会を逃すかもしれない。どうする？",
+    choices: {
+      A: "リスクを避けて、情報がそろうまで待つ",
+      B: "大きな問題は起きにくいと見て進める",
+      C: "不確定要素を整理し、許容できるか判断して決める",
+      D: "まず小さく始めて様子を見る",
+    },
+  },
+};
+
+export const questionMasterV2: QuestionItemV2[] = questionMaster.map((q) => {
+  const hardPrompt = q.question.join("\n");
+  const easyOverride = EASY_TEXT_MASTER[q.id];
+  return {
+    questionId: q.id,
+    prompt: {
+      hard: hardPrompt,
+      easy: easyOverride?.prompt ?? hardPrompt,
+    },
+    choices: q.options.map((o) => ({
+      id: o.label,
+      text: {
+        hard: o.text,
+        easy: easyOverride?.choices?.[o.label] ?? o.text,
+      },
+      score: o.score,
+      correct: o.correct,
+    })),
+  };
+});

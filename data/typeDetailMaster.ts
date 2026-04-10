@@ -77,7 +77,7 @@ export const PIONEER_TYPE_DETAIL = {
   title: "冒険者",
   englishName: "PIONEER",
   tagline:
-    "地図がなくても、答えがなくても、踏み出せる。\nだが、進む先を決める力は、まだ伸ばせる。",
+    "地図がなくても、答えがなくても、踏み出せる。\nその一歩が、新しい道を切り開いていく。",
 
   shortSummary:
     "動き出す覚悟はある。あとは、その一歩を成果につなげる精度を育てる段階。",
@@ -152,7 +152,7 @@ export const WIZARD_TYPE_DETAIL = {
   title: "魔法使い",
   englishName: "WIZARD",
   tagline:
-    "複雑なものほど、道筋は美しく描ける。\nだが、何のために進むかと、最後に決め切る力はまだ伸ばせる。",
+    "複雑なものほど、道筋は美しく描ける。\nその設計が、混沌に秩序を与えていく。",
 
   shortSummary:
     "進め方を整える力は強い。あとは問いの精度と決断が加われば、一気に完成度が上がるタイプ。",
@@ -227,7 +227,7 @@ export const ARTISAN_TYPE_DETAIL = {
   title: "鍛冶師",
   englishName: "ARTISAN",
   tagline:
-    "形にする力は、すでにある。\nあとは何を鍛えるべきかを見極めれば、その強さは本物になる。",
+    "形にする力は、すでにある。\nその手で、成果を現実へと鍛え上げていける。",
 
   shortSummary:
     "作る力も、決める力もある。次に必要なのは、問いの精度を上げること。",
@@ -302,7 +302,7 @@ export const PROPHET_TYPE_DETAIL = {
   title: "預言者",
   englishName: "PROPHET",
   tagline:
-    "見えていない論点に、先に気づける。\nだが、その答えを形にし、最後に決める力はまだ伸ばせる。",
+    "見えていない論点に、先に気づける。\nその洞察が、新しい問いを生み出していく。",
 
   shortSummary:
     "問いの鋭さはある。あとは進め方と決断が加われば、洞察が成果に変わるタイプ。",
@@ -377,7 +377,7 @@ export const HUNTER_TYPE_DETAIL = {
   title: "狩人",
   englishName: "HUNTER",
   tagline:
-    "狙うべきものは見えている。\nあとは、その一撃をもっと再現できる形に整えればいい。",
+    "狙うべきものは見えている。\nその一撃が、停滞を切り裂いていく。",
 
   shortSummary:
     "問いも決断も強い。次に必要なのは、勢いを構造へ変えること。",
@@ -452,7 +452,7 @@ export const SAGE_TYPE_DETAIL = {
   title: "賢者",
   englishName: "SAGE",
   tagline:
-    "問いを見抜き、道筋も描ける。\nあとは最後に、自分の答えとして選び切る力を育てればいい。",
+    "問いを見抜き、道筋も描ける。\nその思考が、勝ち筋を照らしていく。",
 
   shortSummary:
     "見立ても設計も強い。次に必要なのは、判断を他に預けず、自分で閉じること。",

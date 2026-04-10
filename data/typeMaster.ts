@@ -23,7 +23,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     nameJa: "勇者",
     nameEn: "HERO",
     tagline:
-      "課題を見抜き、道を描き、最後は自分で決断できる。AI時代の真のプレイヤー。",
+      "何を成すべきかを定め、道を描き、自ら決めて進む。\nその一歩は、もう迷いではなく意志だ。",
     description: {
       essence:
         "あなたは、AIを使って状況を整理し、課題の本質を自分で定義し、最後は自分の意志で決断できるタイプです。",
@@ -54,7 +54,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "sage",
     nameJa: "賢者",
     nameEn: "SAGE",
-    tagline: "課題を見抜き、完璧な道筋を描く。チームの知恵袋。",
+    tagline: "問いを見抜き、道筋も描ける。\nその思考が、勝ち筋を照らしていく。",
     description: {
       essence:
         "あなたは、問題の本質を鋭く見抜き、緻密な戦略を設計できるタイプです。AIを使った情報整理・構造化が得意で、チームの羅針盤になれます。",
@@ -86,7 +86,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "hunter",
     nameJa: "狩人",
     nameEn: "HUNTER",
-    tagline: "目指すべき場所が見えている。あとは突き進むだけ。",
+    tagline: "狙うべきものは見えている。\nその一撃が、停滞を切り裂いていく。",
     description: {
       essence:
         "あなたは、課題の本質を直感的に掴み、自分の意志で迷わず動けるタイプです。AIを力技で使いこなす、圧倒的な突破力の持ち主です。",
@@ -117,7 +117,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "prophet",
     nameJa: "預言者",
     nameEn: "PROPHET",
-    tagline: "誰も気づかない課題の本質を、いち早く見抜く。",
+    tagline: "見えていない論点に、先に気づける。\nその洞察が、新しい問いを生み出していく。",
     description: {
       essence:
         "あなたは、他の人が見落とす問題の本質を鋭く察知できるタイプです。「何が問題か」を定義する力は、チームの中で群を抜いています。",
@@ -148,7 +148,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "artisan",
     nameJa: "鍛冶師",
     nameEn: "ARTISAN",
-    tagline: "道を描き、自分で決める。アウトプットはいつも一級品。",
+    tagline: "形にする力は、すでにある。\nその手で、成果を現実へと鍛え上げていける。",
     description: {
       essence:
         "あなたは、与えられた課題に対して緻密な設計を立て、自分の判断で仕上げる実行力のあるタイプです。AIを使ったアウトプットの質が高い。",
@@ -180,7 +180,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "wizard",
     nameJa: "魔法使い",
     nameEn: "WIZARD",
-    tagline: "AIを華麗に操り、複雑な道筋を鮮やかに描く。",
+    tagline: "複雑なものほど、道筋は美しく描ける。\nその設計が、混沌に秩序を与えていく。",
     description: {
       essence:
         "あなたは、AIを使った情報整理・戦略設計・実行計画が得意なタイプです。複雑な課題でも、鮮やかにプロセスを組み立てられます。",
@@ -211,7 +211,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "pioneer",
     nameJa: "冒険者",
     nameEn: "PIONEER",
-    tagline: "地図がなくても、答えがなくても、踏み出せる。",
+    tagline: "地図がなくても、答えがなくても、踏み出せる。\nその一歩が、新しい道を切り開いていく。",
     description: {
       essence:
         "あなたは、誰よりも早く行動に移せる覚悟と決断力を持つタイプです。正解がない状況でも、自分の意志で一歩を踏み出せます。",

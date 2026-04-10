@@ -2,6 +2,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 import { ResultCardDecor, resultCardShellClass, sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+import type { DiagnosisMode } from "@/types";
 
 type Level = "HIGH" | "MID" | "LOW";
 
@@ -13,6 +14,7 @@ type Props = {
   colors: { primary: string; secondary: string };
   scores: { purpose: number; design: number; decision: number };
   levels: { purpose: Level; design: Level; decision: Level };
+  mode?: DiagnosisMode;
   overallComment?: string;
   disableOverallClamp?: boolean;
 };
@@ -69,10 +71,12 @@ export function ResultHeroSection({
   colors,
   scores,
   levels,
+  mode,
   overallComment,
   disableOverallClamp,
 }: Props) {
   const tint = `${colors.primary}18`;
+  const modeLabel = (mode ?? "hard") === "easy" ? "EASY" : "HARD";
 
   return (
     <section className="px-4 pt-4">
@@ -109,15 +113,26 @@ export function ResultHeroSection({
             >
               QUESTORIA
             </span>
-            <span
-              className="rounded-sm bg-black/60 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-cyan-300 backdrop-blur-sm"
-              style={{
-                border: "1px solid rgba(0,229,255,0.7)",
-                boxShadow: "0 0 10px rgba(0,229,255,0.3)",
-              }}
-            >
-              RESULT
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="rounded-sm bg-black/60 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-cyan-300 backdrop-blur-sm"
+                style={{
+                  border: "1px solid rgba(0,229,255,0.7)",
+                  boxShadow: "0 0 10px rgba(0,229,255,0.3)",
+                }}
+              >
+                RESULT
+              </span>
+              <span
+                className="rounded-sm bg-black/50 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-cyan-200/90 backdrop-blur-sm"
+                style={{
+                  border: "1px solid rgba(0,229,255,0.38)",
+                  boxShadow: "0 0 10px rgba(0,229,255,0.16)",
+                }}
+              >
+                {modeLabel}
+              </span>
+            </div>
           </div>
 
           <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-6">

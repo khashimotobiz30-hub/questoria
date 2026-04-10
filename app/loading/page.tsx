@@ -50,7 +50,9 @@ function readLoadingSession(): LoadingSessionData | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY_RESULT);
+    const raw =
+      sessionStorage.getItem(SESSION_KEY_RESULT) ??
+      localStorage.getItem(SESSION_KEY_RESULT);
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as unknown;
@@ -72,6 +74,7 @@ export default function LoadingPage() {
 
   const isReady = sessionData !== null;
   const resultType = sessionData?.resultType ?? "hero";
+  const [imagesReady, setImagesReady] = useState(false);
 
   const [stage, setStage] = useState<Stage>("random");
   const [phase, setPhase] = useState(0);
@@ -114,26 +117,52 @@ export default function LoadingPage() {
     }
   }, [sessionData, router]);
 
-  /** 3枚とも先読み（next/image の可視レイヤとは別に link preload を付与） */
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    const links = LOADING_PHASE_IMAGES.map((href) => {
-      const link = document.createElement("link");
-      link.rel = "preload";
-      link.as = "image";
-      link.href = href;
-      document.head.appendChild(link);
-      return link;
-    });
-
-    return () => {
-      links.forEach((el) => el.remove());
-    };
-  }, []);
-
+  /** Phase画像3枚 + 最終 `/top/${resultType}.jpg` を decode まで事前準備してから演出開始 */
   useEffect(() => {
     if (!isReady) return;
+
+    let cancelled = false;
+
+    const preload = async (src: string) => {
+      const img = new window.Image();
+      img.decoding = "async";
+      // eslint-disable-next-line no-async-promise-executor
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // 失敗しても止めない（フォールバック開始する）
+        img.src = src;
+      });
+      // decode が使える環境では完了まで待つ（失敗は握りつぶす）
+      try {
+        await img.decode?.();
+      } catch {
+        /* noop */
+      }
+    };
+
+    const startWhenReady = async () => {
+      const targets = [...LOADING_PHASE_IMAGES, `/top/${resultType}.jpg`];
+
+      try {
+        // どれかが詰まってもアプリが止まらないよう、タイムアウトでフォールバック
+        await Promise.race([
+          Promise.all(targets.map((src) => preload(src))),
+          new Promise<void>((resolve) => window.setTimeout(resolve, 2500)),
+        ]);
+      } finally {
+        if (!cancelled) setImagesReady(true);
+      }
+    };
+
+    void startWhenReady();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isReady, resultType]);
+
+  useEffect(() => {
+    if (!isReady || !imagesReady) return;
 
     let y = -60;
     let frame = 0;
@@ -149,7 +178,7 @@ export default function LoadingPage() {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [isReady]);
+  }, [imagesReady, isReady]);
 
   const spawnEffects = useCallback(
     (currentPhase: number) => {
@@ -279,7 +308,7 @@ export default function LoadingPage() {
   }, [addTimer, router]);
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || !imagesReady) return;
 
     const runPhase = (currentPhase: number) => {
       setPhase(currentPhase);
@@ -322,29 +351,12 @@ export default function LoadingPage() {
       intervalsRef.current.forEach(clearInterval);
       intervalsRef.current = [];
     };
-  }, [isReady, addInterval, addTimer, spawnEffects, startReveal]);
+  }, [imagesReady, isReady, addInterval, addTimer, spawnEffects, startReveal]);
 
   if (!isReady) return null;
 
   return (
     <main className="relative min-h-[100svh] w-full overflow-hidden bg-[#0A0A0F]">
-      <div
-        className="pointer-events-none absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
-        aria-hidden
-      >
-        {LOADING_PHASE_IMAGES.map((src) => (
-          <Image
-            key={src}
-            src={src}
-            alt=""
-            width={1}
-            height={1}
-            priority
-            sizes="1px"
-          />
-        ))}
-      </div>
-
       {stage === "random" && (
         <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
           <div
@@ -465,12 +477,12 @@ export default function LoadingPage() {
             className="mb-2 font-mono text-2xl font-black tracking-widest text-[#FFD700]"
             style={titleShake ? { animation: "titleShake 0.1s infinite" } : {}}
           >
-            解析中
+            審査中
           </h1>
           <p className="mb-3 text-xs text-white/55">
-            AIがあなたの思考を解析しています。
+            あなたの思考の軌跡を読み解いています。
             <br />
-            最適なタイプを算出中…
+            適性タイプを判定中…
           </p>
 
           <div className="mx-auto mb-2 h-[2px] w-48 overflow-hidden bg-cyan-300/15">

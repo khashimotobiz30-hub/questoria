@@ -20,7 +20,7 @@ function Block({ label, text }: { label: string; text?: string }) {
     <div className={resultCardShellClass("default")}>
       <ResultCardDecor withRail />
       <div className="relative z-[1] space-y-3 p-4">
-        <p className={sectionLabelClass}>{label}</p>
+        <p className="text-sm font-semibold leading-snug text-[#FFD700]">{label}</p>
         <div className="space-y-3 border-t border-white/10 pt-3">
           {paragraphs.map((p, i) => (
             <p key={i} className="whitespace-pre-line text-sm leading-relaxed text-white/75">
@@ -57,11 +57,11 @@ export function WhyThisTypeSection(props: Props) {
 
       {hasAny ? (
         <div className="space-y-3">
-          <Block label="JUDGEMENT" text={props.judgementReason} />
+          <Block label="JUDGEMENT（判定）" text={props.judgementReason} />
 
-          <Block label="INSIGHT" text={insightText} />
+          <Block label="INSIGHT（考察）" text={insightText} />
 
-          <Block label="SUMMARY" text={props.profileSummary} />
+          <Block label="SUMMARY（要約）" text={props.profileSummary} />
         </div>
       ) : (
         <div className={resultCardShellClass("subtle")}>

@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 
 import GlitchText from "@/components/questoria/GlitchText";
+import { LpScreen2Content } from "@/components/questoria/LpScreen2Content";
 import ParticleField from "@/components/questoria/ParticleField";
+import { PreviousResultLink } from "@/components/questoria/PreviousResultLink";
 import { ResultCardDecor, resultCardShellClass } from "@/components/questoria/result/resultCardTheme";
-import {
-  RitualDummyAxisBars,
-  RitualLaunchLink,
-  RitualResultPhonePreview,
-} from "@/components/questoria/RitualPlate";
+import { RitualLaunchLink, RitualResultPhonePreview } from "@/components/questoria/RitualPlate";
 
 /** 村人（typeId: origin）結果画面スクショ — ファイル名は後から差し替え可 */
 const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
@@ -26,16 +24,30 @@ const homePlateBodySubheadClass =
  * LP：結果カードの枠・デコは共通、中身だけ「タイトル帯」と「本文面」を明確に分離する。
  * 本文は帯より下をひと続きの黒透過エリアにまとめる（説明文だけ個別ブロックにしない）。
  */
-function HomeResultStyleCard({ sectionLabel, children }: { sectionLabel: string; children: ReactNode }) {
+function HomeResultStyleCard({
+  sectionLabel,
+  children,
+  bandTitleClassName,
+  bodyClassName,
+}: {
+  sectionLabel: string;
+  children: ReactNode;
+  /** 帯タイトルが長い画面用（省略可） */
+  bandTitleClassName?: string;
+  /** 本文エリアの追加クラス（省略可） */
+  bodyClassName?: string;
+}) {
   return (
     <div className="w-full max-w-md" style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.38))" }}>
       <div className={resultCardShellClass("default")}>
         <ResultCardDecor withRail subdued />
         <div className="relative z-[1] flex flex-col">
           <div className="border-b border-[#FFD700]/28 bg-gradient-to-b from-[#FFD700]/20 via-[#2a2210]/94 to-[#15120a]/96 px-4 pb-3.5 pt-3.5 shadow-[inset_0_1px_0_rgba(255,215,0,0.14)] sm:pb-4 sm:pt-4">
-            <p className={homePlateSectionTitleClass}>{sectionLabel}</p>
+            <p className={bandTitleClassName ?? homePlateSectionTitleClass}>{sectionLabel}</p>
           </div>
-          <div className="space-y-3 bg-black/50 px-4 pb-4 pt-4 backdrop-blur-[2px] sm:pb-5">
+          <div
+            className={`space-y-3 bg-black/50 px-4 pb-4 pt-4 backdrop-blur-[2px] sm:pb-5 ${bodyClassName ?? ""}`}
+          >
             {children}
           </div>
         </div>
@@ -162,53 +174,20 @@ export default function Home() {
                 <QuestStartCtaLabel />
               </RitualLaunchLink>
             </div>
+            <PreviousResultLink className="mt-3 flex justify-center" />
           </div>
           <HomeScrollCue />
         </section>
 
-        {/* 2画面目：この診断でわかること */}
+        {/* 2画面目：AI活用スキルと診断方法（スクリーン3と同系の大枠プレート） */}
         <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
           <div className="flex w-full max-w-md flex-col items-center">
-            <HomeResultStyleCard sectionLabel="この診断でわかること">
-              <div className="space-y-2 font-[var(--font-noto)] text-sm leading-relaxed text-white/80">
-                <p>AI活用の差は、知識量だけでは決まりません。</p>
-                <p>この診断では、AIを使う上で大切な3つの力を見ていきます。</p>
-              </div>
-
-              <div className="shrink-0">
-                <RitualDummyAxisBars prominent />
-              </div>
-
-              <ul className="space-y-3 border-t border-white/10 pt-3">
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    目的を決める力
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    AIに何をさせるべきかを考えられるか。
-                  </p>
-                </li>
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    整理して進める力
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    複雑な課題を分解し、進め方を組み立てられるか。
-                  </p>
-                </li>
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    自分で判断する力
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    AIの答えをうのみにせず、自分で良し悪しを判断できるか。
-                  </p>
-                </li>
-              </ul>
-
-              <p className="border-t border-white/10 pt-3 text-center font-mono text-[10px] tracking-[0.16em] text-white/55">
-                全12問　約3〜4分　無料
-              </p>
+            <HomeResultStyleCard
+              sectionLabel="AI活用スキルとその診断方法"
+              bandTitleClassName={`${homePlateSectionTitleClass} text-[12px] leading-snug tracking-[0.06em] sm:text-[14px] sm:tracking-[0.08em]`}
+              bodyClassName="overflow-visible pb-5 pt-5"
+            >
+              <LpScreen2Content />
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">
@@ -220,52 +199,31 @@ export default function Home() {
           <HomeScrollCue />
         </section>
 
-        {/* 3画面目：この診断で受け取れるもの */}
+        {/* 3画面目：この診断でわかること（モックで結果の雰囲気、本文はメリットを短く） */}
         <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
           <div className="flex w-full max-w-md flex-col items-center">
-            <HomeResultStyleCard sectionLabel="この診断で受け取れるもの">
+            <HomeResultStyleCard sectionLabel="この診断でわかること">
               <div className="flex w-full flex-row flex-wrap items-start justify-center gap-5 pb-6 pt-0.5 sm:flex-nowrap sm:gap-6 sm:pb-7 sm:pt-1">
-                <div className="w-full max-w-[130px] shrink-0 sm:max-w-[145px]">
-                  <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} />
+                <div className="w-full max-w-[150px] shrink-0 sm:max-w-[168px]">
+                  <RitualResultPhonePreview src={RESULT_PREVIEW_ORIGIN_SRC} emphasis />
                 </div>
-                <div className="w-full max-w-[130px] shrink-0 translate-y-[18px] sm:max-w-[145px] sm:translate-y-[20px]">
+                <div className="w-full max-w-[150px] shrink-0 translate-y-[18px] sm:max-w-[168px] sm:translate-y-[20px]">
                   <RitualResultPhonePreview
                     src={RESULT_PREVIEW_ORIGIN2_SRC}
                     alt="診断完了後に表示されるフィードバック文言のプレビュー"
+                    emphasis
                   />
                 </div>
               </div>
 
-              <ul className="space-y-3 border-t border-white/10 pt-3">
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    8つのタイプ診断
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    あなたがどのタイプに近いかがわかります。
-                  </p>
-                </li>
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    3つの思考スコア
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    目的設定・設計・判断の強さを数値で確認できます。
-                  </p>
-                </li>
-                <li className="min-w-0">
-                  <p className={homePlateBodySubheadClass}>
-                    結果に応じたアドバイス
-                  </p>
-                  <p className="mt-1.5 font-[var(--font-noto)] text-sm leading-relaxed text-white/75">
-                    次に伸ばすべきポイントがわかります。
-                  </p>
-                </li>
-              </ul>
-
-              <p className="border-t border-white/10 pt-3 text-sm leading-relaxed text-white/70">
-                ※ 結果は8タイプのいずれかに分類されます
-              </p>
+              <div className="space-y-1.5 border-t border-white/10 pt-3 font-[var(--font-noto)] text-[14px] leading-relaxed text-white/78 sm:text-[15px]">
+                <p className="font-semibold text-white/88">
+                  この診断を受けることで、自分の強みだけでなく、つまずきやすいポイントや伸ばすべき力が見えてきます。
+                </p>
+                <p className="text-white/88">
+                  まずは今の現在地を知ることから始めてみてください。
+                </p>
+              </div>
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">

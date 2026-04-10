@@ -1,17 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { questionMaster } from "@/data/questionMaster";
+import { questionMaster, questionMasterV2 } from "@/data/questionMaster";
 import type {
   AnswerRecord,
   AxisLevels,
   AxisScores,
+  DiagnosisMode,
   DiagnosisResult,
   OptionKey,
-  Question,
-  QuestionOption,
   ResultType,
 } from "@/types";
 
@@ -35,15 +34,21 @@ const optionOrderMap: Record<string, number[]> = {
   q12: [0, 1, 3, 2],
 };
 
-type DisplayOption = QuestionOption & {
+type DisplayChoice = {
+  id: OptionKey;
+  text: string;
+  score: number;
+  correct: boolean;
   displayLabel: OptionKey;
 };
 
-function getOrderedOptions(question: Question): DisplayOption[] {
-  const order = optionOrderMap[question.id] ?? [0, 1, 2, 3];
-
+function getOrderedChoices(
+  questionId: string,
+  choices: { id: OptionKey; score: number; correct: boolean; text: string }[],
+): DisplayChoice[] {
+  const order = optionOrderMap[questionId] ?? [0, 1, 2, 3];
   return order.map((originalIndex, displayIndex) => ({
-    ...question.options[originalIndex],
+    ...choices[originalIndex],
     displayLabel: DISPLAY_LABELS[displayIndex],
   }));
 }
@@ -81,7 +86,7 @@ function getResultType(normalizedScores: AxisScores): ResultType {
   return "origin";
 }
 
-function calculateDiagnosisResult(answers: AnswerRecord[]): DiagnosisResult {
+function calculateDiagnosisResult(answers: AnswerRecord[], mode: DiagnosisMode): DiagnosisResult {
   const rawScores = answers.reduce<AxisScores>((acc, answer) => {
     const question = questionMaster.find((item) => item.id === answer.questionId);
     if (!question) return acc;
@@ -103,6 +108,7 @@ function calculateDiagnosisResult(answers: AnswerRecord[]): DiagnosisResult {
   };
 
   return {
+    mode,
     answers,
     rawScores,
     normalizedScores,
@@ -111,30 +117,48 @@ function calculateDiagnosisResult(answers: AnswerRecord[]): DiagnosisResult {
   };
 }
 
+function parseMode(raw: string | null): DiagnosisMode {
+  return raw === "easy" || raw === "hard" ? raw : "hard";
+}
+
 export default function PlayPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlMode = parseMode(searchParams.get("mode"));
 
   const [hasStarted, setHasStarted] = useState(false);
+  const [activeMode, setActiveMode] = useState<DiagnosisMode>(urlMode);
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerRecord[]>([]);
   const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(
     null,
   );
 
+  useEffect(() => {
+    if (hasStarted) return;
+    setActiveMode(urlMode);
+  }, [hasStarted, urlMode]);
+
   const currentQuestionIndex = selectedAnswers.length;
-  const totalQuestions = questionMaster.length;
+  const totalQuestions = questionMasterV2.length;
   const isCompleted = currentQuestionIndex >= totalQuestions;
 
   const currentQuestion = useMemo(() => {
     if (isCompleted) return null;
-    return questionMaster[currentQuestionIndex] ?? null;
+    return questionMasterV2[currentQuestionIndex] ?? null;
   }, [currentQuestionIndex, isCompleted]);
 
   const currentDisplayOptions = useMemo(() => {
     if (!currentQuestion) return [];
-    return getOrderedOptions(currentQuestion);
-  }, [currentQuestion]);
+    const choices = currentQuestion.choices.map((c) => ({
+      id: c.id,
+      score: c.score,
+      correct: c.correct,
+      text: c.text[activeMode],
+    }));
+    return getOrderedChoices(currentQuestion.questionId, choices);
+  }, [activeMode, currentQuestion]);
 
-  const handleStart = () => {
+  const handleStart = (mode: DiagnosisMode) => {
     setSelectedAnswers([]);
     setDiagnosisResult(null);
 
@@ -145,15 +169,17 @@ export default function PlayPage() {
       // noop
     }
 
+    setActiveMode(mode);
+    router.replace(`/play?mode=${mode}`);
     setHasStarted(true);
   };
 
-  const handleSelectOption = (option: DisplayOption) => {
+  const handleSelectOption = (option: DisplayChoice) => {
     if (!currentQuestion) return;
     if (selectedAnswers.length >= totalQuestions) return;
 
     const nextAnswer: AnswerRecord = {
-      questionId: currentQuestion.id,
+      questionId: currentQuestion.questionId,
       selectedOption: option.displayLabel,
       score: option.score,
     };
@@ -168,7 +194,7 @@ export default function PlayPage() {
     }
 
     if (nextAnswers.length === totalQuestions) {
-      const result = calculateDiagnosisResult(nextAnswers);
+      const result = calculateDiagnosisResult(nextAnswers, activeMode);
       setDiagnosisResult(result);
     }
   };
@@ -178,7 +204,10 @@ export default function PlayPage() {
     if (selectedAnswers.length !== totalQuestions) return;
 
     try {
-      sessionStorage.setItem(SESSION_KEY_RESULT, JSON.stringify(diagnosisResult));
+      const raw = JSON.stringify(diagnosisResult);
+      sessionStorage.setItem(SESSION_KEY_RESULT, raw);
+      // 最新1件を永続保持（タブを閉じても /result で見返せる）
+      localStorage.setItem(SESSION_KEY_RESULT, raw);
     } catch {
       // noop
     }
@@ -246,27 +275,53 @@ export default function PlayPage() {
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
-                    <span>所要時間は約1〜2分です</span>
+                    <span>所要時間は約3〜4分です</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
                     <span>回答後すぐに結果を確認できます</span>
                   </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
+                    <span>EASYは短い文章で答えやすいモードです</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
+                    <span>HARDは具体的な状況を読み解くモードです</span>
+                  </li>
                 </ul>
               </div>
 
               <div className="mt-6">
-                <button
-                  type="button"
-                  onClick={handleStart}
-                  className="w-full rounded-xl border border-cyan-300/[0.66] bg-cyan-400/[0.12] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(0,229,255,0.24)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
-                >
-                  ▶ 診断を開始する
-                </button>
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleStart("easy")}
+                    className="w-full rounded-xl border border-[#FFD700]/55 bg-[#FFD700]/[0.10] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-[#fff6dc] shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(255,215,0,0.18)] transition hover:bg-[#FFD700]/[0.13] active:scale-[0.99]"
+                  >
+                    ▶ EASYモードで診断を始める
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStart("hard")}
+                    className="w-full rounded-xl border border-cyan-300/[0.66] bg-cyan-400/[0.12] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(0,229,255,0.24)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
+                  >
+                    ▶ HARDモードで診断を始める
+                  </button>
+                </div>
               </div>
             </>
           ) : (
-            <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
+            <div className="relative mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
+              <span
+                className="absolute right-4 top-4 rounded-sm bg-black/50 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-cyan-200/90 backdrop-blur-sm"
+                style={{
+                  border: "1px solid rgba(0,229,255,0.38)",
+                  boxShadow: "0 0 10px rgba(0,229,255,0.16)",
+                }}
+              >
+                {activeMode === "easy" ? "EASY" : "HARD"}
+              </span>
               {!isCompleted && currentQuestion ? (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3">
@@ -275,13 +330,13 @@ export default function PlayPage() {
                     </p>
 
                     <div className="grid grid-cols-12 gap-1">
-                      {questionMaster.map((question, index) => {
+                      {questionMasterV2.map((question, index) => {
                         const isActive = index === currentQuestionIndex;
                         const isPassed = index < currentQuestionIndex;
 
                         return (
                           <div
-                            key={question.id}
+                            key={question.questionId}
                             className={`h-2 rounded-full ${
                               isPassed
                                 ? "bg-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.55)]"
@@ -302,12 +357,12 @@ export default function PlayPage() {
                     </p>
 
                     <div className="mt-4 space-y-3">
-                      {currentQuestion.question.map((line, index) =>
+                      {currentQuestion.prompt[activeMode].split("\n").map((line, index) =>
                         line === "" ? (
-                          <div key={`${currentQuestion.id}-blank-${index}`} className="h-2" />
+                          <div key={`${currentQuestion.questionId}-blank-${index}`} className="h-2" />
                         ) : (
                           <p
-                            key={`${currentQuestion.id}-line-${index}`}
+                            key={`${currentQuestion.questionId}-line-${index}`}
                             className="text-sm leading-relaxed text-white/90"
                           >
                             {line}
@@ -320,7 +375,7 @@ export default function PlayPage() {
                   <div className="-mx-3 grid grid-cols-1 gap-3">
                     {currentDisplayOptions.map((option) => (
                       <button
-                        key={`${currentQuestion.id}-${option.displayLabel}-${option.text}`}
+                        key={`${currentQuestion.questionId}-${option.displayLabel}-${option.text}`}
                         type="button"
                         onClick={() => handleSelectOption(option)}
                         className="w-full rounded-xl border border-white/[0.22] bg-black/[0.43] px-4 pb-3.5 pt-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34),0_0_26px_rgba(0,229,255,0.048)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-black/44 hover:shadow-[0_6px_28px_rgba(0,0,0,0.45),0_0_26px_rgba(0,229,255,0.13)] active:translate-y-0 active:scale-[0.985] active:border-cyan-300/38 active:bg-black/32 active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_0_16px_rgba(0,229,255,0.06)]"

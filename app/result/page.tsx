@@ -149,9 +149,10 @@ function readResultSession(): DiagnosisResult | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY_RESULT);
+    const raw =
+      sessionStorage.getItem(SESSION_KEY_RESULT) ??
+      localStorage.getItem(SESSION_KEY_RESULT);
     if (!raw) return null;
-
     const parsed = JSON.parse(raw) as unknown;
     return parseStoredDiagnosisResult(parsed);
   } catch {
@@ -340,6 +341,7 @@ export default function ResultPage() {
           colors={typeData.colors}
           scores={result.normalizedScores}
           levels={result.levels}
+          mode={result.mode ?? "hard"}
           overallComment={detail?.overallComment ?? typeData.overallComment}
           disableOverallClamp={detail != null}
         />

@@ -251,27 +251,37 @@ export function RitualResultPhonePreview({
   src,
   alt = "診断完了後に表示される結果画面のプレビュー",
   lightFrame = false,
+  emphasis = false,
 }: {
   src: string;
   alt?: string;
   /** 透かし情報レイヤー上では枠・発光を抑える */
   lightFrame?: boolean;
+  /** LP等：モックを一段目立たせる */
+  emphasis?: boolean;
 }) {
+  const figMax = emphasis ? "max-w-[224px] sm:max-w-[248px]" : "max-w-[196px] sm:max-w-[218px]";
+  const imgSizes = emphasis ? "(max-width:640px) 224px, 248px" : "(max-width:640px) 196px, 218px";
+
+  const shellDefault = emphasis
+    ? "relative aspect-[9/17.5] w-full overflow-hidden rounded-[1.35rem] border border-[#f0c040]/42 bg-[#0a0e14] shadow-[0_18px_54px_rgba(0,0,0,0.6),0_10px_30px_rgba(0,0,0,0.46),inset_0_0_0_1px_rgba(240,192,64,0.18),0_0_42px_rgba(240,192,64,0.16),0_0_78px_rgba(240,192,64,0.07)]"
+    : "relative aspect-[9/17.5] w-full overflow-hidden rounded-[1.35rem] border border-[#40c0c0]/28 bg-[#0a0e14] shadow-[0_14px_44px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(240,192,64,0.12),0_0_28px_rgba(64,192,192,0.07)]";
+
   return (
-    <figure className="mx-auto w-full max-w-[196px] shrink-0 sm:max-w-[218px]">
+    <figure className={`mx-auto w-full shrink-0 ${figMax}`}>
       <div
         className={
           lightFrame
             ? "relative aspect-[9/17.5] w-full overflow-hidden rounded-[1.35rem] border border-white/[0.16] bg-[#0b1016]/95 shadow-[0_8px_26px_rgba(0,0,0,0.52),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.11),inset_0_0_0_1px_rgba(255,255,255,0.07),0_16px_24px_-8px_rgba(0,0,0,0.42)]"
-            : "relative aspect-[9/17.5] w-full overflow-hidden rounded-[1.35rem] border border-[#40c0c0]/28 bg-[#0a0e14] shadow-[0_14px_44px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(240,192,64,0.12),0_0_28px_rgba(64,192,192,0.07)]"
+            : shellDefault
         }
       >
         <Image
           src={src}
           alt={alt}
           fill
-          sizes="(max-width:640px) 196px, 218px"
-          className="object-cover object-center"
+          sizes={imgSizes}
+          className={emphasis ? "object-cover object-center brightness-[1.08] contrast-[1.02] saturate-[1.04]" : "object-cover object-center"}
           priority={false}
         />
         <div

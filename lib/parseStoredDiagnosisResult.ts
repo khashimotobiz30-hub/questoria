@@ -1,4 +1,4 @@
-import type { DiagnosisResult, ResultType } from "@/types";
+import type { DiagnosisMode, DiagnosisResult, ResultType } from "@/types";
 
 const LEGACY_RESULT_TYPE: Record<string, ResultType> = {
   oracle: "prophet",
@@ -31,7 +31,11 @@ export function parseStoredDiagnosisResult(parsed: unknown): DiagnosisResult | n
   if (!resultType) return null;
   if (!p.rawScores || !p.normalizedScores || !p.levels) return null;
 
+  const mode: DiagnosisMode =
+    p.mode === "easy" || p.mode === "hard" ? p.mode : "hard";
+
   return {
+    mode,
     answers: p.answers as DiagnosisResult["answers"],
     rawScores: p.rawScores,
     normalizedScores: p.normalizedScores,
