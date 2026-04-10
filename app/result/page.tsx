@@ -100,12 +100,15 @@ function buildDeeperGuideCopy(
 ): DeeperGuideCopy {
   const foot = detail?.lineWelcomeSummary?.trim();
   return {
-    title: pickString(detail?.deeperGuideTitle, "さらに詳しく知る"),
+    title: pickString(detail?.deeperGuideTitle, "この結果の“続き”を見る"),
     description: pickString(
       detail?.deeperGuideText,
-      "この画面では載せきれない深掘り（つまずきやすい場面の整理、タイプに合わせた進め方、行動を成果につなげるヒントなど）を、LINEで詳細レポートとして受け取れます。友だち追加後は、この診断の続きとして自然に読める体裁でお届けします。",
+      "この画面では載せきれない「伸び悩みやすい原因」と「次の段階に進むコツ」を、LINEで受け取れます。\nあなたの強みを“再現できるスキル”に変えるヒントもまとめています。",
     ),
-    buttonLabel: pickString(detail?.deeperGuideLabel, "LINEで詳細レポートを受け取る"),
+    buttonLabel: pickString(
+      detail?.deeperGuideLabel,
+      "強みを成果につなげる方法を見る",
+    ),
     footnote: foot || undefined,
   };
 }

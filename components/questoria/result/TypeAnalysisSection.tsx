@@ -157,20 +157,6 @@ export function TypeAnalysisSection({ copy }: { copy: TypeAnalysisCopy }) {
         tier: "core",
       },
       {
-        id: "thinkingPattern",
-        title: "THINKING PATTERN（思考パターン）",
-        body: copy.thinkingPattern,
-        defaultOpen: false,
-        tier: "note",
-      },
-      {
-        id: "workStyle",
-        title: "WORK STYLE（働き方）",
-        body: copy.workStyle,
-        defaultOpen: false,
-        tier: "note",
-      },
-      {
         id: "riskPoint",
         title: "RISK POINT（注意点）",
         body: copy.riskPoint,

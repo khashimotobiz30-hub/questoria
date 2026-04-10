@@ -34,14 +34,16 @@ function Block({ label, text }: { label: string; text?: string }) {
 }
 
 export function WhyThisTypeSection(props: Props) {
-  const insightText = [props.highAxisReason, props.lowAxisReason, props.combinationInsight]
+  const body = [
+    props.judgementReason,
+    props.highAxisReason,
+    props.lowAxisReason,
+    props.combinationInsight,
+    props.profileSummary,
+  ]
     .filter(Boolean)
     .join("\n\n");
-
-  const hasAny =
-    props.judgementReason ||
-    insightText ||
-    props.profileSummary;
+  const hasAny = Boolean(body);
 
   return (
     <section className="space-y-4">
@@ -57,11 +59,7 @@ export function WhyThisTypeSection(props: Props) {
 
       {hasAny ? (
         <div className="space-y-3">
-          <Block label="JUDGEMENT（判定）" text={props.judgementReason} />
-
-          <Block label="INSIGHT（考察）" text={insightText} />
-
-          <Block label="SUMMARY（要約）" text={props.profileSummary} />
+          <Block label="SUMMARY（要約）" text={body} />
         </div>
       ) : (
         <div className={resultCardShellClass("subtle")}>
