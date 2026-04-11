@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 
 import {
   ResultCardDecor,
-  resultCardExpandedClass,
   resultCardShellClass,
   sectionLabelClass,
 } from "@/components/questoria/result/resultCardTheme";
@@ -51,12 +50,10 @@ function AccordionItem({ item }: { item: Item }) {
   const paras = splitIntoParagraphs(item.body);
 
   return (
-    <div className={[resultCardShellClass("default"), open ? resultCardExpandedClass : ""].join(" ")}>
-      <ResultCardDecor withRail />
-
+    <div>
       <button
         type="button"
-        className="relative z-[1] flex w-full items-start justify-between gap-3 px-4 py-3.5 text-left"
+        className="relative flex w-full items-start justify-between gap-3 px-4 py-3.5 text-left sm:px-5 sm:py-4"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
@@ -109,8 +106,8 @@ function AccordionItem({ item }: { item: Item }) {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="relative z-[1] px-4 pb-4 pt-0">
-            <div className="space-y-2.5 border-t border-white/10 pt-3">
+          <div className="px-4 pb-4 pt-0 sm:px-5">
+            <div className="space-y-2.5 border-t border-white/[0.07] pt-3">
               {paras.length ? (
                 paras.map((p, i) => (
                   <p
@@ -175,17 +172,25 @@ export function TypeAnalysisSection({ copy }: { copy: TypeAnalysisCopy }) {
   );
 
   return (
-    <section className="space-y-2.5">
-      <header className="px-0.5 pb-0.5">
-        <p className={sectionLabelClass}>TYPE ANALYSIS</p>
-        <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">あなたの傾向</h2>
-        <p className="mt-1 text-sm leading-relaxed text-white/70">あなたらしさは、こんな感じです。</p>
-      </header>
-
-      <div className="space-y-2">
-        {items.map((item) => (
-          <AccordionItem key={item.id} item={item} />
-        ))}
+    <section>
+      <div className={resultCardShellClass("default")}>
+        <ResultCardDecor withRail />
+        <div className="relative z-[1]">
+          <header className="px-4 pb-3 pt-3 sm:px-5 sm:pb-4 sm:pt-4">
+            <p className={sectionLabelClass}>TYPE ANALYSIS</p>
+            <h2 className="mt-2.5 font-orbitron text-lg font-bold tracking-wide text-white sm:mt-3">
+              あなたの傾向
+            </h2>
+            <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-white/70 sm:mt-2">
+              あなたらしさは、こんな感じです。
+            </p>
+          </header>
+          <div className="divide-y divide-white/[0.09] border-t border-white/[0.09] pb-3">
+            {items.map((item) => (
+              <AccordionItem key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

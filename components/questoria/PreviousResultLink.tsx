@@ -4,14 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
-
-const SESSION_KEY_RESULT = "questoria_result";
+import { QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
 
 function hasValidStoredResult(): boolean {
   try {
     const raw =
-      sessionStorage.getItem(SESSION_KEY_RESULT) ??
-      localStorage.getItem(SESSION_KEY_RESULT);
+      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
+      localStorage.getItem(QUESTORIA_RESULT_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw) as unknown;
     return parseStoredDiagnosisResult(parsed) !== null;

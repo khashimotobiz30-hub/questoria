@@ -14,6 +14,7 @@ import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
 import { trackEvent } from "@/lib/analytics";
 import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
+import { clearStoredDiagnosisResult, QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
 import type {
   DiagnosisResult,
   DeeperGuideCopy,
@@ -21,8 +22,6 @@ import type {
   ShareCompareCopy,
   TypeAnalysisCopy,
 } from "@/types";
-
-const SESSION_KEY_RESULT = "questoria_result";
 
 const TYPE_ANALYSIS_PLACEHOLDER =
   "この項目の解説は準備中です。次の画面改修で本文を追記予定です。";
@@ -153,8 +152,8 @@ function readResultSession(): DiagnosisResult | null {
 
   try {
     const raw =
-      sessionStorage.getItem(SESSION_KEY_RESULT) ??
-      localStorage.getItem(SESSION_KEY_RESULT);
+      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
+      localStorage.getItem(QUESTORIA_RESULT_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     return parseStoredDiagnosisResult(parsed);
@@ -295,11 +294,7 @@ export default function ResultPage() {
       result_type: result.resultType,
       title: typeData.nameJa,
     });
-    try {
-      sessionStorage.removeItem(SESSION_KEY_RESULT);
-    } catch {
-      /* noop */
-    }
+    clearStoredDiagnosisResult();
     router.push("/");
   };
 
@@ -361,7 +356,9 @@ export default function ResultPage() {
           <TypeAnalysisSection copy={typeAnalysisCopy} />
 
           <NextActionSection
-            lead={detail?.nextActionLead}
+            riskPoint={pickString(detail?.riskPoint, typeData.riskPoint)}
+            growth={pickString(detail?.growth, typeData.description.growth)}
+            lead={pickString(detail?.nextActionLead, typeData.nextActionLead)}
             nextActions={
               detail?.nextActions
                 ? Array.from(detail.nextActions)
@@ -369,7 +366,6 @@ export default function ResultPage() {
                   ? typeData.nextActions
                   : undefined
             }
-            note={detail?.nextActionNote}
           />
 
           <DeeperGuideSection

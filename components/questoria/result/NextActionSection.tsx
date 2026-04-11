@@ -1,77 +1,63 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-import {
-  ResultCardDecor,
-  resultCardNestedClass,
-  resultCardShellClass,
-  sectionLabelClass,
-} from "@/components/questoria/result/resultCardTheme";
+import { ResultCardDecor, resultCardShellClass, sectionLabelClass } from "@/components/questoria/result/resultCardTheme";
+import { buildNextActionPrescription } from "@/lib/buildNextActionPrescription";
 
 export function NextActionSection({
-  nextActions,
+  riskPoint,
+  growth,
   lead,
-  note,
+  nextActions,
 }: {
-  nextActions?: readonly string[];
+  riskPoint?: string;
+  growth?: string;
   lead?: string;
-  note?: string;
+  nextActions?: readonly string[];
 }) {
-  const items = (nextActions ?? []).slice(0, 3);
-
-  const splitFirstSentence = (text: string) => {
-    const idx = text.indexOf("。");
-    if (idx === -1) return { first: text, rest: "" };
-    const first = text.slice(0, idx + 1).trim();
-    const rest = text.slice(idx + 1).trim();
-    return { first, rest };
-  };
+  const prescription = useMemo(
+    () =>
+      buildNextActionPrescription({
+        riskPoint,
+        growth,
+        nextActionLead: lead,
+        nextActions,
+      }),
+    [riskPoint, growth, lead, nextActions],
+  );
 
   return (
     <section className={resultCardShellClass("action")}>
       <ResultCardDecor withRail />
       <div className="relative z-[1] space-y-4 p-5">
-        <div>
+        <header>
           <p className={sectionLabelClass}>NEXT ACTION</p>
-          <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">次の一歩</h2>
-          <p className="mt-1 text-sm leading-relaxed text-white/70">
-            {lead ?? "読んで終わりにしないための、今日からできる3ステップ。"}
-          </p>
-        </div>
+          <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
+            今から意識するべきこと
+          </h2>
+        </header>
 
-        <div className="space-y-3 border-t border-white/10 pt-4">
-          {items.length > 0 ? (
-            items.map((text, i) => {
-              const s = splitFirstSentence(text);
-              const stepLabel = `${String(i + 1).padStart(2, "0")} STEP`;
-              return (
-                <div key={i} className={`${resultCardNestedClass} p-3.5`}>
-                  <div className="space-y-2">
-                    <p
-                      className="font-mono text-[10px] tracking-[0.26em] text-[#FFD700]/75"
-                      aria-label={stepLabel}
-                    >
-                      {stepLabel}
-                    </p>
-                    <div className="space-y-1.5">
-                      <p className="text-sm leading-relaxed text-white/90">{s.first}</p>
-                      {s.rest ? (
-                        <p className="text-[13px] leading-relaxed text-white/72">{s.rest}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+        <div className="border-t border-white/10 pt-4">
+          {prescription ? (
+            <div className="space-y-4">
+              <p className="whitespace-pre-line text-[15px] leading-[1.75] text-white/82 sm:text-sm sm:leading-relaxed">
+                {prescription.body}
+              </p>
+
+              <div className="rounded-xl border border-[#FFD700]/24 bg-[#FFD700]/[0.055] px-3.5 py-3.5 shadow-[inset_0_1px_0_rgba(255,215,0,0.06)] sm:px-4 sm:py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#FFD700]/85">
+                  今から始める NEXT ACTION は…
+                </p>
+                <p className="mt-2.5 whitespace-pre-line text-sm font-medium leading-relaxed tracking-[0.01em] text-white/[0.93]">
+                  {prescription.immediateAction}
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="rounded-xl border border-dashed border-white/14 bg-black/25 p-4">
               <p className="text-sm text-white/60">TODO: nextActions を他タイプにも追加</p>
             </div>
           )}
         </div>
-
-        {note ? (
-          <p className="border-t border-white/10 pt-4 text-sm leading-relaxed text-white/70">{note}</p>
-        ) : null}
       </div>
     </section>
   );

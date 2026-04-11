@@ -140,14 +140,14 @@ export function ShareSection({
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 </div>
-                <span className="w-full truncate text-center text-[10px] font-medium leading-snug tracking-wide text-white/72">
+                <span className="w-full truncate text-center text-xs font-medium leading-snug tracking-wide text-white/88">
                   {typeNameJaByResultType[type] ?? type}
                 </span>
               </div>
             ))}
           </div>
 
-          <p className="text-[12px] leading-relaxed text-white/72">
+          <p className="text-[13px] leading-relaxed text-white/82 sm:text-sm sm:leading-relaxed">
             他にもこんなタイプがあります。ぜひチェックしてみてください。
           </p>
 

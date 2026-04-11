@@ -160,7 +160,8 @@ export function ResultHeroSection({
           </div>
         </div>
 
-        <div className="space-y-4 p-5">
+        {/* 横は控えめに詰め、SKILL STATUS カードをヒーロー内で広く（下セクションのカード幅に近づける） */}
+        <div className="space-y-4 px-1.5 pb-5 pt-5 sm:px-2">
           <div className={resultCardShellClass("default")}>
             <ResultCardDecor withRail />
             <div className="relative z-[1] p-4">

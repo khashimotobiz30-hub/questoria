@@ -11,9 +11,8 @@ import {
 } from "react";
 
 import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
+import { QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
 import type { ResultType } from "@/types";
-
-const SESSION_KEY_RESULT = "questoria_result";
 
 /** ローディング演出 phase 0/1/2 で表示する画像（固定） */
 const LOADING_PHASE_IMAGES = [
@@ -51,8 +50,8 @@ function readLoadingSession(): LoadingSessionData | null {
 
   try {
     const raw =
-      sessionStorage.getItem(SESSION_KEY_RESULT) ??
-      localStorage.getItem(SESSION_KEY_RESULT);
+      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
+      localStorage.getItem(QUESTORIA_RESULT_KEY);
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as unknown;

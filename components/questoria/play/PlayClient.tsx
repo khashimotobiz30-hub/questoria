@@ -4,6 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { questionMaster, questionMasterV2 } from "@/data/questionMaster";
+import { trackEvent } from "@/lib/analytics";
+import { AXIS_HIGH_THRESHOLD, AXIS_MID_THRESHOLD } from "@/lib/diagnosisConstants";
+import {
+  clearStoredDiagnosisResult,
+  clearStoredQuestoriaAnswers,
+  QUESTORIA_ANSWERS_KEY,
+  QUESTORIA_RESULT_KEY,
+} from "@/lib/questoriaStorage";
 import type {
   AnswerRecord,
   AxisLevels,
@@ -14,10 +22,10 @@ import type {
   ResultType,
 } from "@/types";
 
-const SESSION_KEY_ANSWERS = "questoria_answers";
-const SESSION_KEY_RESULT = "questoria_result";
-
 const DISPLAY_LABELS: OptionKey[] = ["A", "B", "C", "D"];
+
+/** `answer_progress` は途中経過のみ（1 / 4 / 8 問目完了）。12 問完了は `complete_diagnosis` に任せる */
+const ANSWER_PROGRESS_MILESTONES = new Set([1, 4, 8]);
 
 const optionOrderMap: Record<string, number[]> = {
   q1: [2, 0, 3, 1],
@@ -66,15 +74,15 @@ function normalizeScore(raw: number): number {
 }
 
 function getLevel(score: number): AxisLevels["purpose"] {
-  if (score >= 67) return "HIGH";
-  if (score >= 34) return "MID";
+  if (score >= AXIS_HIGH_THRESHOLD) return "HIGH";
+  if (score >= AXIS_MID_THRESHOLD) return "MID";
   return "LOW";
 }
 
 function getResultType(normalizedScores: AxisScores): ResultType {
-  const p = normalizedScores.purpose >= 67;
-  const d = normalizedScores.design >= 67;
-  const j = normalizedScores.decision >= 67;
+  const p = normalizedScores.purpose >= AXIS_HIGH_THRESHOLD;
+  const d = normalizedScores.design >= AXIS_HIGH_THRESHOLD;
+  const j = normalizedScores.decision >= AXIS_HIGH_THRESHOLD;
 
   if (p && d && j) return "hero";
   if (p && d && !j) return "sage";
@@ -160,16 +168,14 @@ export default function PlayClient() {
     setSelectedAnswers([]);
     setDiagnosisResult(null);
 
-    try {
-      sessionStorage.removeItem(SESSION_KEY_ANSWERS);
-      sessionStorage.removeItem(SESSION_KEY_RESULT);
-    } catch {
-      // noop
-    }
+    clearStoredQuestoriaAnswers();
+    clearStoredDiagnosisResult();
 
     setActiveMode(mode);
     router.replace(`/play?mode=${mode}`);
     setHasStarted(true);
+
+    trackEvent("start_diagnosis", { mode });
   };
 
   const handleSelectOption = (option: DisplayChoice) => {
@@ -186,14 +192,26 @@ export default function PlayClient() {
     setSelectedAnswers(nextAnswers);
 
     try {
-      sessionStorage.setItem(SESSION_KEY_ANSWERS, JSON.stringify(nextAnswers));
+      sessionStorage.setItem(QUESTORIA_ANSWERS_KEY, JSON.stringify(nextAnswers));
     } catch {
       // noop
+    }
+
+    if (ANSWER_PROGRESS_MILESTONES.has(nextAnswers.length)) {
+      trackEvent("answer_progress", {
+        mode: activeMode,
+        question_index: nextAnswers.length,
+        question_id: currentQuestion.questionId,
+      });
     }
 
     if (nextAnswers.length === totalQuestions) {
       const result = calculateDiagnosisResult(nextAnswers, activeMode);
       setDiagnosisResult(result);
+      trackEvent("complete_diagnosis", {
+        mode: activeMode,
+        result_type: result.resultType,
+      });
     }
   };
 
@@ -203,9 +221,9 @@ export default function PlayClient() {
 
     try {
       const raw = JSON.stringify(diagnosisResult);
-      sessionStorage.setItem(SESSION_KEY_RESULT, raw);
+      sessionStorage.setItem(QUESTORIA_RESULT_KEY, raw);
       // 最新1件を永続保持（タブを閉じても /result で見返せる）
-      localStorage.setItem(SESSION_KEY_RESULT, raw);
+      localStorage.setItem(QUESTORIA_RESULT_KEY, raw);
     } catch {
       // noop
     }
