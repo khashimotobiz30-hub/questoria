@@ -1,23 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
-import { QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
-
-function hasValidStoredResult(): boolean {
-  try {
-    const raw =
-      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
-      localStorage.getItem(QUESTORIA_RESULT_KEY);
-    if (!raw) return false;
-    const parsed = JSON.parse(raw) as unknown;
-    return parseStoredDiagnosisResult(parsed) !== null;
-  } catch {
-    return false;
-  }
-}
+import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 
 export function PreviousResultLink({
   className,
@@ -25,10 +12,36 @@ export function PreviousResultLink({
   className?: string;
 }) {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    setVisible(hasValidStoredResult());
-  }, []);
+    const isTest =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("prevLinkTest") === "1";
+
+    const update = () => {
+      if (isTest) {
+        setVisible(true);
+        return;
+      }
+      setVisible(readStoredDiagnosisResult() !== null);
+    };
+    update();
+
+    // SPA遷移/戻る操作でマウントが維持される場合があるため、
+    // ページ復帰タイミングでも再判定して「あるのに出ない」を防ぐ。
+    window.addEventListener("focus", update);
+    window.addEventListener("pageshow", update);
+    window.addEventListener("storage", update);
+    document.addEventListener("visibilitychange", update);
+
+    return () => {
+      window.removeEventListener("focus", update);
+      window.removeEventListener("pageshow", update);
+      window.removeEventListener("storage", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [pathname]);
 
   if (!visible) return null;
 

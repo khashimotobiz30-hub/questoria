@@ -8,7 +8,7 @@ export type ResultType =
   | "pioneer"
   | "origin";
 
-export type DiagnosisMode = "easy" | "hard";
+export type DiagnosisMode = "work" | "life";
 
 export type OptionKey = "A" | "B" | "C" | "D";
 
@@ -28,7 +28,16 @@ export type AxisLevels = {
 
 export type AnswerRecord = {
   questionId: string; // "q1"〜"q12"
-  selectedOption: OptionKey;
+  /**
+   * 選択肢の「元のID」（A/B/C/D）。
+   * 表示順をランダム化しても score 対応がズレないよう、常にこの値で保存する。
+   */
+  selectedChoiceId: OptionKey;
+  /**
+   * 旧フィールド（表示ラベル依存）。後方互換のため残すが、新規保存では使わない。
+   * TODO: 旧データ移行後に削除
+   */
+  selectedOption?: OptionKey;
   score: number; // 0 / 0.5 / 1.0 / 1.5 / 2.0
 };
 

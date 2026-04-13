@@ -1,5 +1,27 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Questoria: diagnosis flow notes
+
+### Storage keys (browser)
+
+- **`questoria_result`**: latest completed diagnosis result. Saved to both `sessionStorage` and `localStorage` (used by `/result` and the Top “前回の結果を見る” CTA).
+- **`questoria_answers`**: in-progress answers (session).
+- **`questoria_question_order`**: randomized question order (`questionId[]`, session).
+- **`questoria_choice_order`**: randomized choice order (`{ [questionId]: ["A"|"B"|"C"|"D"] }`, session).
+
+### Top CTA behavior (new start vs resume)
+
+- **Top “クエストを始める”** links to **`/play?fresh=1`** and must always start a **fresh** diagnosis:
+  - Clears **in-progress** data only: `questoria_answers`, `questoria_question_order`, `questoria_choice_order`
+  - Does **not** clear `questoria_result` (so “前回の結果を見る” remains available)
+- **Resume** is supported when navigating to `/play` without `fresh=1`:
+  - If `questoria_answers` exists, `/play` restores progress and continues with the stored order(s)
+
+### Previous result CTA (Top)
+
+- “前回の結果を見る” is shown **only when** a valid `questoria_result` exists (in `sessionStorage` or `localStorage`).
+- Completing a new diagnosis overwrites `questoria_result` with the latest result.
+
 ## Getting Started
 
 First, run the development server:

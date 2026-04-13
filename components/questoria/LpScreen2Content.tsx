@@ -54,7 +54,7 @@ function AxisCardWatermark({ axisId }: { axisId: AxisId }) {
 
 function LpScreen2SectionHeading({ children }: { children: ReactNode }) {
   return (
-    <h3 className="mb-2.5 px-0.5 font-[var(--font-orbitron)] text-lg font-bold tracking-wide text-[#FFD700] [text-shadow:0_0_14px_rgba(255,215,0,0.22),0_1px_2px_rgba(0,0,0,0.88)] sm:text-xl">
+    <h3 className="mb-2 px-0.5 font-[var(--font-orbitron)] text-lg font-bold tracking-wide text-[#FFD700] [text-shadow:0_0_14px_rgba(255,215,0,0.22),0_1px_2px_rgba(0,0,0,0.88)] sm:text-xl">
       {children}
     </h3>
   );
@@ -259,35 +259,33 @@ export function LpScreen2Content() {
   return (
     <div className="w-full">
       {/* 導入（帯下・補足文程度のトーンで主役は3軸カードへ） */}
-      <div className="px-0.5 font-[var(--font-noto)] text-[13px] leading-relaxed text-white/72">
+      <div className="px-0.5 font-[var(--font-noto)] text-[13px] leading-[1.45] text-white/72">
         <p>
-          AIを使える人は、知識が多い人ではなく、目的を定め、整理し、
-          <br />
-          判断できる人です。この診断では、その3つの力を測定します。
+          AIを使える人は、知識が多い人ではなく、目的を定め、整理し、判断できる人です。この診断では、その3つの力を測定します。
         </p>
       </div>
 
       {/* 3軸：中段でプレート面より一段手前に浮かせる */}
-      <div className="relative z-[5] mt-5">
+      <div className="relative z-[5] mt-4">
         <LpScreen2SectionHeading>
           <span className="text-balance text-[15px] leading-snug sm:text-[17px] sm:leading-snug">
             AI活用における重要な3つのスキル
           </span>
         </LpScreen2SectionHeading>
-        <div className="-mx-4 translate-y-1 px-4">
-          <div className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto overflow-y-visible pb-3 pl-0 pr-1 scroll-pl-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 translate-y-0.5 px-4">
+          <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-visible pb-2 pl-0 pr-1 scroll-pl-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {AXIS_CARDS.map((axis) => {
             const Icon = axis.Icon;
             return (
               <article
                 key={axis.id}
                 className="snap-center snap-always shrink-0"
-                style={{ width: "min(53vw, 14rem)" }}
+                style={{ width: "min(51vw, 13.75rem)" }}
               >
                 <button
                   type="button"
                   onClick={() => setAxisModal(axis.id)}
-                  className="group relative flex aspect-[2/3] w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#FFD700]/50 bg-gradient-to-b from-[#141c26]/92 via-[#0a1018]/94 to-[#05080e]/96 text-left shadow-[0_24px_48px_rgba(0,0,0,0.52),0_12px_28px_rgba(0,0,0,0.42),0_4px_12px_rgba(0,0,0,0.32),0_0_40px_rgba(255,215,0,0.14),0_0_80px_rgba(255,215,0,0.06),inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.32)] outline-none backdrop-blur-[14px] transition duration-300 ease-out hover:border-[#FFD700]/58 hover:shadow-[0_28px_56px_rgba(0,0,0,0.54),0_14px_32px_rgba(0,0,0,0.44),0_6px_14px_rgba(0,0,0,0.34),0_0_48px_rgba(255,215,0,0.18),0_0_90px_rgba(255,215,0,0.08),inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(0,0,0,0.34)] focus-visible:ring-2 focus-visible:ring-[#FFD700]/45"
+                  className="group relative flex aspect-[3/4] w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-[#FFD700]/50 bg-gradient-to-b from-[#141c26]/92 via-[#0a1018]/94 to-[#05080e]/96 text-left shadow-[0_24px_48px_rgba(0,0,0,0.52),0_12px_28px_rgba(0,0,0,0.42),0_4px_12px_rgba(0,0,0,0.32),0_0_40px_rgba(255,215,0,0.14),0_0_80px_rgba(255,215,0,0.06),inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.32)] outline-none backdrop-blur-[14px] transition duration-300 ease-out hover:border-[#FFD700]/58 hover:shadow-[0_28px_56px_rgba(0,0,0,0.54),0_14px_32px_rgba(0,0,0,0.44),0_6px_14px_rgba(0,0,0,0.34),0_0_48px_rgba(255,215,0,0.18),0_0_90px_rgba(255,215,0,0.08),inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(0,0,0,0.34)] focus-visible:ring-2 focus-visible:ring-[#FFD700]/45"
                 >
                   {/* ガラス：上〜中央の反射（視認できる強さ）+ 面の厚み */}
                   <div
@@ -318,8 +316,8 @@ export function LpScreen2Content() {
                   />
 
                   {/* ── 上部ブロック：識別（01 + 軸名）→ その下に画像ビジュアル枠 ── */}
-                  <div className="relative z-[2] w-full shrink-0 px-2.5 pt-2.5 sm:px-3">
-                    <div className="flex min-h-[2.25rem] shrink-0 items-center gap-1.5 border-b border-[#FFD700]/26 bg-black/[0.08] pb-1.5 pt-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-6px_12px_rgba(0,0,0,0.18)] sm:gap-2">
+                  <div className="relative z-[2] w-full shrink-0 px-2 pt-2 sm:px-2.5">
+                    <div className="flex min-h-[2.1rem] shrink-0 items-center gap-1.5 border-b border-[#FFD700]/26 bg-black/[0.08] pb-1 pt-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-6px_12px_rgba(0,0,0,0.18)] sm:gap-2">
                       <span className="shrink-0 font-mono text-[10px] font-bold tabular-nums tracking-[0.14em] text-[#FFD700]/92 sm:text-[11px]">
                         {axis.num}
                       </span>
@@ -334,9 +332,9 @@ export function LpScreen2Content() {
                       />
                     </div>
 
-                    <div className="mt-1.5">
+                    <div className="mt-1">
                       <div className="relative overflow-hidden rounded-t-[0.7rem] rounded-b-[0.45rem] border border-[#FFD700]/40 bg-[#02060a] shadow-[0_10px_22px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,215,0,0.1),inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-12px_28px_rgba(0,0,0,0.48)] transition-[border-color,box-shadow] duration-300 ease-out group-hover:border-[#FFD700]/50 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.52),0_0_28px_rgba(255,215,0,0.12),inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-12px_28px_rgba(0,0,0,0.5)]">
-                        <div className="relative aspect-[4/3] w-full">
+                        <div className="relative aspect-[16/10] w-full">
                           <Image
                             src={axis.imageSrc}
                             alt={`${axis.name}を象徴するビジュアル`}
@@ -360,10 +358,10 @@ export function LpScreen2Content() {
                   <AxisCardWatermark axisId={axis.id} />
 
                   {/* ── 中段〜下段：要約 → 補足（2行）→ 余白 → 導線 ── */}
-                  <div className="relative z-[2] flex min-h-0 flex-1 flex-col bg-gradient-to-b from-[#05080c]/98 via-[#040608]/98 to-[#030508]/99 px-2.5 pb-3 pt-2 shadow-[inset_0_14px_20px_-14px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.045)] sm:px-3 sm:pb-3.5">
+                  <div className="relative z-[2] flex min-h-0 flex-1 flex-col bg-gradient-to-b from-[#05080c]/98 via-[#040608]/98 to-[#030508]/99 px-2 pb-2.5 pt-1.5 shadow-[inset_0_14px_20px_-14px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.045)] sm:px-2.5 sm:pb-3">
                     {/* 見出し（要約） */}
                     <p
-                      className="flex h-[2.125rem] w-full shrink-0 items-center justify-center text-center font-[var(--font-noto)] text-[11.5px] font-bold leading-none tracking-[0.04em] text-[#fff6dc] [text-shadow:0_0_16px_rgba(255,215,0,0.1),0_1px_2px_rgba(0,0,0,0.82)] sm:h-[2.25rem] sm:text-[12.5px] sm:tracking-[0.045em]"
+                      className="flex h-[2rem] w-full shrink-0 items-center justify-center text-center font-[var(--font-noto)] text-[11.5px] font-bold leading-none tracking-[0.04em] text-[#fff6dc] [text-shadow:0_0_16px_rgba(255,215,0,0.1),0_1px_2px_rgba(0,0,0,0.82)] sm:h-[2.15rem] sm:text-[12.5px] sm:tracking-[0.045em]"
                       title={axis.tagline}
                     >
                       <span className="block max-w-full truncate px-0.5">
@@ -372,7 +370,7 @@ export function LpScreen2Content() {
                     </p>
 
                     <p
-                      className="mt-1.5 line-clamp-2 min-h-[2.16rem] shrink-0 overflow-hidden text-pretty font-[var(--font-noto)] text-[9px] leading-[1.24] text-white/[0.68] sm:min-h-[2.32rem] sm:text-[9.75px] sm:leading-[1.28]"
+                      className="mt-1 line-clamp-2 min-h-[2.1rem] shrink-0 overflow-hidden text-pretty font-[var(--font-noto)] text-[9px] leading-[1.22] text-white/[0.68] sm:min-h-[2.2rem] sm:text-[9.75px] sm:leading-[1.26]"
                       title={axis.body}
                     >
                       {axis.body}
@@ -380,7 +378,7 @@ export function LpScreen2Content() {
 
                     <div className="min-h-0 flex-1" aria-hidden />
 
-                    <div className="shrink-0 border-t border-white/[0.08] pt-2">
+                    <div className="shrink-0 border-t border-white/[0.08] pt-1.5">
                       <span className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.16em] text-cyan-300/78 transition group-hover:text-cyan-200/95 sm:text-[11px]">
                         詳しく見る
                         <span aria-hidden>→</span>
@@ -396,7 +394,7 @@ export function LpScreen2Content() {
       </div>
 
       {/* 診断方法：下段に一体収め、上のカードと重なる余白でレイヤー感 */}
-      <div className="relative z-[1] -mt-7 border-t border-white/10 bg-black/22 px-1 pb-1 pt-10 backdrop-blur-[1px]">
+      <div className="relative z-[1] -mt-6 border-t border-white/10 bg-black/22 px-1 pb-1 pt-8 backdrop-blur-[1px]">
         <LpScreen2SectionHeading>
           <span className="text-balance text-[15px] leading-snug sm:text-[17px] sm:leading-snug">診断方法</span>
         </LpScreen2SectionHeading>
@@ -410,9 +408,8 @@ export function LpScreen2Content() {
             </span>
           ))}
         </div>
-        <p className="mt-2.5 whitespace-pre-line font-[var(--font-noto)] text-[13px] leading-relaxed text-white/72">
-          知識問題ではなく、{"\n"}
-          実際の場面でどう考え、どう進め、どう判断するかを見る診断です。
+        <p className="mt-2 font-[var(--font-noto)] text-[13px] leading-[1.5] text-white/72">
+          知識問題ではなく、実際の場面でどう考え、どう進め、どう判断するかを見る診断です。
         </p>
         <button
           type="button"

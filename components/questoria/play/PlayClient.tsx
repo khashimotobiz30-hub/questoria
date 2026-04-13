@@ -10,6 +10,8 @@ import {
   clearStoredDiagnosisResult,
   clearStoredQuestoriaAnswers,
   QUESTORIA_ANSWERS_KEY,
+  QUESTORIA_CHOICE_ORDER_KEY,
+  QUESTORIA_QUESTION_ORDER_KEY,
   QUESTORIA_RESULT_KEY,
 } from "@/lib/questoriaStorage";
 import type {
@@ -22,43 +24,83 @@ import type {
   ResultType,
 } from "@/types";
 
-const DISPLAY_LABELS: OptionKey[] = ["A", "B", "C", "D"];
-
 /** `answer_progress` は途中経過のみ（1 / 4 / 8 問目完了）。12 問完了は `complete_diagnosis` に任せる */
 const ANSWER_PROGRESS_MILESTONES = new Set([1, 4, 8]);
-
-const optionOrderMap: Record<string, number[]> = {
-  q1: [2, 0, 3, 1],
-  q2: [3, 1, 0, 2],
-  q3: [1, 3, 2, 0],
-  q4: [0, 2, 1, 3],
-  q5: [2, 1, 3, 0],
-  q6: [1, 0, 2, 3],
-  q7: [3, 2, 0, 1],
-  q8: [0, 3, 1, 2],
-  q9: [2, 0, 1, 3],
-  q10: [1, 2, 3, 0],
-  q11: [3, 0, 2, 1],
-  q12: [0, 1, 3, 2],
-};
 
 type DisplayChoice = {
   id: OptionKey;
   text: string;
   score: number;
   correct: boolean;
-  displayLabel: OptionKey;
 };
 
-function getOrderedChoices(
-  questionId: string,
-  choices: { id: OptionKey; score: number; correct: boolean; text: string }[],
-): DisplayChoice[] {
-  const order = optionOrderMap[questionId] ?? [0, 1, 2, 3];
-  return order.map((originalIndex, displayIndex) => ({
-    ...choices[originalIndex],
-    displayLabel: DISPLAY_LABELS[displayIndex],
-  }));
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function hasTooManyConsecutiveAxis(questionIds: string[], maxConsecutive: number): boolean {
+  let runAxis: string | null = null;
+  let runLen = 0;
+  for (const qid of questionIds) {
+    const axis = questionMaster.find((q) => q.id === qid)?.axis ?? "";
+    if (axis && axis === runAxis) {
+      runLen += 1;
+    } else {
+      runAxis = axis;
+      runLen = 1;
+    }
+    if (runLen > maxConsecutive) return true;
+  }
+  return false;
+}
+
+function buildQuestionOrder(): string[] {
+  const base = questionMaster.map((q) => q.id);
+  // 軽い分散（同一axisが3連続しない）を優先しつつ、自然なランダム性を保つ
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const candidate = shuffle(base);
+    if (!hasTooManyConsecutiveAxis(candidate, 2)) return candidate;
+  }
+  return shuffle(base);
+}
+
+type ChoiceOrderMap = Record<string, OptionKey[]>;
+
+function buildChoiceOrderMap(questionIds: string[]): ChoiceOrderMap {
+  const out: ChoiceOrderMap = {};
+  for (const qid of questionIds) {
+    out[qid] = shuffle<OptionKey>(["A", "B", "C", "D"]);
+  }
+  return out;
+}
+
+function isValidQuestionOrder(maybe: unknown): maybe is string[] {
+  if (!Array.isArray(maybe)) return false;
+  const base = questionMaster.map((q) => q.id);
+  if (maybe.length !== base.length) return false;
+  const set = new Set(maybe);
+  if (set.size !== base.length) return false;
+  return base.every((id) => set.has(id));
+}
+
+function isValidChoiceOrderMap(maybe: unknown, questionOrder: string[]): maybe is ChoiceOrderMap {
+  if (!maybe || typeof maybe !== "object") return false;
+  const m = maybe as Record<string, unknown>;
+  for (const qid of questionOrder) {
+    const v = m[qid];
+    if (!Array.isArray(v) || v.length !== 4) return false;
+    const s = new Set(v);
+    if (s.size !== 4) return false;
+    for (const k of v) {
+      if (k !== "A" && k !== "B" && k !== "C" && k !== "D") return false;
+    }
+  }
+  return true;
 }
 
 function getAxisInitialScores(): AxisScores {
@@ -126,53 +168,193 @@ function calculateDiagnosisResult(answers: AnswerRecord[], mode: DiagnosisMode):
 }
 
 function parseMode(raw: string | null): DiagnosisMode {
-  return raw === "easy" || raw === "hard" ? raw : "hard";
+  if (raw === "work" || raw === "life") return raw;
+  if (raw === "hard") return "work";
+  if (raw === "easy") return "life";
+  return "work";
 }
 
 export default function PlayClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlMode = parseMode(searchParams.get("mode"));
+  const isFreshStart = searchParams.get("fresh") === "1";
+  const isDebugPersist = searchParams.get("debugPersist") === "1";
 
   const [hasStarted, setHasStarted] = useState(false);
   const [activeMode, setActiveMode] = useState<DiagnosisMode>(urlMode);
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerRecord[]>([]);
   const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
+  const [questionOrder, setQuestionOrder] = useState<string[]>(() => questionMaster.map((q) => q.id));
+  const [choiceOrderMap, setChoiceOrderMap] = useState<ChoiceOrderMap>({});
 
   useEffect(() => {
     if (hasStarted) return;
     setActiveMode(urlMode);
   }, [hasStarted, urlMode]);
 
+  // トップCTA（fresh=1）からの遷移は、必ず新規開始として扱う
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isFreshStart) return;
+
+    clearStoredQuestoriaAnswers();
+
+    setSelectedAnswers([]);
+    setDiagnosisResult(null);
+    setHasStarted(false);
+    setQuestionOrder(questionMaster.map((q) => q.id));
+    setChoiceOrderMap({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFreshStart]);
+
+  // 診断の途中復帰（回答・表示順を復元）
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isFreshStart) return;
+    if (hasStarted) return;
+    try {
+      const rawAnswers = sessionStorage.getItem(QUESTORIA_ANSWERS_KEY);
+      if (rawAnswers) {
+        const parsed = JSON.parse(rawAnswers) as unknown;
+        if (Array.isArray(parsed)) {
+          setSelectedAnswers(parsed as AnswerRecord[]);
+          setHasStarted(true);
+        }
+      }
+    } catch {
+      /* noop */
+    }
+  }, [hasStarted, isFreshStart]);
+
+  // 表示順の復元（なければ初期化）
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const rawOrder = sessionStorage.getItem(QUESTORIA_QUESTION_ORDER_KEY);
+      const parsedOrder = rawOrder ? (JSON.parse(rawOrder) as unknown) : null;
+      const finalOrder = isValidQuestionOrder(parsedOrder) ? parsedOrder : questionOrder;
+
+      const rawChoices = sessionStorage.getItem(QUESTORIA_CHOICE_ORDER_KEY);
+      const parsedChoices = rawChoices ? (JSON.parse(rawChoices) as unknown) : null;
+      const finalChoices = isValidChoiceOrderMap(parsedChoices, finalOrder)
+        ? (parsedChoices as ChoiceOrderMap)
+        : buildChoiceOrderMap(finalOrder);
+
+      setQuestionOrder(finalOrder);
+      setChoiceOrderMap(finalChoices);
+
+      if (!isValidQuestionOrder(parsedOrder)) {
+        sessionStorage.setItem(QUESTORIA_QUESTION_ORDER_KEY, JSON.stringify(finalOrder));
+      }
+      if (!isValidChoiceOrderMap(parsedChoices, finalOrder)) {
+        sessionStorage.setItem(QUESTORIA_CHOICE_ORDER_KEY, JSON.stringify(finalChoices));
+      }
+    } catch {
+      // 破損時は現状のstateを優先
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const currentQuestionIndex = selectedAnswers.length;
-  const totalQuestions = questionMasterV2.length;
+  const totalQuestions = questionOrder.length;
   const isCompleted = currentQuestionIndex >= totalQuestions;
+
+  const questionMapV2 = useMemo(() => new Map(questionMasterV2.map((q) => [q.questionId, q])), []);
 
   const currentQuestion = useMemo(() => {
     if (isCompleted) return null;
-    return questionMasterV2[currentQuestionIndex] ?? null;
-  }, [currentQuestionIndex, isCompleted]);
+    const qid = questionOrder[currentQuestionIndex];
+    return (qid ? questionMapV2.get(qid) : null) ?? null;
+  }, [currentQuestionIndex, isCompleted, questionMapV2, questionOrder]);
 
   const currentDisplayOptions = useMemo(() => {
     if (!currentQuestion) return [];
-    const choices = currentQuestion.choices.map((c) => ({
-      id: c.id,
-      score: c.score,
-      correct: c.correct,
-      text: c.text[activeMode],
-    }));
-    return getOrderedChoices(currentQuestion.questionId, choices);
+    const order = choiceOrderMap[currentQuestion.questionId] ?? ["A", "B", "C", "D"];
+    const byId = new Map(
+      currentQuestion.choices.map((c) => [
+        c.id,
+        { id: c.id, score: c.score, correct: c.correct, text: c.text[activeMode] } satisfies DisplayChoice,
+      ]),
+    );
+    return order.map((id) => byId.get(id)).filter((c): c is DisplayChoice => Boolean(c));
   }, [activeMode, currentQuestion]);
+
+  const persistDiagnosisResult = (result: DiagnosisResult) => {
+    if (isDebugPersist) {
+      // eslint-disable-next-line no-console
+      console.log("[Questoria] persistDiagnosisResult: enter", {
+        resultType: result?.resultType,
+        answersLength: Array.isArray(result?.answers) ? result.answers.length : null,
+        hasRawScores: Boolean(result?.rawScores),
+        hasNormalizedScores: Boolean(result?.normalizedScores),
+        hasLevels: Boolean(result?.levels),
+      });
+    }
+    try {
+      const raw = JSON.stringify(result);
+      if (isDebugPersist) {
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] persistDiagnosisResult: JSON.stringify ok", { bytes: raw.length });
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] persistDiagnosisResult: sessionStorage.setItem start");
+      }
+      sessionStorage.setItem(QUESTORIA_RESULT_KEY, raw);
+      if (isDebugPersist) {
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] persistDiagnosisResult: sessionStorage.setItem ok");
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] persistDiagnosisResult: localStorage.setItem start");
+      }
+      // 最新1件を永続保持（タブを閉じても /result で見返せる）
+      localStorage.setItem(QUESTORIA_RESULT_KEY, raw);
+      if (isDebugPersist) {
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] persistDiagnosisResult: localStorage.setItem ok");
+      }
+    } catch {
+      if (isDebugPersist) {
+        // eslint-disable-next-line no-console
+        console.error("[Questoria] persistDiagnosisResult: failed");
+      }
+    }
+  };
+
+  // リロード等で 12/12 まで進んでいる場合は結果を復元
+  useEffect(() => {
+    if (!hasStarted) return;
+    if (diagnosisResult) return;
+    if (selectedAnswers.length !== totalQuestions) return;
+    setDiagnosisResult(calculateDiagnosisResult(selectedAnswers, activeMode));
+  }, [activeMode, diagnosisResult, hasStarted, selectedAnswers, totalQuestions]);
 
   const handleStart = (mode: DiagnosisMode) => {
     setSelectedAnswers([]);
     setDiagnosisResult(null);
 
     clearStoredQuestoriaAnswers();
-    clearStoredDiagnosisResult();
+
+    const newQuestionOrder = buildQuestionOrder();
+    const newChoiceOrders = buildChoiceOrderMap(newQuestionOrder);
+    setQuestionOrder(newQuestionOrder);
+    setChoiceOrderMap(newChoiceOrders);
+    try {
+      sessionStorage.setItem(QUESTORIA_QUESTION_ORDER_KEY, JSON.stringify(newQuestionOrder));
+      sessionStorage.setItem(QUESTORIA_CHOICE_ORDER_KEY, JSON.stringify(newChoiceOrders));
+    } catch {
+      // noop
+    }
 
     setActiveMode(mode);
-    router.replace(`/play?mode=${mode}`);
+    if (isDebugPersist) {
+      const params = new URLSearchParams();
+      params.set("mode", mode);
+      if (isFreshStart) params.set("fresh", "1");
+      params.set("debugPersist", "1");
+      router.replace(`/play?${params.toString()}`);
+    } else {
+      router.replace(`/play?mode=${mode}`);
+    }
     setHasStarted(true);
 
     trackEvent("start_diagnosis", { mode });
@@ -184,7 +366,7 @@ export default function PlayClient() {
 
     const nextAnswer: AnswerRecord = {
       questionId: currentQuestion.questionId,
-      selectedOption: option.displayLabel,
+      selectedChoiceId: option.id,
       score: option.score,
     };
 
@@ -208,6 +390,17 @@ export default function PlayClient() {
     if (nextAnswers.length === totalQuestions) {
       const result = calculateDiagnosisResult(nextAnswers, activeMode);
       setDiagnosisResult(result);
+      // 「結果へ進む」を押さずに離脱しても前回結果が残るよう、完了時点で永続化
+      if (isDebugPersist) {
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] complete branch", {
+          nextAnswersLength: nextAnswers.length,
+          totalQuestions,
+          resultType: result?.resultType,
+          resultAnswersLength: Array.isArray(result?.answers) ? result.answers.length : null,
+        });
+      }
+      persistDiagnosisResult(result);
       trackEvent("complete_diagnosis", {
         mode: activeMode,
         result_type: result.resultType,
@@ -219,14 +412,7 @@ export default function PlayClient() {
     if (!diagnosisResult) return;
     if (selectedAnswers.length !== totalQuestions) return;
 
-    try {
-      const raw = JSON.stringify(diagnosisResult);
-      sessionStorage.setItem(QUESTORIA_RESULT_KEY, raw);
-      // 最新1件を永続保持（タブを閉じても /result で見返せる）
-      localStorage.setItem(QUESTORIA_RESULT_KEY, raw);
-    } catch {
-      // noop
-    }
+    persistDiagnosisResult(diagnosisResult);
 
     router.replace("/loading");
   };
@@ -261,21 +447,27 @@ export default function PlayClient() {
                   GUIDE
                 </p>
 
-                <div className="mt-3 space-y-3 text-sm leading-7 text-white/85">
-                  <p>この診断は、知識を競うためのものではありません。</p>
+                <div className="mt-3 space-y-3 text-sm leading-relaxed text-white/85">
                   <p>
-                    見るのは、
+                    AIを使いこなすうえで重要なのは、
                     <br />
-                    課題に向き合ったときに何を重視し、
-                    <br />
-                    どう組み立て、どう判断するか。
+                    知識量そのものではなく、
                   </p>
-                  <p>
-                    12の設問を通して、
+
+                  <ul className="space-y-1.5 border-l-2 border-cyan-300/25 pl-3 text-white/86">
+                    <li>何を解決するかを定める力</li>
+                    <li>進め方を組み立てる力</li>
+                    <li>出力を見極めて判断する力</li>
+                  </ul>
+
+                  <p>の3つです。</p>
+
+                  <p className="text-white/82">
+                    この診断では、設問への回答を通して、
                     <br />
-                    あなたのAI活用スタイルと
-                    <br />
-                    思考の強みを診断します。
+                    AI活用に必要な
+                    <span className="font-semibold text-white/90">「目的定義力」「設計力」「判断力」</span>
+                    の3つのスキルを診断します。
                   </p>
                 </div>
               </div>
@@ -298,12 +490,16 @@ export default function PlayClient() {
                     <span>回答後すぐに結果を確認できます</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
-                    <span>EASYは短い文章で答えやすいモードです</span>
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
+                    <span>知識量ではなく、考え方や進め方をみる診断です</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
-                    <span>HARDは具体的な状況を読み解くモードです</span>
+                    <span>LIFEは日常シチュエーションで答えるモードです</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
+                    <span>WORKは仕事シチュエーションで答えるモードです</span>
                   </li>
                 </ul>
               </div>
@@ -312,17 +508,17 @@ export default function PlayClient() {
                 <div className="grid grid-cols-1 gap-3">
                   <button
                     type="button"
-                    onClick={() => handleStart("easy")}
+                    onClick={() => handleStart("life")}
                     className="w-full rounded-xl border border-[#FFD700]/55 bg-[#FFD700]/[0.10] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-[#fff6dc] shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(255,215,0,0.18)] transition hover:bg-[#FFD700]/[0.13] active:scale-[0.99]"
                   >
-                    ▶ EASYモードで診断を始める
+                    ▶ LIFEモードで診断を始める
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleStart("hard")}
+                    onClick={() => handleStart("work")}
                     className="w-full rounded-xl border border-cyan-300/[0.66] bg-cyan-400/[0.12] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(0,229,255,0.24)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
                   >
-                    ▶ HARDモードで診断を始める
+                    ▶ WORKモードで診断を始める
                   </button>
                 </div>
               </div>
@@ -336,7 +532,7 @@ export default function PlayClient() {
                   boxShadow: "0 0 10px rgba(0,229,255,0.16)",
                 }}
               >
-                {activeMode === "easy" ? "EASY" : "HARD"}
+                {activeMode === "life" ? "LIFE" : "WORK"}
               </span>
               {!isCompleted && currentQuestion ? (
                 <div className="flex flex-col gap-4">
@@ -346,13 +542,13 @@ export default function PlayClient() {
                     </p>
 
                     <div className="grid grid-cols-12 gap-1">
-                      {questionMasterV2.map((question, index) => {
+                      {questionOrder.map((questionId, index) => {
                         const isActive = index === currentQuestionIndex;
                         const isPassed = index < currentQuestionIndex;
 
                         return (
                           <div
-                            key={question.questionId}
+                            key={questionId}
                             className={`h-2 rounded-full ${
                               isPassed
                                 ? "bg-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.55)]"
@@ -391,7 +587,7 @@ export default function PlayClient() {
                   <div className="-mx-3 grid grid-cols-1 gap-3">
                     {currentDisplayOptions.map((option) => (
                       <button
-                        key={`${currentQuestion.questionId}-${option.displayLabel}-${option.text}`}
+                      key={`${currentQuestion.questionId}-${option.id}-${option.text}`}
                         type="button"
                         onClick={() => handleSelectOption(option)}
                         className="w-full rounded-xl border border-white/[0.22] bg-black/[0.43] px-4 pb-3.5 pt-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34),0_0_26px_rgba(0,229,255,0.048)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-black/44 hover:shadow-[0_6px_28px_rgba(0,0,0,0.45),0_0_26px_rgba(0,229,255,0.13)] active:translate-y-0 active:scale-[0.985] active:border-cyan-300/38 active:bg-black/32 active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_0_16px_rgba(0,229,255,0.06)]"

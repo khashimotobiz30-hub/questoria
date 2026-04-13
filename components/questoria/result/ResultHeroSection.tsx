@@ -76,7 +76,7 @@ export function ResultHeroSection({
   disableOverallClamp,
 }: Props) {
   const tint = `${colors.primary}18`;
-  const modeLabel = (mode ?? "hard") === "easy" ? "EASY" : "HARD";
+  const modeLabel = (mode ?? "work") === "life" ? "LIFE" : "WORK";
 
   return (
     <section className="px-4 pt-4">

@@ -10,8 +10,7 @@ import {
   type CSSProperties,
 } from "react";
 
-import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
-import { QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
+import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import type { ResultType } from "@/types";
 
 /** ローディング演出 phase 0/1/2 で表示する画像（固定） */
@@ -49,13 +48,7 @@ function readLoadingSession(): LoadingSessionData | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw =
-      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
-      localStorage.getItem(QUESTORIA_RESULT_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as unknown;
-    const diagnosis = parseStoredDiagnosisResult(parsed);
+    const diagnosis = readStoredDiagnosisResult();
     if (!diagnosis) return null;
 
     return {

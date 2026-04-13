@@ -5,6 +5,11 @@ const LEGACY_RESULT_TYPE: Record<string, ResultType> = {
   berserker: "hunter",
 };
 
+const LEGACY_MODE_MAP: Record<string, DiagnosisMode> = {
+  hard: "work",
+  easy: "life",
+};
+
 const VALID: readonly ResultType[] = [
   "hero",
   "sage",
@@ -31,8 +36,11 @@ export function parseStoredDiagnosisResult(parsed: unknown): DiagnosisResult | n
   if (!resultType) return null;
   if (!p.rawScores || !p.normalizedScores || !p.levels) return null;
 
+  const rawMode = typeof p.mode === "string" ? p.mode : "";
   const mode: DiagnosisMode =
-    p.mode === "easy" || p.mode === "hard" ? p.mode : "hard";
+    rawMode === "work" || rawMode === "life"
+      ? rawMode
+      : LEGACY_MODE_MAP[rawMode] ?? "work";
 
   return {
     mode,

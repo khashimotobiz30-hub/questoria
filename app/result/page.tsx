@@ -13,8 +13,8 @@ import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
 import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
 import { trackEvent } from "@/lib/analytics";
-import { parseStoredDiagnosisResult } from "@/lib/parseStoredDiagnosisResult";
-import { clearStoredDiagnosisResult, QUESTORIA_RESULT_KEY } from "@/lib/questoriaStorage";
+import { clearStoredQuestoriaAnswers } from "@/lib/questoriaStorage";
+import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import type {
   DiagnosisResult,
   DeeperGuideCopy,
@@ -150,16 +150,7 @@ const typeImageMap: Record<ResultType, string> = {
 function readResultSession(): DiagnosisResult | null {
   if (typeof window === "undefined") return null;
 
-  try {
-    const raw =
-      sessionStorage.getItem(QUESTORIA_RESULT_KEY) ??
-      localStorage.getItem(QUESTORIA_RESULT_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    return parseStoredDiagnosisResult(parsed);
-  } catch {
-    return null;
-  }
+  return readStoredDiagnosisResult();
 }
 
 export default function ResultPage() {
@@ -294,7 +285,8 @@ export default function ResultPage() {
       result_type: result.resultType,
       title: typeData.nameJa,
     });
-    clearStoredDiagnosisResult();
+    // 再診断は「途中データのみ」リセット。前回結果（questoria_result）は保持する。
+    clearStoredQuestoriaAnswers();
     router.push("/");
   };
 
@@ -339,7 +331,7 @@ export default function ResultPage() {
           colors={typeData.colors}
           scores={result.normalizedScores}
           levels={result.levels}
-          mode={result.mode ?? "hard"}
+          mode={result.mode ?? "work"}
           overallComment={detail?.overallComment ?? typeData.overallComment}
           disableOverallClamp={detail != null}
         />

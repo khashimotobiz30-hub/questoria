@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
 import GlitchText from "@/components/questoria/GlitchText";
+import DebugTopTools from "@/components/questoria/DebugTopTools";
+import HomeScrollIndicator from "@/components/questoria/HomeScrollIndicator";
 import { LpScreen2Content } from "@/components/questoria/LpScreen2Content";
 import ParticleField from "@/components/questoria/ParticleField";
 import { PreviousResultLink } from "@/components/questoria/PreviousResultLink";
@@ -71,9 +73,14 @@ function QuestStartCtaLabel() {
   );
 }
 
-function HomeScrollCue() {
+function HomeScrollCue({ offsetClassName }: { offsetClassName?: string }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-8">
+    <div
+      className={[
+        "pointer-events-none absolute inset-x-0 bottom-0 flex justify-center",
+        offsetClassName ?? "pb-[calc(env(safe-area-inset-bottom)+3.5rem)]",
+      ].join(" ")}
+    >
       <div className="pointer-events-none flex flex-col items-center" aria-hidden>
         <div
           className="flex flex-col items-center"
@@ -95,6 +102,7 @@ function HomeScrollCue() {
 export default function Home() {
   return (
     <main className="relative h-[100dvh] h-screen overflow-hidden text-white">
+      <DebugTopTools />
       {/* 固定背景 */}
       <div className="fixed inset-0 z-0" aria-hidden="true">
         <div
@@ -107,9 +115,19 @@ export default function Home() {
       </div>
 
       {/* 前景：scroll-snap（自然スクロール + セクション単位で停止） */}
-      <div className="relative z-10 h-full snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-y-contain">
+      <HomeScrollIndicator
+        containerId="home-scroll-container"
+        sectionIds={["home-screen-1", "home-screen-2", "home-screen-3"]}
+      />
+      <div
+        id="home-scroll-container"
+        className="relative z-10 h-full snap-y snap-mandatory overflow-y-auto overflow-x-hidden overscroll-y-contain scroll-smooth"
+      >
         {/* 1画面目：HERO */}
-        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+        <section
+          id="home-screen-1"
+          className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8"
+        >
           <div className="w-full max-w-md text-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2.5 sm:gap-3">
@@ -170,7 +188,7 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <RitualLaunchLink href="/play" variant="primary">
+              <RitualLaunchLink href="/play?fresh=1" variant="primary">
                 <QuestStartCtaLabel />
               </RitualLaunchLink>
             </div>
@@ -180,27 +198,33 @@ export default function Home() {
         </section>
 
         {/* 2画面目：AI活用スキルと診断方法（スクリーン3と同系の大枠プレート） */}
-        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+        <section
+          id="home-screen-2"
+          className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-8 pb-[max(2.25rem,env(safe-area-inset-bottom))] pt-7"
+        >
           <div className="flex w-full max-w-md flex-col items-center">
             <HomeResultStyleCard
               sectionLabel="AI活用スキルとその診断方法"
               bandTitleClassName={`${homePlateSectionTitleClass} text-[12px] leading-snug tracking-[0.06em] sm:text-[14px] sm:tracking-[0.08em]`}
-              bodyClassName="overflow-visible pb-5 pt-5"
+              bodyClassName="overflow-visible pb-4 pt-4"
             >
               <LpScreen2Content />
             </HomeResultStyleCard>
 
-            <div className="mt-10 flex justify-center sm:mt-12">
-              <RitualLaunchLink href="/play" variant="primary">
+            <div className="mb-6 mt-8 flex justify-center sm:mb-7 sm:mt-10">
+              <RitualLaunchLink href="/play?fresh=1" variant="primary">
                 <QuestStartCtaLabel />
               </RitualLaunchLink>
             </div>
           </div>
-          <HomeScrollCue />
+          <HomeScrollCue offsetClassName="pb-[calc(env(safe-area-inset-bottom)+2.25rem)]" />
         </section>
 
         {/* 3画面目：この診断でわかること（モックで結果の雰囲気、本文はメリットを短く） */}
-        <section className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8">
+        <section
+          id="home-screen-3"
+          className="relative flex min-h-[100dvh] min-h-screen snap-start snap-always flex-col items-center justify-center px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-8"
+        >
           <div className="flex w-full max-w-md flex-col items-center">
             <HomeResultStyleCard sectionLabel="この診断でわかること">
               <div className="flex w-full flex-row flex-wrap items-start justify-center gap-5 pb-6 pt-0.5 sm:flex-nowrap sm:gap-6 sm:pb-7 sm:pt-1">
@@ -216,7 +240,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="space-y-1.5 border-t border-white/10 pt-3 font-[var(--font-noto)] text-[14px] leading-relaxed text-white/78 sm:text-[15px]">
+              <div className="space-y-1.5 border-t border-white/10 pt-3 font-[var(--font-noto)] text-[13px] leading-[1.6] text-white/78 sm:text-[14px]">
                 <p className="font-semibold text-white/88">
                   この診断を受けることで、自分の強みだけでなく、つまずきやすいポイントや伸ばすべき力が見えてきます。
                 </p>
@@ -227,7 +251,7 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <RitualLaunchLink href="/play" variant="primary">
+              <RitualLaunchLink href="/play?fresh=1" variant="primary">
                 <QuestStartCtaLabel />
               </RitualLaunchLink>
             </div>
