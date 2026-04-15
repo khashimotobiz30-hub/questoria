@@ -17,7 +17,7 @@ export function DeeperGuideSection({
   onLineCtaClick?: () => void;
 }) {
   const lineCtaClass =
-    "inline-flex min-h-[3.25rem] w-full items-center justify-center rounded-xl border border-[#FFD700]/40 bg-gradient-to-b from-[#FFD700]/17 via-[#FFD700]/7 to-black/48 px-4 py-4 text-sm font-bold tracking-wide text-white shadow-[0_0_32px_rgba(255,215,0,0.13),0_0_72px_rgba(255,215,0,0.05)] transition hover:border-[#FFD700]/52 hover:from-[#FFD700]/21 hover:shadow-[0_0_40px_rgba(255,215,0,0.17),0_0_88px_rgba(255,215,0,0.07)] hover:to-black/44 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]";
+    "inline-flex min-h-[3.25rem] w-full items-center justify-center rounded-xl border border-[#D2B03B]/85 bg-gradient-to-b from-[#E0C05C] via-[#C89B24] to-[#8A6A16] px-4 py-4 text-sm font-bold tracking-wide text-[#15130F] shadow-[inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-2px_0_rgba(0,0,0,0.28),0_14px_28px_rgba(0,0,0,0.42),0_0_18px_rgba(210,176,59,0.12)] transition-transform transition-shadow hover:from-[#E9CE73] hover:via-[#D2AA2D] hover:to-[#97761A] hover:border-[#E0C05C]/95 hover:-translate-y-[2px] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),inset_0_-2px_0_rgba(0,0,0,0.26),0_18px_36px_rgba(0,0,0,0.48),0_0_22px_rgba(210,176,59,0.16)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2B03B]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]";
 
   return (
     <section className={resultCardShellClass("default")}>

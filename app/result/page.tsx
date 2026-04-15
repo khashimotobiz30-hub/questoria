@@ -334,23 +334,32 @@ export default function ResultPage() {
           mode={result.mode ?? "work"}
           overallComment={detail?.overallComment ?? typeData.overallComment}
           disableOverallClamp={detail != null}
+          hideSkillStatusDescription
         />
 
         <div className="space-y-8 px-4 pb-12 pt-6">
           <WhyThisTypeSection
-            judgementReason={detail?.judgementReason}
-            highAxisReason={detail?.highAxisReason}
-            lowAxisReason={detail?.lowAxisReason}
-            combinationInsight={detail?.combinationInsight}
-            profileSummary={detail?.profileSummary ?? typeData.profileSummary}
+            summaryOverride={detail?.judgementReason}
+            hideCoreLabel
           />
 
-          <TypeAnalysisSection copy={typeAnalysisCopy} />
+          <TypeAnalysisSection
+            copy={typeAnalysisCopy}
+            hideIntro
+            hideGrowth
+            hideTierLabel
+            unifyItemTitleTone
+            openRiskPointByDefault
+            hideRiskPointClosedPreview
+          />
 
           <NextActionSection
+            title={detail?.nextActionTitle ?? "AI活用の際に意識するべきこと"}
             riskPoint={pickString(detail?.riskPoint, typeData.riskPoint)}
             growth={pickString(detail?.growth, typeData.description.growth)}
             lead={pickString(detail?.nextActionLead, typeData.nextActionLead)}
+            bodyOverride={detail?.nextActionBody}
+            immediateActionOverride={detail?.nextActionImmediateAction}
             nextActions={
               detail?.nextActions
                 ? Array.from(detail.nextActions)

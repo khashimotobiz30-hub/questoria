@@ -17,6 +17,7 @@ type Props = {
   mode?: DiagnosisMode;
   overallComment?: string;
   disableOverallClamp?: boolean;
+  hideSkillStatusDescription?: boolean;
 };
 
 function SkillBar({ label, score, level }: { label: string; score: number; level: Level }) {
@@ -74,6 +75,7 @@ export function ResultHeroSection({
   mode,
   overallComment,
   disableOverallClamp,
+  hideSkillStatusDescription,
 }: Props) {
   const tint = `${colors.primary}18`;
   const modeLabel = (mode ?? "work") === "life" ? "LIFE" : "WORK";
@@ -172,13 +174,15 @@ export function ResultHeroSection({
                 <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
               </div>
 
-              <p
-                className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
-                  disableOverallClamp ? "pb-0.5" : "line-clamp-4"
-                }`}
-              >
-                {overallComment ?? "TODO: overallComment を他タイプにも追加"}
-              </p>
+              {!hideSkillStatusDescription && (
+                <p
+                  className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
+                    disableOverallClamp ? "pb-0.5" : "line-clamp-4"
+                  }`}
+                >
+                  {overallComment ?? "TODO: overallComment を他タイプにも追加"}
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -10,10 +10,12 @@ type Props = {
   lowAxisReason?: string;
   combinationInsight?: string;
   profileSummary?: string;
+  summaryOverride?: string;
+  hideCoreLabel?: boolean;
 };
 
 /** `TypeAnalysisSection` の AccordionItem（CORE）と同系のトグル＋矢印 */
-function SummaryAccordion({ text }: { text: string }) {
+function SummaryAccordion({ text, hideCoreLabel }: { text: string; hideCoreLabel?: boolean }) {
   const [open, setOpen] = useState(true);
 
   const paragraphs = text
@@ -31,9 +33,11 @@ function SummaryAccordion({ text }: { text: string }) {
       >
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[#FFD700]/28 bg-[#FFD700]/12 px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-[#FFD700]/95">
-              CORE
-            </span>
+            {!hideCoreLabel ? (
+              <span className="rounded-full border border-[#FFD700]/28 bg-[#FFD700]/12 px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-[#FFD700]/95">
+                CORE
+              </span>
+            ) : null}
             <p className="text-sm font-semibold leading-snug text-[#FFD700]">SUMMARY（要約）</p>
           </div>
         </div>
@@ -80,15 +84,18 @@ function SummaryAccordion({ text }: { text: string }) {
 }
 
 export function WhyThisTypeSection(props: Props) {
-  const body = [
-    props.judgementReason,
-    props.highAxisReason,
-    props.lowAxisReason,
-    props.combinationInsight,
-    props.profileSummary,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+  const summaryOverride = props.summaryOverride?.trim();
+  const body = summaryOverride
+    ? summaryOverride
+    : [
+        props.judgementReason,
+        props.highAxisReason,
+        props.lowAxisReason,
+        props.combinationInsight,
+        props.profileSummary,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
   const hasAny = Boolean(body);
 
   return (
@@ -107,7 +114,7 @@ export function WhyThisTypeSection(props: Props) {
           </header>
           <div className="border-t border-white/[0.09] pb-3">
             {hasAny ? (
-              <SummaryAccordion text={body} />
+              <SummaryAccordion text={body} hideCoreLabel={props.hideCoreLabel} />
             ) : (
               <p className="px-4 pb-2 pt-3 text-sm leading-relaxed text-white/70 sm:px-5 sm:pb-3 sm:pt-4">
                 このタイプの判定理由テキストは準備中です。

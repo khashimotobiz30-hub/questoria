@@ -4,26 +4,38 @@ import { ResultCardDecor, resultCardShellClass, sectionLabelClass } from "@/comp
 import { buildNextActionPrescription } from "@/lib/buildNextActionPrescription";
 
 export function NextActionSection({
+  title,
   riskPoint,
   growth,
   lead,
   nextActions,
+  bodyOverride,
+  immediateActionOverride,
 }: {
+  title?: string;
   riskPoint?: string;
   growth?: string;
   lead?: string;
   nextActions?: readonly string[];
+  bodyOverride?: string;
+  immediateActionOverride?: string;
 }) {
-  const prescription = useMemo(
-    () =>
-      buildNextActionPrescription({
-        riskPoint,
-        growth,
-        nextActionLead: lead,
-        nextActions,
-      }),
-    [riskPoint, growth, lead, nextActions],
-  );
+  const prescription = useMemo(() => {
+    const body = bodyOverride?.trim();
+    const immediateAction = immediateActionOverride?.trim();
+    if (body || immediateAction) {
+      return {
+        body: body ?? "",
+        immediateAction: immediateAction ?? "",
+      };
+    }
+    return buildNextActionPrescription({
+      riskPoint,
+      growth,
+      nextActionLead: lead,
+      nextActions,
+    });
+  }, [bodyOverride, immediateActionOverride, riskPoint, growth, lead, nextActions]);
 
   return (
     <section className={resultCardShellClass("action")}>
@@ -32,7 +44,7 @@ export function NextActionSection({
         <header>
           <p className={sectionLabelClass}>NEXT ACTION</p>
           <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
-            今から意識するべきこと
+            {title ?? "今から意識するべきこと"}
           </h2>
         </header>
 

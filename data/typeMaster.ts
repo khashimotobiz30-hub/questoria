@@ -223,7 +223,7 @@ export const typeMaster: Record<ResultType, TypeData> = {
     resultType: "pioneer",
     nameJa: "冒険者",
     nameEn: "PIONEER",
-    tagline: "地図がなくても、答えがなくても、踏み出せる。\nその一歩が、新しい道を切り開いていく。",
+    tagline: "正解が見えなくても、先へ進める。\nその一歩が、まだない道をつくっていく。",
     description: {
       essence:
         "正解がなくても「まず進む」を選べるタイプです。向かう先が曖昧だと行動力が遠回りにつながることもあります。",

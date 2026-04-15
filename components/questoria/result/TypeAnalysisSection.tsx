@@ -41,13 +41,30 @@ function oneLinePreview(text: string, maxChars = 48) {
   return `${normalized.slice(0, maxChars)}…`;
 }
 
-function AccordionItem({ item }: { item: Item }) {
+function AccordionItem({
+  item,
+  hideTierLabel,
+  unifyTitleTone,
+  hideClosedPreview,
+}: {
+  item: Item;
+  hideTierLabel?: boolean;
+  unifyTitleTone?: boolean;
+  hideClosedPreview?: boolean;
+}) {
   const [open, setOpen] = useState(item.defaultOpen);
   const isCore = item.tier === "core";
   const preview =
-    !open && item.tier === "note" ? oneLinePreview(item.body.split("\n")[0] ?? item.body) : "";
+    !hideClosedPreview && !open && item.tier === "note"
+      ? oneLinePreview(item.body.split("\n")[0] ?? item.body)
+      : "";
 
   const paras = splitIntoParagraphs(item.body);
+  const titleToneClass = unifyTitleTone
+    ? "text-[#FFD700]"
+    : isCore
+      ? "text-[#FFD700]"
+      : "text-white/78";
 
   return (
     <div>
@@ -59,19 +76,19 @@ function AccordionItem({ item }: { item: Item }) {
       >
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={
-                isCore
-                  ? "rounded-full border border-[#FFD700]/28 bg-[#FFD700]/12 px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-[#FFD700]/95"
-                  : "rounded-full border border-white/12 bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-white/52"
-              }
-            >
-              {isCore ? "CORE" : "NOTE"}
-            </span>
+            {!hideTierLabel ? (
+              <span
+                className={
+                  isCore
+                    ? "rounded-full border border-[#FFD700]/28 bg-[#FFD700]/12 px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-[#FFD700]/95"
+                    : "rounded-full border border-white/12 bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] tracking-[0.18em] text-white/52"
+                }
+              >
+                {isCore ? "CORE" : "NOTE"}
+              </span>
+            ) : null}
             <p
-              className={`text-sm font-semibold leading-snug ${
-                isCore ? "text-[#FFD700]" : "text-white/78"
-              }`}
+              className={`text-sm font-semibold leading-snug ${titleToneClass}`}
             >
               {item.title}
             </p>
@@ -136,39 +153,58 @@ function AccordionItem({ item }: { item: Item }) {
   );
 }
 
-export function TypeAnalysisSection({ copy }: { copy: TypeAnalysisCopy }) {
+export function TypeAnalysisSection({
+  copy,
+  hideIntro,
+  hideGrowth,
+  hideTierLabel,
+  unifyItemTitleTone,
+  openRiskPointByDefault,
+  hideRiskPointClosedPreview,
+}: {
+  copy: TypeAnalysisCopy;
+  hideIntro?: boolean;
+  hideGrowth?: boolean;
+  hideTierLabel?: boolean;
+  unifyItemTitleTone?: boolean;
+  openRiskPointByDefault?: boolean;
+  hideRiskPointClosedPreview?: boolean;
+}) {
   const items = useMemo<Item[]>(
-    () => [
-      {
-        id: "essence",
-        title: "ESSENCE（本質）",
-        body: copy.essence,
-        defaultOpen: true,
-        tier: "core",
-      },
-      {
-        id: "strength",
-        title: "STRENGTH（強み）",
-        body: copy.strength,
-        defaultOpen: true,
-        tier: "core",
-      },
-      {
-        id: "riskPoint",
-        title: "RISK POINT（注意点）",
-        body: copy.riskPoint,
-        defaultOpen: false,
-        tier: "note",
-      },
-      {
-        id: "growth",
-        title: "GROWTH（伸びしろ）",
-        body: copy.growth,
-        defaultOpen: true,
-        tier: "core",
-      },
-    ],
-    [copy],
+    () =>
+      [
+        {
+          id: "essence",
+          title: "ESSENCE（本質）",
+          body: copy.essence,
+          defaultOpen: true,
+          tier: "core",
+        },
+        {
+          id: "strength",
+          title: "STRENGTH（強み）",
+          body: copy.strength,
+          defaultOpen: true,
+          tier: "core",
+        },
+        {
+          id: "riskPoint",
+          title: "RISK POINT（注意点）",
+          body: copy.riskPoint,
+          defaultOpen: openRiskPointByDefault ?? false,
+          tier: "note",
+        },
+        hideGrowth
+          ? null
+          : {
+              id: "growth",
+              title: "GROWTH（伸びしろ）",
+              body: copy.growth,
+              defaultOpen: true,
+              tier: "core",
+            },
+      ].filter(Boolean) as Item[],
+    [copy, hideGrowth, openRiskPointByDefault],
   );
 
   return (
@@ -181,13 +217,21 @@ export function TypeAnalysisSection({ copy }: { copy: TypeAnalysisCopy }) {
             <h2 className="mt-2.5 font-orbitron text-lg font-bold tracking-wide text-white sm:mt-3">
               あなたの傾向
             </h2>
-            <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-white/70 sm:mt-2">
-              あなたらしさは、こんな感じです。
-            </p>
+            {!hideIntro ? (
+              <p className="mt-1.5 max-w-prose text-sm leading-relaxed text-white/70 sm:mt-2">
+                あなたらしさは、こんな感じです。
+              </p>
+            ) : null}
           </header>
           <div className="divide-y divide-white/[0.09] border-t border-white/[0.09] pb-3">
             {items.map((item) => (
-              <AccordionItem key={item.id} item={item} />
+              <AccordionItem
+                key={item.id}
+                item={item}
+                hideTierLabel={hideTierLabel}
+                unifyTitleTone={unifyItemTitleTone}
+                hideClosedPreview={hideRiskPointClosedPreview && item.id === "riskPoint"}
+              />
             ))}
           </div>
         </div>
