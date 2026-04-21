@@ -33,6 +33,8 @@ export function ShareSection({
   onShareX,
   onInviteFriends,
   onRerun,
+  source,
+  onDeeperDiagnosis,
 }: {
   otherTypes: ResultType[];
   typeImageMap: Record<ResultType, string>;
@@ -41,6 +43,8 @@ export function ShareSection({
   onShareX: () => void;
   onInviteFriends: () => void;
   onRerun: () => void;
+  source?: "deep" | "light";
+  onDeeperDiagnosis?: () => void;
 }) {
   const [typeListOpen, setTypeListOpen] = useState(false);
 
@@ -123,56 +127,82 @@ export function ShareSection({
         </div>
       </div>
 
-      <div className={resultCardShellClass("compare")}>
-        <ResultCardDecor withRail />
-        <div className="relative z-[1] space-y-3 p-5">
-          <p className={sectionLabelClass}>TRY AGAIN</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-2.5">
-            {otherTypes.map((type) => (
-              <div key={type} className="flex min-w-0 flex-col items-center gap-1.5">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-white/14 bg-black/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]">
-                  <Image
-                    src={typeImageMap[type]}
-                    alt={typeNameJaByResultType[type] ?? type}
-                    fill
-                    className="object-cover object-top"
-                    style={{ filter: "brightness(0.96) saturate(0.94)" }}
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                </div>
-                <span className="w-full truncate text-center text-xs font-medium leading-snug tracking-wide text-white/88">
-                  {typeNameJaByResultType[type] ?? type}
-                </span>
-              </div>
-            ))}
+      {source === "light" ? (
+        <div className={resultCardShellClass("action")}>
+          <ResultCardDecor withRail />
+          <div className="relative z-[1] space-y-3 p-5">
+            <p className={sectionLabelClass}>DEEPER DIAGNOSIS</p>
+            <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
+              より詳細な診断を行う
+            </h2>
+
+            <div className="space-y-2 border-t border-white/10 pt-4 text-[13px] leading-relaxed text-white/82 sm:text-sm">
+              <p>今回の設問と結果は、LIGHT診断モードによるものです。</p>
+              <p>LIGHT診断は、今の傾向をつかむための簡易診断モードです。</p>
+              <p>より正確に知りたい方は、以下よりWORK / LIFEモードをお試しください。</p>
+            </div>
+
+            <button
+              type="button"
+              className="group mt-4 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-cyan-300/55 bg-cyan-400/[0.10] px-4 py-3.5 text-sm font-medium tracking-wide text-cyan-100 shadow-[0_0_28px_rgba(0,229,255,0.18)] transition hover:bg-cyan-400/15 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]"
+              onClick={onDeeperDiagnosis}
+            >
+              WORK／LIFEモードで診断する
+            </button>
           </div>
-
-          <p className="text-[13px] leading-relaxed text-white/82 sm:text-sm sm:leading-relaxed">
-            他にもこんなタイプがあります。ぜひチェックしてみてください。
-          </p>
-
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 font-mono text-[12px] tracking-[0.16em] text-cyan-300/85 transition hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35"
-            onClick={() => setTypeListOpen(true)}
-          >
-            8タイプ一覧を見る <span aria-hidden>→</span>
-          </button>
-
-          <button
-            type="button"
-            className="group mt-4 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-white/22 bg-gradient-to-b from-white/[0.09] to-black/36 px-4 py-3.5 text-sm font-medium tracking-wide text-white/80 shadow-[0_0_18px_rgba(255,255,255,0.06),0_0_22px_rgba(255,215,0,0.06)] transition hover:border-white/30 hover:from-white/[0.11] hover:to-black/42 hover:text-white/88 hover:shadow-[0_0_24px_rgba(255,255,255,0.07),0_0_30px_rgba(255,215,0,0.08)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/28 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]"
-            onClick={onRerun}
-          >
-            <RotateCcw
-              className="size-[13px] shrink-0 text-white/56 transition-colors group-hover:text-white/74"
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-            もう一度診断する
-          </button>
         </div>
-      </div>
+      ) : (
+        <div className={resultCardShellClass("compare")}>
+          <ResultCardDecor withRail />
+          <div className="relative z-[1] space-y-3 p-5">
+            <p className={sectionLabelClass}>TRY AGAIN</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-2.5">
+              {otherTypes.map((type) => (
+                <div key={type} className="flex min-w-0 flex-col items-center gap-1.5">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-white/14 bg-black/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]">
+                    <Image
+                      src={typeImageMap[type]}
+                      alt={typeNameJaByResultType[type] ?? type}
+                      fill
+                      className="object-cover object-top"
+                      style={{ filter: "brightness(0.96) saturate(0.94)" }}
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  </div>
+                  <span className="w-full truncate text-center text-xs font-medium leading-snug tracking-wide text-white/88">
+                    {typeNameJaByResultType[type] ?? type}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-[13px] leading-relaxed text-white/82 sm:text-sm sm:leading-relaxed">
+              他にもこんなタイプがあります。ぜひチェックしてみてください。
+            </p>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 font-mono text-[12px] tracking-[0.16em] text-cyan-300/85 transition hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35"
+              onClick={() => setTypeListOpen(true)}
+            >
+              8タイプ一覧を見る <span aria-hidden>→</span>
+            </button>
+
+            <button
+              type="button"
+              className="group mt-4 inline-flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-white/22 bg-gradient-to-b from-white/[0.09] to-black/36 px-4 py-3.5 text-sm font-medium tracking-wide text-white/80 shadow-[0_0_18px_rgba(255,255,255,0.06),0_0_22px_rgba(255,215,0,0.06)] transition hover:border-white/30 hover:from-white/[0.11] hover:to-black/42 hover:text-white/88 hover:shadow-[0_0_24px_rgba(255,255,255,0.07),0_0_30px_rgba(255,215,0,0.08)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/28 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0F]"
+              onClick={onRerun}
+            >
+              <RotateCcw
+                className="size-[13px] shrink-0 text-white/56 transition-colors group-hover:text-white/74"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+              もう一度診断する
+            </button>
+          </div>
+        </div>
+      )}
 
       {typeListOpen ? (
         <div

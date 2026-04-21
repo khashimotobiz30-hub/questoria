@@ -1,6 +1,9 @@
 /** sessionStorage / localStorage 共通キー（診断結果・最新1件の永続用） */
 export const QUESTORIA_RESULT_KEY = "questoria_result";
 
+/** sessionStorage / localStorage 共通キー（LIGHT診断結果・最新1件の永続用） */
+export const QUESTORIA_LIGHT_RESULT_KEY = "questoria_light_result";
+
 /** 診断途中の回答（主に sessionStorage） */
 export const QUESTORIA_ANSWERS_KEY = "questoria_answers";
 
@@ -32,6 +35,24 @@ export function clearStoredDiagnosisResult(): void {
   }
   try {
     localStorage.removeItem(QUESTORIA_RESULT_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
+/**
+ * `questoria_light_result` を sessionStorage と localStorage の両方から削除する。
+ * 一方のストレージが失敗しても、もう一方は試行する（それぞれ try/catch）。
+ */
+export function clearStoredLightDiagnosisResult(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(QUESTORIA_LIGHT_RESULT_KEY);
+  } catch {
+    /* noop */
+  }
+  try {
+    localStorage.removeItem(QUESTORIA_LIGHT_RESULT_KEY);
   } catch {
     /* noop */
   }

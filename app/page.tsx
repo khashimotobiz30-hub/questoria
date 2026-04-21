@@ -6,8 +6,9 @@ import HomeScrollIndicator from "@/components/questoria/HomeScrollIndicator";
 import { LpScreen2Content } from "@/components/questoria/LpScreen2Content";
 import ParticleField from "@/components/questoria/ParticleField";
 import { PreviousResultLink } from "@/components/questoria/PreviousResultLink";
+import { QuestStartCta } from "@/components/questoria/QuestStartCta";
 import { ResultCardDecor, resultCardShellClass } from "@/components/questoria/result/resultCardTheme";
-import { RitualLaunchLink, RitualResultPhonePreview } from "@/components/questoria/RitualPlate";
+import { RitualResultPhonePreview } from "@/components/questoria/RitualPlate";
 
 /** 村人（typeId: origin）結果画面スクショ — ファイル名は後から差し替え可 */
 const RESULT_PREVIEW_ORIGIN_SRC = "/top/result-preview-origin.png";
@@ -188,9 +189,9 @@ export default function Home() {
             </div>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <RitualLaunchLink href="/play?fresh=1" variant="primary">
+              <QuestStartCta variant="primary">
                 <QuestStartCtaLabel />
-              </RitualLaunchLink>
+              </QuestStartCta>
             </div>
             <PreviousResultLink className="mt-3 flex justify-center" />
           </div>
@@ -212,9 +213,9 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mb-6 mt-8 flex justify-center sm:mb-7 sm:mt-10">
-              <RitualLaunchLink href="/play?fresh=1" variant="primary">
+              <QuestStartCta variant="primary">
                 <QuestStartCtaLabel />
-              </RitualLaunchLink>
+              </QuestStartCta>
             </div>
           </div>
           <HomeScrollCue offsetClassName="pb-[calc(env(safe-area-inset-bottom)+2.25rem)]" />
@@ -251,9 +252,9 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <RitualLaunchLink href="/play?fresh=1" variant="primary">
+              <QuestStartCta variant="primary">
                 <QuestStartCtaLabel />
-              </RitualLaunchLink>
+              </QuestStartCta>
             </div>
           </div>
         </section>

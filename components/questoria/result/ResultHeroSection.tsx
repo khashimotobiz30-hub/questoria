@@ -15,12 +15,23 @@ type Props = {
   scores: { purpose: number; design: number; decision: number };
   levels: { purpose: Level; design: Level; decision: Level };
   mode?: DiagnosisMode;
+  source?: "deep" | "light";
   overallComment?: string;
   disableOverallClamp?: boolean;
   hideSkillStatusDescription?: boolean;
 };
 
-function SkillBar({ label, score, level }: { label: string; score: number; level: Level }) {
+function SkillBar({
+  label,
+  score,
+  level,
+  hideScoreNumber,
+}: {
+  label: string;
+  score: number;
+  level: Level;
+  hideScoreNumber?: boolean;
+}) {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -39,9 +50,11 @@ function SkillBar({ label, score, level }: { label: string; score: number; level
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <span className="text-sm text-white/70">{label}</span>
-        <span className="font-mono text-sm font-bold" style={{ color: barColor.text }}>
-          {Math.round(score)}
-        </span>
+        {!hideScoreNumber && (
+          <span className="font-mono text-sm font-bold" style={{ color: barColor.text }}>
+            {Math.round(score)}
+          </span>
+        )}
       </div>
 
       <div className="relative h-[10px] w-full overflow-hidden rounded-full bg-white/10">
@@ -73,12 +86,14 @@ export function ResultHeroSection({
   scores,
   levels,
   mode,
+  source,
   overallComment,
   disableOverallClamp,
   hideSkillStatusDescription,
 }: Props) {
   const tint = `${colors.primary}18`;
-  const modeLabel = (mode ?? "work") === "life" ? "LIFE" : "WORK";
+  const modeLabel = source === "light" ? "LIGHT" : (mode ?? "work") === "life" ? "LIFE" : "WORK";
+  const hideSkillStatus = source === "light";
 
   return (
     <section className="px-4 pt-4">
@@ -163,29 +178,31 @@ export function ResultHeroSection({
         </div>
 
         {/* 横は控えめに詰め、SKILL STATUS カードをヒーロー内で広く（下セクションのカード幅に近づける） */}
-        <div className="space-y-4 px-1.5 pb-5 pt-5 sm:px-2">
-          <div className={resultCardShellClass("default")}>
-            <ResultCardDecor withRail />
-            <div className="relative z-[1] p-4">
-              <p className={sectionLabelClass}>SKILL STATUS</p>
-              <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
-                <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
-                <SkillBar label="設計力" score={scores.design} level={levels.design} />
-                <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
-              </div>
+        {!hideSkillStatus && (
+          <div className="space-y-4 px-1.5 pb-5 pt-5 sm:px-2">
+            <div className={resultCardShellClass("default")}>
+              <ResultCardDecor withRail />
+              <div className="relative z-[1] p-4">
+                <p className={sectionLabelClass}>SKILL STATUS</p>
+                <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
+                  <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
+                  <SkillBar label="設計力" score={scores.design} level={levels.design} />
+                  <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
+                </div>
 
-              {!hideSkillStatusDescription && (
-                <p
-                  className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
-                    disableOverallClamp ? "pb-0.5" : "line-clamp-4"
-                  }`}
-                >
-                  {overallComment ?? "TODO: overallComment を他タイプにも追加"}
-                </p>
-              )}
+                {!hideSkillStatusDescription && (
+                  <p
+                    className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
+                      disableOverallClamp ? "pb-0.5" : "line-clamp-4"
+                    }`}
+                  >
+                    {overallComment ?? "TODO: overallComment を他タイプにも追加"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

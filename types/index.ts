@@ -50,6 +50,60 @@ export type DiagnosisResult = {
   resultType: ResultType;
 };
 
+/** LIGHT専用軸（入口用・自己申告）。Deepの `decision` と区別して `judgment` を使う。 */
+export type LightAxisKey = "purpose" | "design" | "judgment";
+
+export type LightAxisScores = Record<LightAxisKey, number>;
+export type LightAxisLevels = Record<LightAxisKey, "HIGH" | "LOW">;
+
+export type LightAnswerRecord = {
+  questionId: string; // e.g. "Q1"〜
+  optionId: string; // e.g. "A"〜
+  optionLabel: string;
+};
+
+/**
+ * LIGHT entry diagnosis result.
+ * - `mode` is intentionally NOT present (WORK/LIFE meaning must be preserved for deep diagnosis only).
+ * - `source` lets UI/storage distinguish deep vs light safely.
+ */
+export type LightDiagnosisResult = {
+  source: "light";
+
+  /** 将来活用前提の回答ログ（集計・個別参照用） */
+  answers: LightAnswerRecord[];
+
+  /** コア設問（Q9/Q10/Q11）由来の軸スコア */
+  coreScores: LightAxisScores;
+  /** 補正値（設問単位/選択肢による加減点の合算） */
+  adjustments: LightAxisScores;
+
+  /** 生点（raw）= ベース + 補正 */
+  rawScores: LightAxisScores;
+  /** 表示用の0-100正規化（deepのレーダー等と合わせる） */
+  normalizedScores: LightAxisScores;
+
+  /** High/Low判定（raw>=4 かつ core>=2 を High） */
+  levels: LightAxisLevels;
+
+  /** 8タイプ */
+  resultType: ResultType;
+
+  /** ISO timestamp */
+  completedAt: string;
+  /** identifies the question set used */
+  questionSetId: string;
+  /** for future compatibility when question set changes */
+  version: number;
+};
+
+/** Deep diagnosis result (existing WORK/LIFE). */
+export type DeepDiagnosisResult = DiagnosisResult & {
+  source?: "deep";
+};
+
+export type StoredDiagnosisResult = DeepDiagnosisResult | LightDiagnosisResult;
+
 /** TYPE ANALYSIS（Phase 2）— 6項目の表示用コピー */
 export type TypeAnalysisCopy = {
   essence: string;

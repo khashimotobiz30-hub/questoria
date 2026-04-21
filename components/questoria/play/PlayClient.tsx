@@ -521,6 +521,16 @@ export default function PlayClient() {
                     ▶ WORKモードで診断を始める
                   </button>
                 </div>
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/light?fresh=1")}
+                    className="w-full rounded-xl border border-white/[0.16] bg-black/[0.34] px-4 py-3 font-mono text-xs font-medium tracking-wide text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_26px_rgba(0,0,0,0.35)] transition hover:border-white/[0.22] hover:bg-black/[0.38] hover:text-white/90 active:scale-[0.99]"
+                  >
+                    ▶ LIGHT診断を試す
+                  </button>
+                </div>
               </div>
             </>
           ) : (
