@@ -1,0 +1,11 @@
+import { createClient } from "@supabase/supabase-js";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+export function isSupabaseEnabled(): boolean {
+  return url.length > 0 && anonKey.length > 0;
+}
+
+export const supabase = isSupabaseEnabled() ? createClient(url, anonKey) : null;
+

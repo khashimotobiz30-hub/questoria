@@ -13,6 +13,9 @@ import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
 import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
 import { trackEvent } from "@/lib/analytics";
+import { getLastLightResponseId, markLightResponseClickedLine } from "@/lib/lightResponseLog";
+import { downloadLightResponseLogsCsv } from "@/lib/lightResponseLog";
+import { markLightResponseClickedLineSupabase } from "@/lib/lightResponseLogSupabase";
 import { clearStoredQuestoriaAnswers } from "@/lib/questoriaStorage";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
@@ -406,13 +409,20 @@ export default function ResultClient() {
             copy={deeperGuideCopy}
             lineUrl={LINE_ADD_FRIEND_URL}
             onLineCtaClick={() =>
-              trackEvent("click_line_deeper_guide", {
-                type_id: result.resultType,
-                result_type: result.resultType,
-                title: typeData.nameJa,
-                source_section: "deeper_guide",
-                source,
-              })
+              (() => {
+                trackEvent("click_line_deeper_guide", {
+                  type_id: result.resultType,
+                  result_type: result.resultType,
+                  title: typeData.nameJa,
+                  source_section: "deeper_guide",
+                  source,
+                });
+                const lastLightId = getLastLightResponseId();
+                if (lastLightId) {
+                  markLightResponseClickedLine(lastLightId);
+                  void markLightResponseClickedLineSupabase(lastLightId);
+                }
+              })()
             }
           />
 
@@ -427,6 +437,18 @@ export default function ResultClient() {
             source={isLight(result) ? "light" : "deep"}
             onDeeperDiagnosis={handleGoDeeper}
           />
+
+          {searchParams.get("export") === "1" ? (
+            <div className="pt-2">
+              <button
+                type="button"
+                className="w-full rounded-xl border border-white/18 bg-black/22 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-sm transition hover:border-white/24 hover:bg-black/28 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35"
+                onClick={() => downloadLightResponseLogsCsv()}
+              >
+                診断ログをダウンロード（CSV）
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </main>

@@ -10,6 +10,9 @@ import {
   lightQuestionMaster,
 } from "@/data/lightQuestionMaster";
 import { trackEvent } from "@/lib/analytics";
+import { createLightResponseLog, generateLightResponseId, setLastLightResponseId } from "@/lib/lightResponseLog";
+import { createLightResponseLogSupabase } from "@/lib/lightResponseLogSupabase";
+import { isDebugLogEnabled, syncDebugLogFromQueryParam } from "@/lib/debugLog";
 import { buildLightDiagnosisResult, type LightSelectedAnswer } from "@/lib/questoria/lightScoring";
 import { QUESTORIA_LIGHT_RESULT_KEY } from "@/lib/questoriaStorage";
 import type { LightDiagnosisResult } from "@/types";
@@ -28,12 +31,16 @@ export default function LightClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFreshStart = searchParams.get("fresh") === "1";
+  const urlLog = searchParams.get("log");
+  const [isDebugLog, setIsDebugLog] = useState(false);
   const completeSentRef = useRef(false);
+  const insertPromiseRef = useRef<Promise<unknown> | null>(null);
 
   const [hasStarted, setHasStarted] = useState(false);
   const [selected, setSelected] = useState<LightSelectedAnswer[]>([]);
   const [selecting, setSelecting] = useState(false);
   const [questionEnter, setQuestionEnter] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [selectedFx, setSelectedFx] = useState<{ questionId: string; optionId: string } | null>(
     null,
   );
@@ -47,6 +54,11 @@ export default function LightClient() {
     setSelected([]);
     setHasStarted(false);
   }, [isFreshStart]);
+
+  useEffect(() => {
+    syncDebugLogFromQueryParam(urlLog);
+    setIsDebugLog(isDebugLogEnabled());
+  }, [urlLog]);
 
   const currentQuestion = useMemo(() => {
     if (isCompleted) return null;
@@ -90,6 +102,15 @@ export default function LightClient() {
       if (next.length === total) {
         const result = buildLightDiagnosisResult(lightQuestionMaster, next);
         persistLightResult(result);
+        const light_response_id = generateLightResponseId();
+        setLastLightResponseId(light_response_id);
+        if (isDebugLog) {
+          // eslint-disable-next-line no-console
+          console.log("[Questoria] LIGHT complete: generated light_response_id", light_response_id);
+        }
+        // Analysis log (best-effort, never block UI)
+        createLightResponseLog({ result, light_response_id });
+        insertPromiseRef.current = createLightResponseLogSupabase({ result, light_response_id });
         if (!completeSentRef.current) {
           completeSentRef.current = true;
           trackEvent("complete_light_diagnosis", {
@@ -116,7 +137,21 @@ export default function LightClient() {
       total_questions: result.answers.length,
       result_type: result.resultType,
     });
-    router.replace("/loading?src=light");
+    setSaving(true);
+    void (async () => {
+      try {
+        // Ensure Supabase insert is completed before leaving the LIGHT flow.
+        // This reduces the chance of deep-start updates running before the row exists.
+        const p = insertPromiseRef.current ?? createLightResponseLogSupabase({ result });
+        insertPromiseRef.current = p;
+        await p;
+      } catch {
+        // best-effort only (never block UI)
+      } finally {
+        setSaving(false);
+        router.replace("/loading?src=light");
+      }
+    })();
   };
 
   return (
@@ -355,8 +390,9 @@ export default function LightClient() {
 
                   <button
                     type="button"
+                    disabled={saving}
                     onClick={handleGoLoading}
-                    className="relative w-full overflow-hidden rounded-xl border border-cyan-400/55 bg-transparent px-6 py-5 shadow-[0_0_8px_rgba(0,229,255,0.26),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_12px_rgba(0,229,255,0.18),0_0_26px_rgba(0,229,255,0.10)] active:translate-y-0 active:scale-[0.985] motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]"
+                    className="relative w-full overflow-hidden rounded-xl border border-cyan-400/55 bg-transparent px-6 py-5 shadow-[0_0_8px_rgba(0,229,255,0.26),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_12px_rgba(0,229,255,0.18),0_0_26px_rgba(0,229,255,0.10)] active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60 motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]"
                   >
                     <span
                       className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
@@ -370,7 +406,7 @@ export default function LightClient() {
                         ▶
                       </span>
                       <span className="text-sm font-medium tracking-[0.2em] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.26)]">
-                        診断結果を確認する
+                        {saving ? "保存中…" : "診断結果を確認する"}
                       </span>
                     </span>
                   </button>

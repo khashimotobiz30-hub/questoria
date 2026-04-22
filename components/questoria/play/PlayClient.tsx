@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
 import { questionMaster, questionMasterV2 } from "@/data/questionMaster";
 import { trackEvent } from "@/lib/analytics";
+import { isDebugLogEnabled, syncDebugLogFromQueryParam } from "@/lib/debugLog";
+import { getLastLightResponseId, markLightResponseWentToDeep } from "@/lib/lightResponseLog";
+import { markLightResponseWentToDeepSupabase } from "@/lib/lightResponseLogSupabase";
 import { AXIS_HIGH_THRESHOLD, AXIS_MID_THRESHOLD } from "@/lib/diagnosisConstants";
 import {
   clearStoredDiagnosisResult,
@@ -291,6 +294,8 @@ export default function PlayClient() {
   const urlMode = parseMode(searchParams.get("mode"));
   const isFreshStart = searchParams.get("fresh") === "1";
   const isDebugPersist = searchParams.get("debugPersist") === "1";
+  const urlLog = searchParams.get("log");
+  const [isDebugLog, setIsDebugLog] = useState(false);
 
   const [hasStarted, setHasStarted] = useState(false);
   const [activeMode, setActiveMode] = useState<DiagnosisMode>(urlMode);
@@ -306,6 +311,11 @@ export default function PlayClient() {
     if (hasStarted) return;
     setActiveMode(urlMode);
   }, [hasStarted, urlMode]);
+
+  useEffect(() => {
+    syncDebugLogFromQueryParam(urlLog);
+    setIsDebugLog(isDebugLogEnabled());
+  }, [urlLog]);
 
   // トップCTA（fresh=1）からの遷移は、必ず新規開始として扱う
   useEffect(() => {
@@ -486,6 +496,19 @@ export default function PlayClient() {
     setHasStarted(true);
 
     trackEvent("start_diagnosis", { mode });
+    // If user came from LIGHT, attach deep start to the latest LIGHT response log (best-effort).
+    const lastLightId = getLastLightResponseId();
+    if (lastLightId) {
+      if (isDebugLog) {
+        // eslint-disable-next-line no-console
+        console.log("[Questoria] deep start: lastLightId/mode", { lastLightId, mode });
+      }
+      markLightResponseWentToDeep(lastLightId, mode);
+      void markLightResponseWentToDeepSupabase(lastLightId, mode);
+    } else if (isDebugLog) {
+      // eslint-disable-next-line no-console
+      console.log("[Questoria] deep start: lastLightId is null", { mode });
+    }
   };
 
   const commitSelectOption = (option: DisplayChoice) => {
