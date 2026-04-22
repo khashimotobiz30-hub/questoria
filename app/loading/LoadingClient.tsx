@@ -10,6 +10,7 @@ import {
   type CSSProperties,
 } from "react";
 
+import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
 import type { ResultType } from "@/types";
@@ -69,7 +70,8 @@ export default function LoadingClient() {
   const src = searchParams.get("src");
   const source: "deep" | "light" = src === "light" ? "light" : "deep";
 
-  const [sessionData] = useState<LoadingSessionData | null>(() => readLoadingSession(source));
+  const [sessionData, setSessionData] = useState<LoadingSessionData | null>(null);
+  const [hasResolvedSession, setHasResolvedSession] = useState(false);
 
   const isReady = sessionData !== null;
   const resultType = sessionData?.resultType ?? "hero";
@@ -111,10 +113,42 @@ export default function LoadingClient() {
   }, []);
 
   useEffect(() => {
-    if (sessionData === null) {
-      router.replace("/");
-    }
-  }, [sessionData, router]);
+    let cancelled = false;
+    let attempt = 0;
+    const timers: number[] = [];
+
+    const tryRead = () => {
+      if (cancelled) return;
+      const next = readLoadingSession(source);
+      if (next) {
+        setSessionData(next);
+        setHasResolvedSession(true);
+        return;
+      }
+
+      attempt += 1;
+      if (attempt >= 5) {
+        setHasResolvedSession(true);
+        return;
+      }
+
+      timers.push(window.setTimeout(tryRead, 200));
+    };
+
+    // First attempt immediately (then retry every 200ms up to ~1s).
+    tryRead();
+
+    return () => {
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+  }, [source]);
+
+  useEffect(() => {
+    if (!hasResolvedSession) return;
+    if (sessionData !== null) return;
+    router.replace("/");
+  }, [hasResolvedSession, router, sessionData]);
 
   /** Phase画像3枚 + 最終 `/top/${resultType}.jpg` を decode まで事前準備してから演出開始 */
   useEffect(() => {
@@ -352,12 +386,25 @@ export default function LoadingClient() {
     };
   }, [imagesReady, isReady, addInterval, addTimer, spawnEffects, startReveal]);
 
-  if (!isReady) return null;
+  // Keep visuals stable while checking storage (avoid flicker/redirect jank).
+  if (!isReady) {
+    return (
+      <main className="relative min-h-[100svh] w-full overflow-hidden">
+        <QuestoriaBackground blurAmount="blur-md" overlayOpacity="bg-black/65" showParticles={false} />
+        <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-4">
+          <p className="font-mono text-[11px] tracking-[0.28em] text-cyan-300/70">
+            データを確認中...
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="relative min-h-[100svh] w-full overflow-hidden bg-[#0A0A0F]">
+    <main className="relative min-h-[100svh] w-full overflow-hidden">
+      <QuestoriaBackground blurAmount="blur-md" overlayOpacity="bg-black/65" showParticles={false} />
       {stage === "random" && (
-        <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
+        <div className="absolute inset-0 flex justify-center bg-transparent">
           <div
             className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-200 sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
             style={{ opacity: imgOpacity }}
@@ -377,7 +424,7 @@ export default function LoadingClient() {
       )}
 
       {stage !== "random" && (
-        <div className="absolute inset-0 flex justify-center bg-[#0A0A0F]">
+        <div className="absolute inset-0 flex justify-center bg-transparent">
           <div
             className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-300 ease-out sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
             style={{

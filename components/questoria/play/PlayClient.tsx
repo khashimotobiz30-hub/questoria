@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
 import { questionMaster, questionMasterV2 } from "@/data/questionMaster";
 import { trackEvent } from "@/lib/analytics";
 import { AXIS_HIGH_THRESHOLD, AXIS_MID_THRESHOLD } from "@/lib/diagnosisConstants";
@@ -33,6 +34,47 @@ type DisplayChoice = {
   score: number;
   correct: boolean;
 };
+
+function getModeAccent(mode: DiagnosisMode) {
+  const isLife = mode === "life";
+  return {
+    /** progress segments */
+    progressPassed: isLife
+      ? "bg-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.55)]"
+      : "bg-cyan-300 shadow-[0_0_10px_rgba(0,229,255,0.55)]",
+    progressActive: isLife
+      ? "bg-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.55)]"
+      : "bg-cyan-300 shadow-[0_0_10px_rgba(0,229,255,0.55)]",
+    /** right-top badge */
+    badgeText: isLife ? "text-[#FFFB00] font-bold" : "text-cyan-200/90",
+    badgeBorder: isLife ? "rgba(255,251,0,0.55)" : "rgba(0,229,255,0.38)",
+    badgeShadow: isLife ? "rgba(255,251,0,0.22)" : "rgba(0,229,255,0.16)",
+    badgeBg: isLife ? "bg-[#FFFB00]/[0.06]" : "bg-black/50",
+    /** question marker */
+    questionMarkText: isLife ? "text-[#FFD700]" : "text-cyan-300",
+    questionBoxBorder: isLife ? "border-[#FFD700]/20" : "border-cyan-300/20",
+    questionBoxBg: isLife
+      ? "bg-gradient-to-b from-[#FFD700]/8 via-[#FFD700]/5 to-[#FFD700]/4"
+      : "bg-gradient-to-b from-cyan-400/[0.06] via-black/[0.36] to-black/[0.40]",
+    /** option button accents */
+    optionIconText: isLife ? "text-[#FFD700]/90" : "text-cyan-200/90",
+    optionIconSelectedGlow: isLife
+      ? "drop-shadow-[0_0_10px_rgba(255,215,0,0.55)] drop-shadow-[0_0_22px_rgba(255,215,0,0.22)]"
+      : "drop-shadow-[0_0_10px_rgba(0,229,255,0.55)] drop-shadow-[0_0_22px_rgba(0,229,255,0.22)]",
+    optionHoverBorder: isLife ? "hover:border-[#FFD700]/55" : "hover:border-cyan-300/60",
+    optionHoverGlow: isLife
+      ? "hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(255,215,0,0.16),0_0_42px_rgba(255,215,0,0.10)]"
+      : "hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(0,229,255,0.16),0_0_42px_rgba(0,229,255,0.10)]",
+    optionActiveBorder: isLife ? "active:border-[#FFD700]/46" : "active:border-cyan-300/48",
+    optionActiveGlow: isLife
+      ? "active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.45),0_0_16px_rgba(255,215,0,0.14)]"
+      : "active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.45),0_0_16px_rgba(0,229,255,0.12)]",
+    optionSelectedBorder: isLife ? "border-[#FFD700]/70" : "border-cyan-300/70",
+    optionSelectedGlow: isLife
+      ? "shadow-[0_14px_44px_rgba(0,0,0,0.54),0_0_26px_rgba(255,215,0,0.22),0_0_60px_rgba(255,215,0,0.12)]"
+      : "shadow-[0_14px_44px_rgba(0,0,0,0.54),0_0_26px_rgba(0,229,255,0.22),0_0_60px_rgba(0,229,255,0.12)]",
+  };
+}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -185,6 +227,9 @@ export default function PlayClient() {
   const [activeMode, setActiveMode] = useState<DiagnosisMode>(urlMode);
   const [selectedAnswers, setSelectedAnswers] = useState<AnswerRecord[]>([]);
   const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [selectedFx, setSelectedFx] = useState<{ questionId: string; optionId: OptionKey } | null>(null);
+  const [questionEnter, setQuestionEnter] = useState(false);
   const [questionOrder, setQuestionOrder] = useState<string[]>(() => questionMaster.map((q) => q.id));
   const [choiceOrderMap, setChoiceOrderMap] = useState<ChoiceOrderMap>({});
 
@@ -280,6 +325,18 @@ export default function PlayClient() {
     return order.map((id) => byId.get(id)).filter((c): c is DisplayChoice => Boolean(c));
   }, [activeMode, currentQuestion]);
 
+  const accent = useMemo(() => getModeAccent(activeMode), [activeMode]);
+
+  useEffect(() => {
+    // Clear "selected" feedback when question advances.
+    if (!currentQuestion) return;
+    setSelecting(false);
+    setSelectedFx(null);
+    setQuestionEnter(false);
+    const raf = window.requestAnimationFrame(() => setQuestionEnter(true));
+    return () => window.cancelAnimationFrame(raf);
+  }, [currentQuestion?.questionId]);
+
   const persistDiagnosisResult = (result: DiagnosisResult) => {
     if (isDebugPersist) {
       // eslint-disable-next-line no-console
@@ -360,7 +417,7 @@ export default function PlayClient() {
     trackEvent("start_diagnosis", { mode });
   };
 
-  const handleSelectOption = (option: DisplayChoice) => {
+  const commitSelectOption = (option: DisplayChoice) => {
     if (!currentQuestion) return;
     if (selectedAnswers.length >= totalQuestions) return;
 
@@ -408,6 +465,17 @@ export default function PlayClient() {
     }
   };
 
+  const handleSelectOption = (option: DisplayChoice) => {
+    if (!currentQuestion) return;
+    if (selecting) return;
+    setSelecting(true);
+    setSelectedFx({ questionId: currentQuestion.questionId, optionId: option.id });
+    // Give a short visual feedback window (tap/selection) before advancing.
+    window.setTimeout(() => {
+      commitSelectOption(option);
+    }, 200);
+  };
+
   const handleGoLoading = () => {
     if (!diagnosisResult) return;
     if (selectedAnswers.length !== totalQuestions) return;
@@ -418,9 +486,15 @@ export default function PlayClient() {
   };
 
   return (
-    <main className="min-h-[100svh] w-full bg-[#0A0A0F] px-4 py-6 text-white">
-      <div className="mx-auto w-full max-w-md">
-        <div className="rounded-2xl border border-cyan-400/30 bg-black/30 p-5 shadow-[0_0_30px_rgba(0,229,255,0.08)] backdrop-blur">
+    <main className="relative min-h-[100svh] w-full overflow-hidden px-4 py-6 text-white">
+      <QuestoriaBackground blurAmount="blur-md" overlayOpacity="bg-black/60" showParticles={false} />
+      <div className="relative z-10 mx-auto w-full max-w-md">
+        <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-slate-900/40 p-5 shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_30px_rgba(0,229,255,0.08)] backdrop-blur-2xl">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
+            aria-hidden
+          />
+          <div className="relative">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -442,8 +516,11 @@ export default function PlayClient() {
 
           {!hasStarted ? (
             <>
-              <div className="mt-5 rounded-xl border border-cyan-300/25 bg-gradient-to-b from-cyan-400/[0.055] via-black/[0.41] to-black/[0.44] p-4 shadow-[0_0_28px_rgba(0,229,255,0.075)]">
+              <div className="mt-5 rounded-xl border border-cyan-300/20 bg-gradient-to-b from-white/5 via-slate-900/40 to-transparent p-4 shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_28px_rgba(0,229,255,0.075)] backdrop-blur-2xl">
                 <p className="font-orbitron text-sm tracking-wide text-cyan-100 [text-shadow:0_0_14px_rgba(0,229,255,0.22)]">
+                  <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.28)]" aria-hidden>
+                    ◆
+                  </span>
                   GUIDE
                 </p>
 
@@ -472,39 +549,43 @@ export default function PlayClient() {
                 </div>
               </div>
 
-              <div className="mt-6 rounded-xl border border-white/[0.11] bg-black/40 p-4">
+              <div className="mt-6 rounded-xl border border-white/20 bg-slate-900/35 p-4 shadow-[0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
                 <h2 className="font-orbitron text-sm tracking-wide text-cyan-200">
+                  <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.24)]" aria-hidden>
+                    ◆
+                  </span>
                   INFO
                 </h2>
                 <ul className="mt-3 space-y-2 text-sm text-white/80">
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>全12問・4択で進みます</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>所要時間は約3〜4分です</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>回答後すぐに結果を確認できます</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-300" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>知識量ではなく、考え方や進め方をみる診断です</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>LIFEは日常シチュエーションで答えるモードです</span>
                   </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#FFD700]/85" />
+                  <li className="flex items-start gap-2">
+                    <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
                     <span>WORKは仕事シチュエーションで答えるモードです</span>
                   </li>
                 </ul>
               </div>
 
               <div className="mt-6">
+                <div className="w-full">
                 <div className="grid grid-cols-1 gap-3">
                   <button
                     type="button"
@@ -520,38 +601,41 @@ export default function PlayClient() {
                   >
                     ▶ WORKモードで診断を始める
                   </button>
-                </div>
-
-                <div className="mt-3">
                   <button
                     type="button"
                     onClick={() => router.push("/light?fresh=1")}
-                    className="w-full rounded-xl border border-white/[0.16] bg-black/[0.34] px-4 py-3 font-mono text-xs font-medium tracking-wide text-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_26px_rgba(0,0,0,0.35)] transition hover:border-white/[0.22] hover:bg-black/[0.38] hover:text-white/90 active:scale-[0.99]"
+                    className="w-full rounded-xl border border-cyan-400/35 bg-slate-900/35 px-4 py-3 font-mono text-[13px] font-medium leading-snug tracking-wide text-white/80 shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_16px_rgba(0,229,255,0.06),inset_0_1px_0_rgba(255,255,255,0.06),0_10px_26px_rgba(0,0,0,0.35)] backdrop-blur-2xl opacity-80 transition hover:border-cyan-300/60 hover:bg-slate-900/40 hover:text-white/90 hover:shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_24px_rgba(0,229,255,0.14),0_10px_26px_rgba(0,0,0,0.35)] hover:opacity-100 active:scale-[0.99]"
                   >
-                    ▶ LIGHT診断を試す
+                    ▶ 初回診断（LIGHT）をやり直す
                   </button>
+                </div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="relative mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
+            <div className="relative mt-6 rounded-xl border border-white/20 bg-slate-900/35 p-4 shadow-[0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
               <span
-                className="absolute right-4 top-4 rounded-sm bg-black/50 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-cyan-200/90 backdrop-blur-sm"
+                className={`absolute right-4 top-4 rounded-sm px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] backdrop-blur-sm ${accent.badgeBg} ${accent.badgeText}`}
                 style={{
-                  border: "1px solid rgba(0,229,255,0.38)",
-                  boxShadow: "0 0 10px rgba(0,229,255,0.16)",
+                  border: `1px solid ${accent.badgeBorder}`,
+                  boxShadow: `0 0 10px ${accent.badgeShadow}`,
                 }}
               >
                 {activeMode === "life" ? "LIFE" : "WORK"}
               </span>
               {!isCompleted && currentQuestion ? (
-                <div className="flex flex-col gap-4">
+                <div
+                  className={`flex flex-col gap-4 transition-all duration-300 ease-out ${
+                    questionEnter ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+                  }`}
+                >
                   <div className="flex flex-col gap-3">
                     <p className="font-mono text-xs tracking-wide text-white/70">
                       QUESTION {currentQuestionIndex + 1} / {totalQuestions}
                     </p>
 
-                    <div className="grid grid-cols-12 gap-1">
+                    <div className="rounded-xl border border-white/20 bg-slate-900/35 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
+                      <div className="grid grid-cols-12 gap-1">
                       {questionOrder.map((questionId, index) => {
                         const isActive = index === currentQuestionIndex;
                         const isPassed = index < currentQuestionIndex;
@@ -561,20 +645,28 @@ export default function PlayClient() {
                             key={questionId}
                             className={`h-2 rounded-full ${
                               isPassed
-                                ? "bg-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.55)]"
+                                ? accent.progressPassed
                                 : isActive
-                                  ? "bg-cyan-300 shadow-[0_0_10px_rgba(0,229,255,0.55)]"
-                                  : "bg-white/10"
+                                  ? "bg-white animate-pulse drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                                  : "bg-white/16 border border-white/[0.10]"
                             }`}
                             aria-hidden="true"
                           />
                         );
                       })}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="-mx-3 rounded-xl border border-[#FFD700]/20 bg-gradient-to-b from-[#FFD700]/8 via-[#FFD700]/5 to-[#FFD700]/4 p-4">
-                    <p className="font-mono text-[11px] tracking-[0.28em] text-[#FFD700]">
+                  <div
+                    className={`relative -mx-3 overflow-hidden rounded-xl border p-4 shadow-[0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl ${accent.questionBoxBorder} bg-slate-900/35`}
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
+                      aria-hidden
+                    />
+                    <div className="relative">
+                    <p className={`font-mono text-[11px] tracking-[0.28em] ${accent.questionMarkText}`}>
                       ◆ 設問
                     </p>
 
@@ -592,45 +684,120 @@ export default function PlayClient() {
                         ),
                       )}
                     </div>
+                    </div>
                   </div>
 
                   <div className="-mx-3 grid grid-cols-1 gap-3">
                     {currentDisplayOptions.map((option) => (
+                      (() => {
+                        const isSelected =
+                          selectedFx?.questionId === currentQuestion.questionId &&
+                          selectedFx?.optionId === option.id;
+                        return (
                       <button
                       key={`${currentQuestion.questionId}-${option.id}-${option.text}`}
                         type="button"
+                        disabled={selecting}
                         onClick={() => handleSelectOption(option)}
-                        className="w-full rounded-xl border border-white/[0.22] bg-black/[0.43] px-4 pb-3.5 pt-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34),0_0_26px_rgba(0,229,255,0.048)] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-black/44 hover:shadow-[0_6px_28px_rgba(0,0,0,0.45),0_0_26px_rgba(0,229,255,0.13)] active:translate-y-0 active:scale-[0.985] active:border-cyan-300/38 active:bg-black/32 active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_0_16px_rgba(0,229,255,0.06)]"
+                        className={`relative w-full overflow-hidden rounded-xl border bg-slate-900/45 px-6 pb-3.5 pt-4 shadow-[0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-slate-900/50 active:translate-y-0 active:scale-[0.985] active:bg-slate-900/40 disabled:cursor-not-allowed disabled:opacity-60 ${
+                          isSelected ? `${accent.optionSelectedBorder} ${accent.optionSelectedGlow}` : "border-white/20"
+                        } ${accent.optionHoverBorder} ${accent.optionHoverGlow} ${accent.optionActiveBorder} ${accent.optionActiveGlow}`}
                       >
-                        <span className="block text-sm leading-relaxed text-white/85">{option.text}</span>
+                        <span
+                          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
+                          aria-hidden
+                        />
+                        <span className="relative flex w-full items-start justify-start gap-3">
+                          <span
+                            className={`mt-1 w-4 shrink-0 font-mono text-[12px] leading-none ${accent.optionIconText} ${
+                              isSelected ? accent.optionIconSelectedGlow : ""
+                            }`}
+                            aria-hidden
+                          >
+                            ◆
+                          </span>
+                          <span className="min-w-0 flex-1 text-left text-sm leading-relaxed text-white/88">
+                            {option.text}
+                          </span>
+                        </span>
                       </button>
+                        );
+                      })()
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-[#FFD700]/30 bg-black/40 p-4">
-                  <p className="font-mono text-sm text-[#FFD700]/90">
-                    診断完了（12/12）
+                <div className="flex flex-col gap-6">
+                  <p
+                    className={`font-mono text-sm ${
+                      activeMode === "life"
+                        ? "font-bold text-[#FFFB00] drop-shadow-[0_0_8px_rgba(255,251,0,0.35)]"
+                        : "font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.35)]"
+                    }`}
+                  >
+                    診断完了 (12/12)
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/80">
-                    全12問の回答が完了しました。
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-white/80">
-                    これから結果の判定に進みます。
-                  </p>
+
+                  <div className="grid grid-cols-12 gap-1">
+                    {Array.from({ length: 12 }).map((_, index) => (
+                      <div
+                        key={`complete-${index}`}
+                        className={`h-2 rounded-full ${
+                          activeMode === "life"
+                              ? "bg-[#FFFB00] shadow-[0_0_14px_rgba(255,251,0,0.60)]"
+                              : "bg-cyan-300 shadow-[0_0_14px_rgba(0,229,255,0.60)]"
+                        }`}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="space-y-2 text-center">
+                    <p className="text-sm leading-relaxed text-white/90">
+                      全ての質問への回答が完了しました。
+                    </p>
+                    <p className="text-sm leading-relaxed text-white/84">
+                      回答内容に基づき、あなたのタイプを診断します。
+                    </p>
+                  </div>
 
                   <button
                     type="button"
                     disabled={!diagnosisResult || selectedAnswers.length !== totalQuestions}
                     onClick={handleGoLoading}
-                    className="mt-5 w-full rounded-xl border border-cyan-300/60 bg-cyan-400/10 px-4 py-3 font-mono text-sm tracking-wide text-cyan-100 shadow-[0_0_28px_rgba(0,229,255,0.20)] transition hover:bg-cyan-400/15 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+                    className={`relative w-full overflow-hidden rounded-xl border bg-transparent px-6 py-5 shadow-[0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40 ${
+                      activeMode === "life"
+                        ? "border-yellow-500/55 shadow-[0_0_10px_rgba(255,251,0,0.22),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-yellow-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(255,251,0,0.32),0_0_40px_rgba(255,251,0,0.14)]"
+                        : "border-cyan-400/55 shadow-[0_0_10px_rgba(0,229,255,0.22),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_16px_rgba(0,229,255,0.16),0_0_34px_rgba(0,229,255,0.10)]"
+                    } motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]`}
                   >
-                    結果へ進む
+                    <span
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
+                      aria-hidden
+                    />
+                    <span className="relative flex w-full items-center justify-center gap-2">
+                      <span
+                        className={`w-4 shrink-0 font-mono text-[14px] leading-none ${
+                          activeMode === "life" ? "text-[#FFFB00]" : "text-cyan-400"
+                        } ${
+                          activeMode === "life"
+                            ? "drop-shadow-[0_0_10px_rgba(255,251,0,0.55)] drop-shadow-[0_0_22px_rgba(255,251,0,0.22)]"
+                            : "drop-shadow-[0_0_10px_rgba(0,229,255,0.55)] drop-shadow-[0_0_22px_rgba(0,229,255,0.22)]"
+                        }`}
+                        aria-hidden
+                      >
+                        ▶
+                      </span>
+                      <span className="text-base font-semibold tracking-[0.15em] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.28)]">
+                        診断結果を確認する
+                      </span>
+                    </span>
                   </button>
                 </div>
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </main>

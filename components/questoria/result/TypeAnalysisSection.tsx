@@ -88,7 +88,7 @@ function AccordionItem({
               </span>
             ) : null}
             <p
-              className={`text-sm font-semibold leading-snug ${titleToneClass}`}
+              className={`text-sm font-semibold leading-snug tracking-[0.2em] ${titleToneClass}`}
             >
               {item.title}
             </p>
@@ -213,7 +213,12 @@ export function TypeAnalysisSection({
         <ResultCardDecor withRail />
         <div className="relative z-[1]">
           <header className="px-4 pb-3 pt-3 sm:px-5 sm:pb-4 sm:pt-4">
-            <p className={sectionLabelClass}>TYPE ANALYSIS</p>
+            <p className={sectionLabelClass}>
+              <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                ◆
+              </span>
+              TYPE ANALYSIS
+            </p>
             <h2 className="mt-2.5 font-orbitron text-lg font-bold tracking-wide text-white sm:mt-3">
               あなたの傾向
             </h2>

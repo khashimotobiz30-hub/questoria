@@ -4,8 +4,8 @@ import GlitchText from "@/components/questoria/GlitchText";
 import DebugTopTools from "@/components/questoria/DebugTopTools";
 import HomeScrollIndicator from "@/components/questoria/HomeScrollIndicator";
 import { LpScreen2Content } from "@/components/questoria/LpScreen2Content";
-import ParticleField from "@/components/questoria/ParticleField";
 import { PreviousResultLink } from "@/components/questoria/PreviousResultLink";
+import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
 import { QuestStartCta } from "@/components/questoria/QuestStartCta";
 import { ResultCardDecor, resultCardShellClass } from "@/components/questoria/result/resultCardTheme";
 import { RitualResultPhonePreview } from "@/components/questoria/RitualPlate";
@@ -104,16 +104,7 @@ export default function Home() {
   return (
     <main className="relative h-[100dvh] h-screen overflow-hidden text-white">
       <DebugTopTools />
-      {/* 固定背景 */}
-      <div className="fixed inset-0 z-0" aria-hidden="true">
-        <div
-          className="absolute inset-0 bg-center bg-cover"
-          style={{ backgroundImage: "url('/top/bg.jpg')" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-        <ParticleField />
-      </div>
+      <QuestoriaBackground blurAmount="blur-none" overlayOpacity="bg-black/50" showParticles />
 
       {/* 前景：scroll-snap（自然スクロール + セクション単位で停止） */}
       <HomeScrollIndicator
@@ -213,7 +204,7 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mb-6 mt-8 flex justify-center sm:mb-7 sm:mt-10">
-              <QuestStartCta variant="primary">
+              <QuestStartCta variant="primary" showResultLinks={false}>
                 <QuestStartCtaLabel />
               </QuestStartCta>
             </div>
@@ -252,7 +243,7 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <QuestStartCta variant="primary">
+              <QuestStartCta variant="primary" showResultLinks={false}>
                 <QuestStartCtaLabel />
               </QuestStartCta>
             </div>

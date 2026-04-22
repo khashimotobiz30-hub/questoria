@@ -42,7 +42,12 @@ export function NextActionSection({
       <ResultCardDecor withRail />
       <div className="relative z-[1] space-y-4 p-5">
         <header>
-          <p className={sectionLabelClass}>NEXT ACTION</p>
+          <p className={sectionLabelClass}>
+            <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+              ◆
+            </span>
+            NEXT ACTION
+          </p>
           <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
             {title ?? "今から意識するべきこと"}
           </h2>

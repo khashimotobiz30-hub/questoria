@@ -327,7 +327,7 @@ export default function ResultClient() {
 
   return (
     <main
-      className="min-h-[100svh] w-full bg-[#0A0A0F] text-white"
+      className="relative min-h-[100svh] w-full overflow-hidden text-white"
       style={{
         filter: glitchClearing ? `blur(${glitchIntensity * 1.5}px)` : "none",
         transition: "filter 0.6s ease",
@@ -357,7 +357,7 @@ export default function ResultClient() {
         </div>
       )}
 
-      <div className="mx-auto w-full max-w-md">
+      <div className="relative z-10 mx-auto w-full max-w-md">
         <ResultHeroSection
           typeNameJa={typeData.nameJa}
           typeNameEn={typeData.nameEn}

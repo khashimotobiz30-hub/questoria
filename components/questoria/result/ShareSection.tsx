@@ -100,7 +100,12 @@ export function ShareSection({
         <ResultCardDecor withRail />
         <div className="relative z-[1] space-y-4 p-5">
           <div>
-            <p className={sectionLabelClass}>SHARE / COMPARE</p>
+            <p className={sectionLabelClass}>
+              <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                ◆
+              </span>
+              SHARE / COMPARE
+            </p>
             <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
               シェアして比べる
             </h2>
@@ -131,14 +136,19 @@ export function ShareSection({
         <div className={resultCardShellClass("action")}>
           <ResultCardDecor withRail />
           <div className="relative z-[1] space-y-3 p-5">
-            <p className={sectionLabelClass}>DEEPER DIAGNOSIS</p>
+            <p className={sectionLabelClass}>
+              <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                ◆
+              </span>
+              DEEPER DIAGNOSIS
+            </p>
             <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
               より詳細な診断を行う
             </h2>
 
             <div className="space-y-2 border-t border-white/10 pt-4 text-[13px] leading-relaxed text-white/82 sm:text-sm">
               <p>今回の設問と結果は、LIGHT診断モードによるものです。</p>
-              <p>LIGHT診断は、今の傾向をつかむための簡易診断モードです。</p>
+              <p>LIGHT診断は、今の傾向をつかむための簡易診断です。</p>
               <p>より正確に知りたい方は、以下よりWORK / LIFEモードをお試しください。</p>
             </div>
 
@@ -155,7 +165,12 @@ export function ShareSection({
         <div className={resultCardShellClass("compare")}>
           <ResultCardDecor withRail />
           <div className="relative z-[1] space-y-3 p-5">
-            <p className={sectionLabelClass}>TRY AGAIN</p>
+            <p className={sectionLabelClass}>
+              <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                ◆
+              </span>
+              TRY AGAIN
+            </p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-2.5">
               {otherTypes.map((type) => (
                 <div key={type} className="flex min-w-0 flex-col items-center gap-1.5">
@@ -221,7 +236,12 @@ export function ShareSection({
             <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/[0.08] to-transparent" aria-hidden />
             <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 px-4 pb-3 pt-4">
               <div className="min-w-0">
-                <p className={sectionLabelClass}>TYPE LIST</p>
+                <p className={sectionLabelClass}>
+                  <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                    ◆
+                  </span>
+                  TYPE LIST
+                </p>
                 <h3 id="type-list-modal-title" className="mt-1 font-orbitron text-lg font-bold tracking-wide text-white">
                   8タイプ一覧
                 </h3>

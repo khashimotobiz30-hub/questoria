@@ -37,7 +37,7 @@ export const resultCardExpandedClass =
 
 /** 結果画面のセクション見出しラベル（例: SKILL STATUS / TYPE ANALYSIS など） */
 export const sectionLabelClass =
-  "font-mono text-[12px] font-semibold tracking-[0.18em] text-[#FFD700]/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_0_14px_rgba(255,215,0,0.26)] sm:text-[13px] sm:tracking-[0.2em]";
+  "font-mono text-[12px] font-semibold tracking-[0.2em] text-[#FFD700]/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_0_14px_rgba(255,215,0,0.26)] sm:text-[13px] sm:tracking-[0.22em]";
 
 /** ネストカード（STEP、ダッシュ枠など） */
 export const resultCardNestedClass =

@@ -25,7 +25,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q1_position",
     order: 1,
-    prompt: "現在の立場",
+    prompt: "今の立場に近いのは？",
     options: [
       { id: "employee", label: "会社員" },
       { id: "student", label: "学生" },
@@ -37,7 +37,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q2_ai_frequency",
     order: 2,
-    prompt: "AIの利用頻度",
+    prompt: "AIはどのくらい使っていますか？",
     options: [
       {
         id: "rarely",
@@ -52,7 +52,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q3_main_purpose",
     order: 3,
-    prompt: "AIを使う主な目的",
+    prompt: "AIを使う主な目的は？",
     options: [
       { id: "research", label: "情報収集" },
       { id: "work_efficiency", label: "仕事の効率化" },
@@ -69,7 +69,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q4_biggest_problem",
     order: 4,
-    prompt: "AIで今いちばん困っていること",
+    prompt: "AIで今いちばん困っていることは？",
     options: [
       {
         id: "dont_know_what_to_ask",
@@ -102,7 +102,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q5_anxiety",
     order: 5,
-    prompt: "AIに対する不安・抵抗感",
+    prompt: "AIへの不安や抵抗感で近いのは？",
     options: [
       {
         id: "might_believe_wrong_info",
@@ -126,7 +126,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q6_future_goal",
     order: 6,
-    prompt: "今後AIでできるようになりたいこと",
+    prompt: "今後AIでできるようになりたいことは？",
     options: [
       { id: "use_effectively", label: "調べるだけで終わらせず活かしたい" },
       { id: "use_for_work", label: "仕事で使えるようになりたい" },
@@ -138,7 +138,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q7_stance",
     order: 7,
-    prompt: "AIを使うときのスタンス",
+    prompt: "AIを使うときのスタンスで近いのは？",
     options: [
       {
         id: "want_answer_first",
@@ -165,7 +165,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q8_after_using_ai",
     order: 8,
-    prompt: "AIを使ったあとに起こりやすいこと",
+    prompt: "AIを使ったあとに起こりやすいのは？",
     options: [
       {
         id: "next_action_clear",
@@ -192,7 +192,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q9_how_to_start",
     order: 9,
-    prompt: "AIを使うときの始め方",
+    prompt: "AIを使うとき、どう始めることが多いですか？",
     coreAxis: "purpose",
     options: [
       { id: "mostly_defined", label: "聞きたいことがある程度決まっている", coreScore: 4 },
@@ -204,7 +204,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q10_when_answer_is_off",
     order: 10,
-    prompt: "思った答えが出ないとき",
+    prompt: "思った答えが出ないとき、どうすることが多いですか？",
     coreAxis: "design",
     options: [
       { id: "add_or_change_conditions", label: "条件を足したり変えたりする", coreScore: 4 },
@@ -216,7 +216,8 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   {
     id: "q11_when_ai_differs",
     order: 11,
-    prompt: "AIの答えが自分の感覚と違ったとき",
+    prompt:
+      "AIの答えが自分の感覚と違ったとき、どう捉えることが多いですか？",
     coreAxis: "judgment",
     options: [
       { id: "pause_and_rethink", label: "いったん止まって考え直す", coreScore: 4 },

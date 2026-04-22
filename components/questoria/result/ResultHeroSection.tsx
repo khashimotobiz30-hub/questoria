@@ -46,6 +46,9 @@ function SkillBar({
         ? { bar: "#C8A800", glow: "rgba(200,168,0,0.35)", text: "#C8A800" }
         : { bar: "#6B5900", glow: "rgba(107,89,0,0.25)", text: "#6B5900" };
 
+  const pct = Math.max(0, Math.min(100, Math.round(score)));
+  const tipLeft = pct <= 2 ? "0%" : `calc(${pct}% - 6px)`;
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
@@ -67,11 +70,24 @@ function SkillBar({
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
           style={{
-            width: animated ? `${Math.round(score)}%` : "0%",
+            width: animated ? `${pct}%` : "0%",
             background: `linear-gradient(90deg, ${barColor.bar}88, ${barColor.bar})`,
             boxShadow: `0 0 8px ${barColor.glow}, 0 0 16px ${barColor.glow}`,
           }}
         />
+        {animated && pct > 0 ? (
+          <div
+            className="absolute top-0 h-[10px] w-[6px]"
+            style={{
+              left: tipLeft,
+              background: `linear-gradient(180deg, rgba(255,255,255,0.20), transparent)`,
+              boxShadow: "0 0 6px rgba(255,255,255,0.22)",
+              filter: "drop-shadow(0 0 2px rgba(255,255,255,0.20))",
+              borderRadius: 9999,
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -183,7 +199,12 @@ export function ResultHeroSection({
             <div className={resultCardShellClass("default")}>
               <ResultCardDecor withRail />
               <div className="relative z-[1] p-4">
-                <p className={sectionLabelClass}>SKILL STATUS</p>
+                <p className={sectionLabelClass}>
+                  <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                    ◆
+                  </span>
+                  SKILL STATUS
+                </p>
                 <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
                   <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
                   <SkillBar label="設計力" score={scores.design} level={levels.design} />

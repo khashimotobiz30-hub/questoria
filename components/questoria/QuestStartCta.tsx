@@ -10,11 +10,18 @@ type Props = {
   variant?: "primary" | "secondary";
   children: React.ReactNode;
   className?: string;
+  /** Show "view previous results" sub CTA (Screen 1 only) */
+  showResultLinks?: boolean;
 };
 
 type Mode = "firstTime" | "afterLight" | "afterDeep";
 
-export function QuestStartCta({ variant = "primary", children, className }: Props) {
+export function QuestStartCta({
+  variant = "primary",
+  children,
+  className,
+  showResultLinks = true,
+}: Props) {
   const [mode, setMode] = useState<Mode>("firstTime");
 
   useEffect(() => {
@@ -56,13 +63,13 @@ export function QuestStartCta({ variant = "primary", children, className }: Prop
       <RitualLaunchLink href={href} variant={variant}>
         {children}
       </RitualLaunchLink>
-      {mode === "afterLight" && (
+      {showResultLinks && mode === "afterLight" && (
         <div className="mt-3 flex justify-center">
           <a
             href="/result?src=light"
             className="inline-flex items-center justify-center rounded-lg border border-cyan-300/25 bg-black/30 px-4 py-2 font-mono text-[12px] tracking-[0.14em] text-cyan-200/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-sm transition hover:border-cyan-300/40 hover:bg-black/36 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/40"
           >
-            LIGHTの結果を見る
+            簡易診断の結果を見る
           </a>
         </div>
       )}

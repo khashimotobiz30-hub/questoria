@@ -38,7 +38,9 @@ function SummaryAccordion({ text, hideCoreLabel }: { text: string; hideCoreLabel
                 CORE
               </span>
             ) : null}
-            <p className="text-sm font-semibold leading-snug text-[#FFD700]">SUMMARY（要約）</p>
+            <p className="text-sm font-semibold leading-snug tracking-[0.2em] text-[#FFD700]">
+              SUMMARY（要約）
+            </p>
           </div>
         </div>
         <span
@@ -104,7 +106,12 @@ export function WhyThisTypeSection(props: Props) {
         <ResultCardDecor withRail />
         <div className="relative z-[1]">
           <header className="px-4 pb-3 pt-3 sm:px-5 sm:pb-4 sm:pt-4">
-            <p className={sectionLabelClass}>WHY THIS TYPE</p>
+            <p className={sectionLabelClass}>
+              <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
+                ◆
+              </span>
+              WHY THIS TYPE
+            </p>
             <h2 className="mt-2.5 font-orbitron text-lg font-bold tracking-wide text-white sm:mt-3">
               なぜこのタイプなのか
             </h2>
