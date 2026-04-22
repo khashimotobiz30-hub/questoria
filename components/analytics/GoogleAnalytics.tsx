@@ -23,10 +23,10 @@ function GaPageViews() {
 export function GoogleAnalytics() {
   if (!isGaEnabled()) return null;
 
+  // Enable DebugView:
+  // - always in development
+  // - or when `?ga_debug=1` is present (useful even in production)
   const gaDebugMode = process.env.NODE_ENV === "development";
-  const configOptions = gaDebugMode
-    ? "{ send_page_view: false, debug_mode: true }"
-    : "{ send_page_view: false }";
 
   return (
     <>
@@ -40,7 +40,8 @@ export function GoogleAnalytics() {
           function gtag(){dataLayer.push(arguments);}
           window.gtag = gtag;
           gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}', ${configOptions});
+          var __gaDebug = ${gaDebugMode ? "true" : "false"} || (String(window.location && window.location.search || '').indexOf('ga_debug=1') !== -1);
+          gtag('config', '${GA_MEASUREMENT_ID}', __gaDebug ? { send_page_view: false, debug_mode: true } : { send_page_view: false });
         `}
       </Script>
       <Suspense fallback={null}>
