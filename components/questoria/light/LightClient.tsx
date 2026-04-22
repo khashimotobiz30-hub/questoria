@@ -160,7 +160,7 @@ export default function LightClient() {
                 <ul className="mt-3 space-y-2 text-sm text-white/80">
                   <li className="flex items-start gap-2">
                     <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
-                    <span>全12問・選択式の設問で進みます</span>
+                    <span>全10問・選択式の設問で進みます</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
@@ -213,7 +213,10 @@ export default function LightClient() {
                       QUESTION {currentIndex + 1} / {total}
                     </p>
                     <div className="rounded-xl border border-white/20 bg-slate-900/35 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
-                      <div className="grid grid-cols-12 gap-1">
+                      <div
+                        className="grid gap-1"
+                        style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
+                      >
                         {lightQuestionMaster.map((q, index) => {
                           const isActive = index === currentIndex;
                           const isPassed = index < currentIndex;
@@ -294,11 +297,14 @@ export default function LightClient() {
               ) : (
                 <div className="flex flex-col gap-6">
                   <p className="font-mono text-sm font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.35)]">
-                    診断完了 (12/12)
+                    診断完了 ({total}/{total})
                   </p>
 
-                  <div className="grid grid-cols-12 gap-1">
-                    {Array.from({ length: 12 }).map((_, index) => (
+                  <div
+                    className="grid gap-1"
+                    style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}
+                  >
+                    {Array.from({ length: total }).map((_, index) => (
                       <div
                         key={`complete-${index}`}
                         className="h-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(0,229,255,0.60)]"

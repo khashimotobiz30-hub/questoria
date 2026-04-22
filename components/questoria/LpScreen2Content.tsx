@@ -399,7 +399,7 @@ export function LpScreen2Content() {
           <span className="text-balance text-[15px] leading-snug sm:text-[17px] sm:leading-snug">診断方法</span>
         </LpScreen2SectionHeading>
         <div className="flex flex-wrap gap-2">
-          {["全12問", "4択形式", "約3〜4分", "無料"].map((t) => (
+          {["全9問", "4択形式", "約2〜3分", "無料"].map((t) => (
             <span
               key={t}
               className="inline-flex items-center rounded-full border border-cyan-400/22 bg-cyan-500/[0.06] px-2.5 py-1 font-mono text-[10px] font-semibold tracking-[0.1em] text-cyan-100/88 sm:px-3 sm:text-[11px] sm:tracking-[0.12em]"

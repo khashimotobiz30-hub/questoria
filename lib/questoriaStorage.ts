@@ -13,6 +13,9 @@ export const QUESTORIA_QUESTION_ORDER_KEY = "questoria_question_order";
 /** 診断中の選択肢表示順（questionId -> OptionKey[]） */
 export const QUESTORIA_CHOICE_ORDER_KEY = "questoria_choice_order";
 
+/** 診断途中データの互換メタ（questionSetId/version） */
+export const QUESTORIA_PROGRESS_META_KEY = "questoria_progress_meta";
+
 /**
  * `questoria_result` を sessionStorage と localStorage の両方から削除する。
  * 一方のストレージが失敗しても、もう一方は試行する（それぞれ try/catch）。
@@ -68,6 +71,7 @@ export function clearStoredQuestoriaAnswers(): void {
     sessionStorage.removeItem(QUESTORIA_ANSWERS_KEY);
     sessionStorage.removeItem(QUESTORIA_QUESTION_ORDER_KEY);
     sessionStorage.removeItem(QUESTORIA_CHOICE_ORDER_KEY);
+    sessionStorage.removeItem(QUESTORIA_PROGRESS_META_KEY);
   } catch {
     /* noop */
   }
@@ -75,6 +79,7 @@ export function clearStoredQuestoriaAnswers(): void {
     localStorage.removeItem(QUESTORIA_ANSWERS_KEY);
     localStorage.removeItem(QUESTORIA_QUESTION_ORDER_KEY);
     localStorage.removeItem(QUESTORIA_CHOICE_ORDER_KEY);
+    localStorage.removeItem(QUESTORIA_PROGRESS_META_KEY);
   } catch {
     /* noop */
   }

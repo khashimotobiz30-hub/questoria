@@ -18,8 +18,8 @@ export type LightQuestion = {
   coreAxis?: LightAxisKey;
 };
 
-export const LIGHT_QUESTION_SET_ID = "light_v1";
-export const LIGHT_QUESTION_SET_VERSION = 1 as const;
+export const LIGHT_QUESTION_SET_ID = "light_v2";
+export const LIGHT_QUESTION_SET_VERSION = 2 as const;
 
 export const lightQuestionMaster: readonly LightQuestion[] = [
   {
@@ -124,47 +124,8 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
     ],
   },
   {
-    id: "q6_future_goal",
-    order: 6,
-    prompt: "今後AIでできるようになりたいことは？",
-    options: [
-      { id: "use_effectively", label: "調べるだけで終わらせず活かしたい" },
-      { id: "use_for_work", label: "仕事で使えるようになりたい" },
-      { id: "monetize", label: "収益化につなげたい" },
-      { id: "use_for_output", label: "発信に活かしたい" },
-      { id: "find_best_style", label: "自分に合った使い方を見つけたい" },
-    ],
-  },
-  {
-    id: "q7_stance",
-    order: 7,
-    prompt: "AIを使うときのスタンスで近いのは？",
-    options: [
-      {
-        id: "want_answer_first",
-        label: "まず答えをもらいたい",
-        adjustment: { purpose: -1 },
-      },
-      {
-        id: "thinking_partner",
-        label: "一緒に考える相手として使いたい",
-        adjustment: { design: +1 },
-      },
-      {
-        id: "organize_my_thoughts",
-        label: "自分の考えを整理するために使いたい",
-        adjustment: { purpose: +1 },
-      },
-      {
-        id: "cannot_express_yet",
-        label: "まだうまく言えない",
-        adjustment: { purpose: -1, design: -1 },
-      },
-    ],
-  },
-  {
     id: "q8_after_using_ai",
-    order: 8,
+    order: 6,
     prompt: "AIを使ったあとに起こりやすいのは？",
     options: [
       {
@@ -191,7 +152,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   },
   {
     id: "q9_how_to_start",
-    order: 9,
+    order: 7,
     prompt: "AIを使うとき、どう始めることが多いですか？",
     coreAxis: "purpose",
     options: [
@@ -203,7 +164,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   },
   {
     id: "q10_when_answer_is_off",
-    order: 10,
+    order: 8,
     prompt: "思った答えが出ないとき、どうすることが多いですか？",
     coreAxis: "design",
     options: [
@@ -215,7 +176,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   },
   {
     id: "q11_when_ai_differs",
-    order: 11,
+    order: 9,
     prompt:
       "AIの答えが自分の感覚と違ったとき、どう捉えることが多いですか？",
     coreAxis: "judgment",
@@ -228,7 +189,7 @@ export const lightQuestionMaster: readonly LightQuestion[] = [
   },
   {
     id: "q12_current_state",
-    order: 12,
+    order: 10,
     prompt: "AIを使っていて、今の自分に一番近いのは？",
     options: [
       {

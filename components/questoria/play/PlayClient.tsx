@@ -12,6 +12,7 @@ import {
   clearStoredQuestoriaAnswers,
   QUESTORIA_ANSWERS_KEY,
   QUESTORIA_CHOICE_ORDER_KEY,
+  QUESTORIA_PROGRESS_META_KEY,
   QUESTORIA_QUESTION_ORDER_KEY,
   QUESTORIA_RESULT_KEY,
 } from "@/lib/questoriaStorage";
@@ -25,8 +26,25 @@ import type {
   ResultType,
 } from "@/types";
 
-/** `answer_progress` は途中経過のみ（1 / 4 / 8 問目完了）。12 問完了は `complete_diagnosis` に任せる */
+/** `answer_progress` は途中経過のみ（1 / 4 / 8 問目完了）。完了は `complete_diagnosis` に任せる */
 const ANSWER_PROGRESS_MILESTONES = new Set([1, 4, 8]);
+
+const DEEP_QUESTION_SET_ID = "deep_v2_9q" as const;
+const DEEP_QUESTION_SET_VERSION = 2 as const;
+
+const EXPECTED_QUESTION_IDS = [
+  "q1",
+  "q3",
+  "q4",
+  "q5",
+  "q6",
+  "q8",
+  "q9",
+  "q11",
+  "q12",
+] as const;
+
+const EXPECTED_QUESTION_SET = new Set<string>(EXPECTED_QUESTION_IDS);
 
 type DisplayChoice = {
   id: OptionKey;
@@ -154,7 +172,7 @@ function getAxisInitialScores(): AxisScores {
 }
 
 function normalizeScore(raw: number): number {
-  return Math.round((raw / 8) * 100);
+  return Math.round((raw / 6) * 100);
 }
 
 function getLevel(score: number): AxisLevels["purpose"] {
@@ -216,6 +234,57 @@ function parseMode(raw: string | null): DiagnosisMode {
   return "work";
 }
 
+type ProgressMeta = {
+  questionSetId: string;
+  version: number;
+};
+
+function readProgressMeta(): ProgressMeta | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(QUESTORIA_PROGRESS_META_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    const p = parsed as Partial<ProgressMeta>;
+    if (typeof p.questionSetId !== "string") return null;
+    if (typeof p.version !== "number") return null;
+    return { questionSetId: p.questionSetId, version: p.version };
+  } catch {
+    return null;
+  }
+}
+
+function writeProgressMeta(meta: ProgressMeta) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = JSON.stringify(meta);
+    sessionStorage.setItem(QUESTORIA_PROGRESS_META_KEY, raw);
+    localStorage.setItem(QUESTORIA_PROGRESS_META_KEY, raw);
+  } catch {
+    // noop
+  }
+}
+
+function isValidAnswersProgress(maybe: unknown): maybe is AnswerRecord[] {
+  if (!Array.isArray(maybe)) return false;
+  const seen = new Set<string>();
+  for (const row of maybe as unknown[]) {
+    if (!row || typeof row !== "object") return false;
+    const r = row as Partial<AnswerRecord>;
+    const qid = typeof r.questionId === "string" ? r.questionId : "";
+    if (!qid || !EXPECTED_QUESTION_SET.has(qid)) return false;
+    if (seen.has(qid)) return false;
+    seen.add(qid);
+
+    const choice = r.selectedChoiceId;
+    if (choice !== "A" && choice !== "B" && choice !== "C" && choice !== "D") return false;
+    if (typeof r.score !== "number" || Number.isNaN(r.score)) return false;
+  }
+  // progress can be 0..9, but never exceed total
+  return maybe.length <= EXPECTED_QUESTION_IDS.length;
+}
+
 export default function PlayClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -259,47 +328,48 @@ export default function PlayClient() {
     if (isFreshStart) return;
     if (hasStarted) return;
     try {
-      const rawAnswers = sessionStorage.getItem(QUESTORIA_ANSWERS_KEY);
-      if (rawAnswers) {
-        const parsed = JSON.parse(rawAnswers) as unknown;
-        if (Array.isArray(parsed)) {
-          setSelectedAnswers(parsed as AnswerRecord[]);
-          setHasStarted(true);
-        }
-      }
-    } catch {
-      /* noop */
-    }
-  }, [hasStarted, isFreshStart]);
+      const meta = readProgressMeta();
+      const isMetaOk =
+        meta?.questionSetId === DEEP_QUESTION_SET_ID && meta?.version === DEEP_QUESTION_SET_VERSION;
 
-  // 表示順の復元（なければ初期化）
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
       const rawOrder = sessionStorage.getItem(QUESTORIA_QUESTION_ORDER_KEY);
       const parsedOrder = rawOrder ? (JSON.parse(rawOrder) as unknown) : null;
-      const finalOrder = isValidQuestionOrder(parsedOrder) ? parsedOrder : questionOrder;
+      const isOrderOk = isValidQuestionOrder(parsedOrder);
+      const finalOrder = isOrderOk ? parsedOrder : questionMaster.map((q) => q.id);
 
       const rawChoices = sessionStorage.getItem(QUESTORIA_CHOICE_ORDER_KEY);
       const parsedChoices = rawChoices ? (JSON.parse(rawChoices) as unknown) : null;
-      const finalChoices = isValidChoiceOrderMap(parsedChoices, finalOrder)
-        ? (parsedChoices as ChoiceOrderMap)
-        : buildChoiceOrderMap(finalOrder);
+      const isChoicesOk = isValidChoiceOrderMap(parsedChoices, finalOrder);
+      const finalChoices = isChoicesOk ? (parsedChoices as ChoiceOrderMap) : buildChoiceOrderMap(finalOrder);
+
+      const rawAnswers = sessionStorage.getItem(QUESTORIA_ANSWERS_KEY);
+      const parsedAnswers = rawAnswers ? (JSON.parse(rawAnswers) as unknown) : null;
+      const isAnswersOk = isValidAnswersProgress(parsedAnswers);
+
+      const isCompatOk = isMetaOk && isOrderOk && isChoicesOk && isAnswersOk;
+      if (!isCompatOk) {
+        clearStoredQuestoriaAnswers();
+        setSelectedAnswers([]);
+        setDiagnosisResult(null);
+        setHasStarted(false);
+        setQuestionOrder(questionMaster.map((q) => q.id));
+        setChoiceOrderMap({});
+        return;
+      }
 
       setQuestionOrder(finalOrder);
       setChoiceOrderMap(finalChoices);
-
-      if (!isValidQuestionOrder(parsedOrder)) {
-        sessionStorage.setItem(QUESTORIA_QUESTION_ORDER_KEY, JSON.stringify(finalOrder));
-      }
-      if (!isValidChoiceOrderMap(parsedChoices, finalOrder)) {
-        sessionStorage.setItem(QUESTORIA_CHOICE_ORDER_KEY, JSON.stringify(finalChoices));
-      }
+      setSelectedAnswers(parsedAnswers as AnswerRecord[]);
+      setHasStarted((parsedAnswers as AnswerRecord[]).length > 0);
     } catch {
-      // 破損時は現状のstateを優先
+      clearStoredQuestoriaAnswers();
+      setSelectedAnswers([]);
+      setDiagnosisResult(null);
+      setHasStarted(false);
+      setQuestionOrder(questionMaster.map((q) => q.id));
+      setChoiceOrderMap({});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasStarted, isFreshStart]);
 
   const currentQuestionIndex = selectedAnswers.length;
   const totalQuestions = questionOrder.length;
@@ -377,7 +447,7 @@ export default function PlayClient() {
     }
   };
 
-  // リロード等で 12/12 まで進んでいる場合は結果を復元
+  // リロード等で最後まで進んでいる場合は結果を復元
   useEffect(() => {
     if (!hasStarted) return;
     if (diagnosisResult) return;
@@ -396,6 +466,7 @@ export default function PlayClient() {
     setQuestionOrder(newQuestionOrder);
     setChoiceOrderMap(newChoiceOrders);
     try {
+      writeProgressMeta({ questionSetId: DEEP_QUESTION_SET_ID, version: DEEP_QUESTION_SET_VERSION });
       sessionStorage.setItem(QUESTORIA_QUESTION_ORDER_KEY, JSON.stringify(newQuestionOrder));
       sessionStorage.setItem(QUESTORIA_CHOICE_ORDER_KEY, JSON.stringify(newChoiceOrders));
     } catch {
@@ -559,11 +630,11 @@ export default function PlayClient() {
                 <ul className="mt-3 space-y-2 text-sm text-white/80">
                   <li className="flex items-start gap-2">
                     <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
-                    <span>全12問・4択で進みます</span>
+                    <span>全9問・4択で進みます</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
-                    <span>所要時間は約3〜4分です</span>
+                    <span>所要時間は約2〜3分です</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="h-1 w-1 shrink-0 translate-y-[6px] rounded-full bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" />
@@ -635,7 +706,10 @@ export default function PlayClient() {
                     </p>
 
                     <div className="rounded-xl border border-white/20 bg-slate-900/35 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_10px_rgba(255,255,255,0.05)] backdrop-blur-2xl">
-                      <div className="grid grid-cols-12 gap-1">
+                      <div
+                        className="grid gap-1"
+                        style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}
+                      >
                       {questionOrder.map((questionId, index) => {
                         const isActive = index === currentQuestionIndex;
                         const isPassed = index < currentQuestionIndex;
@@ -735,11 +809,11 @@ export default function PlayClient() {
                         : "font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.35)]"
                     }`}
                   >
-                    診断完了 (12/12)
+                    診断完了 ({totalQuestions}/{totalQuestions})
                   </p>
 
-                  <div className="grid grid-cols-12 gap-1">
-                    {Array.from({ length: 12 }).map((_, index) => (
+                  <div className={`grid gap-1`} style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}>
+                    {Array.from({ length: totalQuestions }).map((_, index) => (
                       <div
                         key={`complete-${index}`}
                         className={`h-2 rounded-full ${
