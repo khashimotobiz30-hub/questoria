@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
-import { lightQuestionMaster } from "@/data/lightQuestionMaster";
+import {
+  LIGHT_QUESTION_SET_ID,
+  LIGHT_QUESTION_SET_VERSION,
+  lightQuestionMaster,
+} from "@/data/lightQuestionMaster";
+import { trackEvent } from "@/lib/analytics";
 import { buildLightDiagnosisResult, type LightSelectedAnswer } from "@/lib/questoria/lightScoring";
 import { QUESTORIA_LIGHT_RESULT_KEY } from "@/lib/questoriaStorage";
 import type { LightDiagnosisResult } from "@/types";
@@ -23,6 +28,7 @@ export default function LightClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFreshStart = searchParams.get("fresh") === "1";
+  const completeSentRef = useRef(false);
 
   const [hasStarted, setHasStarted] = useState(false);
   const [selected, setSelected] = useState<LightSelectedAnswer[]>([]);
@@ -59,6 +65,13 @@ export default function LightClient() {
   const handleStart = () => {
     setSelected([]);
     setHasStarted(true);
+    completeSentRef.current = false;
+    trackEvent("start_light_diagnosis", {
+      question_set_id: LIGHT_QUESTION_SET_ID,
+      version: LIGHT_QUESTION_SET_VERSION,
+      total_questions: total,
+      fresh: isFreshStart,
+    });
   };
 
   const handleSelect = (optionId: string) => {
@@ -77,6 +90,18 @@ export default function LightClient() {
       if (next.length === total) {
         const result = buildLightDiagnosisResult(lightQuestionMaster, next);
         persistLightResult(result);
+        if (!completeSentRef.current) {
+          completeSentRef.current = true;
+          trackEvent("complete_light_diagnosis", {
+            question_set_id: result.questionSetId,
+            version: result.version,
+            total_questions: result.answers.length,
+            result_type: result.resultType,
+            levels_purpose: result.levels.purpose,
+            levels_design: result.levels.design,
+            levels_judgment: result.levels.judgment,
+          });
+        }
       }
     }, 200);
   };
@@ -85,6 +110,12 @@ export default function LightClient() {
     if (!isCompleted) return;
     const result = buildLightDiagnosisResult(lightQuestionMaster, selected);
     persistLightResult(result);
+    trackEvent("click_light_go_loading", {
+      question_set_id: result.questionSetId,
+      version: result.version,
+      total_questions: result.answers.length,
+      result_type: result.resultType,
+    });
     router.replace("/loading?src=light");
   };
 

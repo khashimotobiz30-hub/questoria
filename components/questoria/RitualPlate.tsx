@@ -334,10 +334,12 @@ export function RitualLaunchLink({
   href,
   children,
   variant = "primary",
+  onClick,
 }: {
   href: string;
   children: ReactNode;
   variant?: "primary" | "secondary" | "auxiliary";
+  onClick?: () => void;
 }) {
   const isAux = variant === "auxiliary";
 
@@ -378,6 +380,7 @@ export function RitualLaunchLink({
     <Link
       href={href}
       className={`${roundClass} ${ritualLaunchBase} ${fontClass} ${glowLayer} ${surface} ${sizing} ${hover}`}
+      onClick={onClick}
     >
       {variant === "primary" ? (
         <span

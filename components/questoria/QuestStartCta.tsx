@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { trackEvent } from "@/lib/analytics";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
 import { RitualLaunchLink } from "@/components/questoria/RitualPlate";
@@ -57,10 +58,26 @@ export function QuestStartCta({
   // - firstTime: LIGHT entry
   // - afterLight/afterDeep: go to deep diagnosis flow (WORK/LIFE) as the next step
   const href = mode === "firstTime" ? "/light?fresh=1" : "/play?fresh=1";
+  const targetFlow = mode === "firstTime" ? "light" : "deep";
 
   return (
     <div className={className}>
-      <RitualLaunchLink href={href} variant={variant}>
+      <RitualLaunchLink
+        href={href}
+        variant={variant}
+        onClick={() => {
+          const deep = readStoredDiagnosisResult();
+          const light = readStoredLightDiagnosisResult();
+          trackEvent("click_top_main_cta", {
+            cta_id: "top_main",
+            target_flow: targetFlow,
+            has_light_result: Boolean(light),
+            has_deep_result: Boolean(deep),
+            fresh: true,
+            screen: "top",
+          });
+        }}
+      >
         {children}
       </RitualLaunchLink>
       {showResultLinks && mode === "afterLight" && (
