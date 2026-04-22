@@ -97,8 +97,10 @@ export default function LoadingClient() {
   const noiseIdRef = useRef(0);
   const sliceIdRef = useRef(0);
   const rafRef = useRef<number>(0);
+  const startFadeRafRef = useRef<number>(0);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
+  const hasStartedAnimationRef = useRef(false);
 
   const addTimer = useCallback((fn: () => void, ms: number) => {
     const id = setTimeout(fn, ms);
@@ -174,12 +176,16 @@ export default function LoadingClient() {
     };
 
     const startWhenReady = async () => {
-      const targets = [...LOADING_PHASE_IMAGES, `/top/${resultType}.jpg`];
+      const first = LOADING_PHASE_IMAGES[0];
+      const rest = [...LOADING_PHASE_IMAGES.slice(1), `/top/${resultType}.jpg`];
 
       try {
-        // どれかが詰まってもアプリが止まらないよう、タイムアウトでフォールバック
+        // 最初の1枚は decode 完了まで必ず待つ（開始のキレ優先）
+        if (first) await preload(first);
+
+        // 残りは詰まっても止めない（タイムアウトでフォールバック）
         await Promise.race([
-          Promise.all(targets.map((src) => preload(src))),
+          Promise.all(rest.map((src) => preload(src))),
           new Promise<void>((resolve) => window.setTimeout(resolve, 2500)),
         ]);
       } finally {
@@ -242,7 +248,7 @@ export default function LoadingClient() {
           return next.length > 22 ? next.slice(-22) : next;
         });
 
-        window.setTimeout(() => {
+        addTimer(() => {
           setNoiseBlocks((prev) => prev.filter((block) => block.id !== id));
         }, 120 + Math.random() * 150);
       }, noiseInterval);
@@ -272,7 +278,7 @@ export default function LoadingClient() {
 
         setGlitchSlices(slices);
 
-        window.setTimeout(() => {
+        addTimer(() => {
           setGlitchSlices([]);
         }, 80 + Math.random() * 100);
       }, noiseInterval * 1.85);
@@ -285,7 +291,7 @@ export default function LoadingClient() {
         );
       };
     },
-    [addInterval],
+    [addInterval, addTimer],
   );
 
   const startReveal = useCallback(() => {
@@ -327,7 +333,7 @@ export default function LoadingClient() {
 
           setGlitchSlices(slices);
 
-          window.setTimeout(() => {
+          addTimer(() => {
             setGlitchSlices([]);
           }, 70);
         }, i * 110);
@@ -342,40 +348,57 @@ export default function LoadingClient() {
 
   useEffect(() => {
     if (!isReady || !imagesReady) return;
+    if (hasStartedAnimationRef.current) return;
+    hasStartedAnimationRef.current = true;
 
-    const runPhase = (currentPhase: number) => {
-      setPhase(currentPhase);
-      setTitleShake(currentPhase === 2);
-      setCorruptColor(
-        currentPhase === 2 ? "rgba(255,0,60,0.7)" : "rgba(0,229,255,0.35)",
-      );
+    const runPhase = (nextPhase: number) => {
+      const startPhaseTimers = () => {
+        let currentMsgIndex = 0;
+        const intervalId = addInterval(() => {
+          currentMsgIndex = (currentMsgIndex + 1) % CORRUPT_MSGS[nextPhase].length;
+          setCorruptMsg(CORRUPT_MSGS[nextPhase][currentMsgIndex]);
+        }, 600);
 
-      setImgOpacity(0);
-      addTimer(() => setImgOpacity(1), 200);
+        const cleanEffects = spawnEffects(nextPhase);
 
-      let currentMsgIndex = 0;
-      const intervalId = addInterval(() => {
-        currentMsgIndex = (currentMsgIndex + 1) % CORRUPT_MSGS[currentPhase].length;
-        setCorruptMsg(CORRUPT_MSGS[currentPhase][currentMsgIndex]);
-      }, 600);
-
-      const cleanEffects = spawnEffects(currentPhase);
-
-      if (currentPhase < 2) {
         addTimer(() => {
           clearInterval(intervalId);
           cleanEffects();
-          runPhase(currentPhase + 1);
+          if (nextPhase < 2) {
+            runPhase(nextPhase + 1);
+          } else {
+            startReveal();
+          }
         }, 1700);
-      } else {
-        addTimer(() => {
-          clearInterval(intervalId);
-          cleanEffects();
-          startReveal();
-        }, 1700);
+      };
+
+      const applyPhaseState = () => {
+        setPhase(nextPhase);
+        setTitleShake(nextPhase === 2);
+        setCorruptColor(nextPhase === 2 ? "rgba(255,0,60,0.7)" : "rgba(0,229,255,0.35)");
+      };
+
+      if (nextPhase === 0) {
+        // First character: already in "dark" state (opacity 0), just fade in.
+        applyPhaseState();
+        startFadeRafRef.current = window.requestAnimationFrame(() => {
+          setImgOpacity(1);
+          startPhaseTimers();
+        });
+        return;
       }
+
+      // 2nd+ character: 1 cycle = fade-out -> swap -> fade-in -> run timers
+      setImgOpacity(0);
+      addTimer(() => {
+        applyPhaseState();
+        setImgOpacity(1);
+        startPhaseTimers();
+      }, 200);
     };
 
+    // Start in the dark, then fade in the first character (no pre-blackout).
+    setImgOpacity(0);
     runPhase(0);
 
     return () => {
@@ -383,6 +406,8 @@ export default function LoadingClient() {
       timersRef.current = [];
       intervalsRef.current.forEach(clearInterval);
       intervalsRef.current = [];
+      window.cancelAnimationFrame(startFadeRafRef.current);
+      hasStartedAnimationRef.current = false;
     };
   }, [imagesReady, isReady, addInterval, addTimer, spawnEffects, startReveal]);
 
@@ -406,6 +431,7 @@ export default function LoadingClient() {
       {stage === "random" && (
         <div className="absolute inset-0 flex justify-center bg-transparent">
           <div
+            key={phase}
             className="relative h-full min-h-[100svh] w-full max-w-[min(100%,34rem)] transition-opacity duration-200 sm:max-w-[min(100%,40rem)] md:max-w-[min(100%,46rem)]"
             style={{ opacity: imgOpacity }}
           >
