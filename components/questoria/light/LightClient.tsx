@@ -319,7 +319,7 @@ export default function LightClient() {
                   <button
                     type="button"
                     onClick={handleGoLoading}
-                    className="relative w-full overflow-hidden rounded-xl border border-cyan-400/55 bg-transparent px-6 py-5 shadow-[0_0_10px_rgba(0,229,255,0.22),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_16px_rgba(0,229,255,0.16),0_0_34px_rgba(0,229,255,0.10)] active:translate-y-0 active:scale-[0.985] motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]"
+                    className="relative w-full overflow-hidden rounded-xl border border-cyan-400/55 bg-transparent px-6 py-5 shadow-[0_0_8px_rgba(0,229,255,0.26),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_12px_rgba(0,229,255,0.18),0_0_26px_rgba(0,229,255,0.10)] active:translate-y-0 active:scale-[0.985] motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]"
                   >
                     <span
                       className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"
@@ -327,12 +327,12 @@ export default function LightClient() {
                     />
                     <span className="relative flex w-full items-center justify-center gap-2">
                       <span
-                        className="w-4 shrink-0 font-mono text-[14px] leading-none text-cyan-400 drop-shadow-[0_0_10px_rgba(0,229,255,0.55)] drop-shadow-[0_0_22px_rgba(0,229,255,0.22)]"
+                        className="w-4 shrink-0 font-mono text-[12px] leading-none text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.32)]"
                         aria-hidden
                       >
                         ▶
                       </span>
-                      <span className="text-base font-semibold tracking-[0.15em] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.28)]">
+                      <span className="text-sm font-medium tracking-[0.2em] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.26)]">
                         診断結果を確認する
                       </span>
                     </span>

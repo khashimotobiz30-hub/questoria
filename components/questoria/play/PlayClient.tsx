@@ -767,8 +767,8 @@ export default function PlayClient() {
                     onClick={handleGoLoading}
                     className={`relative w-full overflow-hidden rounded-xl border bg-transparent px-6 py-5 shadow-[0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] backdrop-blur-2xl transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40 ${
                       activeMode === "life"
-                        ? "border-yellow-500/55 shadow-[0_0_10px_rgba(255,251,0,0.22),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-yellow-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(255,251,0,0.32),0_0_40px_rgba(255,251,0,0.14)]"
-                        : "border-cyan-400/55 shadow-[0_0_10px_rgba(0,229,255,0.22),0_0_10px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-cyan-300/70 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_16px_rgba(0,229,255,0.16),0_0_34px_rgba(0,229,255,0.10)]"
+                        ? "border-[#FFD700]/75 shadow-[0_0_14px_rgba(255,215,0,0.32),0_0_26px_rgba(255,215,0,0.16),0_0_10px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-[#FFD700]/90 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(255,215,0,0.42),0_0_44px_rgba(255,215,0,0.22)]"
+                        : "border-[#00FFFF]/70 shadow-[0_0_14px_rgba(0,255,255,0.30),0_0_26px_rgba(0,255,255,0.15),0_0_10px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.08),0_2px_5px_rgba(0,0,0,0.52),0_9px_22px_rgba(0,0,0,0.48),0_20px_44px_rgba(0,0,0,0.34)] hover:border-[#00FFFF]/90 hover:shadow-[0_10px_34px_rgba(0,0,0,0.50),0_0_18px_rgba(0,255,255,0.38),0_0_44px_rgba(0,255,255,0.20)]"
                     } motion-safe:animate-[pulse_2.2s_ease-in-out_infinite]`}
                   >
                     <span
@@ -777,18 +777,18 @@ export default function PlayClient() {
                     />
                     <span className="relative flex w-full items-center justify-center gap-2">
                       <span
-                        className={`w-4 shrink-0 font-mono text-[14px] leading-none ${
-                          activeMode === "life" ? "text-[#FFFB00]" : "text-cyan-400"
-                        } ${
-                          activeMode === "life"
-                            ? "drop-shadow-[0_0_10px_rgba(255,251,0,0.55)] drop-shadow-[0_0_22px_rgba(255,251,0,0.22)]"
-                            : "drop-shadow-[0_0_10px_rgba(0,229,255,0.55)] drop-shadow-[0_0_22px_rgba(0,229,255,0.22)]"
-                        }`}
+                        className={`w-4 shrink-0 font-mono text-[12px] leading-none ${
+                          activeMode === "life" ? "text-[#FFD700]" : "text-[#00FFFF]"
+                        } drop-shadow-[0_0_10px_rgba(255,255,255,0.18)]`}
                         aria-hidden
                       >
                         ▶
                       </span>
-                      <span className="text-base font-semibold tracking-[0.15em] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.28)]">
+                      <span
+                        className={`text-sm font-medium tracking-[0.2em] ${
+                          activeMode === "life" ? "text-[#FFD700]" : "text-[#00FFFF]"
+                        } drop-shadow-[0_0_10px_rgba(255,255,255,0.16)]`}
+                      >
                         診断結果を確認する
                       </span>
                     </span>
