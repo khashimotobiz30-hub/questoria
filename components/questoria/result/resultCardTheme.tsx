@@ -37,7 +37,16 @@ export const resultCardExpandedClass =
 
 /** 結果画面のセクション見出しラベル（例: SKILL STATUS / TYPE ANALYSIS など） */
 export const sectionLabelClass =
-  "font-mono text-[12px] font-semibold tracking-[0.2em] text-[#FFD700]/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_0_14px_rgba(255,215,0,0.26)] sm:text-[13px] sm:tracking-[0.22em]";
+  "font-mono text-[12px] font-semibold tracking-[0.2em] text-[#E6C55A]/90 [text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_0_10px_rgba(230,197,90,0.16)] sm:text-[13px] sm:tracking-[0.22em]";
+
+/** 本文（レポート）: 青灰オフホワイト */
+export const reportBodyTextClass = "text-[#E6EEF9]/88";
+/** 補助文: 本文より一段落とした青灰 */
+export const reportMutedTextClass = "text-[#A7B4CC]/74";
+/** 見出し: 白ベースで少し強く */
+export const reportHeadingTextClass = "text-white/92";
+/** 英字ラベル: 落ち着いたアンバーゴールド */
+export const reportLabelGoldClass = "text-[#E6C55A]/90";
 
 /** ネストカード（STEP、ダッシュ枠など） */
 export const resultCardNestedClass =

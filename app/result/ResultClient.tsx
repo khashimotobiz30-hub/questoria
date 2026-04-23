@@ -3,10 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { DeeperGuideSection } from "@/components/questoria/result/DeeperGuideSection";
+import { LineCtaBannerSection } from "@/components/questoria/result/LineCtaBannerSection";
+import { LineMeritBannerSection } from "@/components/questoria/result/LineMeritBannerSection";
+import { LockedGuidePreviewSection } from "@/components/questoria/result/LockedGuidePreviewSection";
 import { NextActionSection } from "@/components/questoria/result/NextActionSection";
+import { ResultPlateSection } from "@/components/questoria/result/ResultPlateSection";
 import { ResultHeroSection } from "@/components/questoria/result/ResultHeroSection";
 import { ShareSection } from "@/components/questoria/result/ShareSection";
+import { ShareModal } from "@/components/questoria/result/ShareModal";
 import { TypeAnalysisSection } from "@/components/questoria/result/TypeAnalysisSection";
 import { WhyThisTypeSection } from "@/components/questoria/result/WhyThisTypeSection";
 import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
@@ -20,7 +24,6 @@ import { clearStoredQuestoriaAnswers } from "@/lib/questoriaStorage";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
 import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
 import type {
-  DeeperGuideCopy,
   LightDiagnosisResult,
   StoredDiagnosisResult,
   ResultType,
@@ -99,24 +102,6 @@ function buildTypeAnalysisCopy(
   };
 }
 
-function buildDeeperGuideCopy(
-  detail: (typeof typeDetailMaster)[ResultType] | undefined,
-): DeeperGuideCopy {
-  const foot = detail?.lineWelcomeSummary?.trim();
-  return {
-    title: pickString(detail?.deeperGuideTitle, "この結果の“続き”を見る"),
-    description: pickString(
-      detail?.deeperGuideText,
-      "この画面では載せきれない「伸び悩みやすい原因」と「次の段階に進むコツ」を、LINEで受け取れます。\nあなたの強みを“再現できるスキル”に変えるヒントもまとめています。",
-    ),
-    buttonLabel: pickString(
-      detail?.deeperGuideLabel,
-      "強みを成果につなげる方法を見る",
-    ),
-    footnote: foot || undefined,
-  };
-}
-
 function buildShareCompareCopy(
   detail: (typeof typeDetailMaster)[ResultType] | undefined,
 ): ShareCompareCopy {
@@ -171,6 +156,7 @@ export default function ResultClient() {
 
   const [glitchClearing, setGlitchClearing] = useState(true);
   const [glitchIntensity, setGlitchIntensity] = useState(1);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     // Avoid synchronous setState in effect (lint) and keep hydration stable.
@@ -231,12 +217,21 @@ export default function ResultClient() {
   const typeData = typeMaster[result.resultType];
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
   const rootUrl = `${window.location.origin}/`;
+  const isLight = (r: StoredDiagnosisResult): r is LightDiagnosisResult =>
+    (r as LightDiagnosisResult).source === "light";
+  const shareModeLabel = isLight(result)
+    ? "LIGHT"
+    : (result.mode ?? "work") === "life"
+      ? "LIFE"
+      : "WORK";
+  const shareLandingUrl = `${window.location.origin}/share?type=${encodeURIComponent(
+    result.resultType,
+  )}&mode=${encodeURIComponent(shareModeLabel)}`;
   const shareText = buildUnifiedShareText(typeData.nameJa);
-  const shareCopyText = `${shareText}\n${rootUrl}`;
+  const shareCopyText = `${shareText}\n${shareLandingUrl}`;
 
   const detail = typeDetailMaster[result.resultType];
   const typeAnalysisCopy = buildTypeAnalysisCopy(typeData, detail);
-  const deeperGuideCopy = buildDeeperGuideCopy(detail);
   const shareCompareCopy = buildShareCompareCopy(detail);
   const typeNameJaByResultType = ALL_RESULT_TYPES.reduce(
     (acc, k) => {
@@ -245,9 +240,6 @@ export default function ResultClient() {
     },
     {} as Record<ResultType, string>,
   );
-
-  const isLight = (r: StoredDiagnosisResult): r is LightDiagnosisResult =>
-    (r as LightDiagnosisResult).source === "light";
 
   const displayScores = isLight(result)
     ? {
@@ -272,7 +264,7 @@ export default function ResultClient() {
       title: typeData.nameJa,
       source,
     });
-    const url = rootUrl;
+    const url = shareLandingUrl;
     void (async () => {
       try {
         if (navigator.share) {
@@ -301,7 +293,7 @@ export default function ResultClient() {
       title: typeData.nameJa,
       source,
     });
-    const url = rootUrl;
+    const url = shareLandingUrl;
     const text = shareText;
     const u = encodeURIComponent(url);
     const t = encodeURIComponent(text);
@@ -312,16 +304,58 @@ export default function ResultClient() {
     );
   };
 
-  const handleRerun = () => {
-    trackEvent("click_retry_diagnosis", {
+  const handleCopyLink = async () => {
+    trackEvent("click_share_copy_link", {
       type_id: result.resultType,
       result_type: result.resultType,
       title: typeData.nameJa,
+      source_section: "share_modal",
       source,
     });
-    // 再診断は「途中データのみ」リセット。前回結果（questoria_result）は保持する。
-    clearStoredQuestoriaAnswers();
-    router.push("/");
+    const url = shareLandingUrl;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Fallback: select/copy via prompt (least bad)
+      window.prompt("リンクをコピーしてください", url);
+    }
+  };
+
+  const handleSaveShareImage = async () => {
+    trackEvent("click_share_save_image", {
+      type_id: result.resultType,
+      result_type: result.resultType,
+      title: typeData.nameJa,
+      source_section: "share_modal",
+      source,
+    });
+
+    try {
+      // 本命A（サーバー側OG生成）と同じ方式で、保存画像を生成してダウンロードする。
+      const api = `/api/og/save?type=${encodeURIComponent(result.resultType)}&mode=${encodeURIComponent(
+        shareModeLabel,
+      )}`;
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("og save fetch failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "questoria-result.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      // フォールバック: プレースホルダーを保存
+      const downloadUrl = "/top/result-preview-origin.png";
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "questoria-result.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
   };
 
   const handleGoDeeper = () => {
@@ -361,81 +395,117 @@ export default function ResultClient() {
       )}
 
       <div className="relative z-10 mx-auto w-full max-w-md">
-        <ResultHeroSection
-          typeNameJa={typeData.nameJa}
-          typeNameEn={typeData.nameEn}
-          tagline={pickString(detail?.tagline, typeData.tagline)}
-          imageSrc={imageSrc}
-          colors={typeData.colors}
-          scores={displayScores}
-          levels={displayLevels}
-          mode={isLight(result) ? undefined : result.mode ?? "work"}
-          source={isLight(result) ? "light" : "deep"}
-          overallComment={detail?.overallComment ?? typeData.overallComment}
-          disableOverallClamp={detail != null}
-          hideSkillStatusDescription
-        />
+        <div className="px-4 pb-12 pt-4">
+          <ResultPlateSection>
+            <div className="py-4">
+              <ResultHeroSection
+                typeNameJa={typeData.nameJa}
+                typeNameEn={typeData.nameEn}
+                tagline={pickString(detail?.tagline, typeData.tagline)}
+                imageSrc={imageSrc}
+                colors={typeData.colors}
+                scores={displayScores}
+                levels={displayLevels}
+                mode={isLight(result) ? undefined : result.mode ?? "work"}
+                source={isLight(result) ? "light" : "deep"}
+                overallComment={detail?.overallComment ?? typeData.overallComment}
+                disableOverallClamp={detail != null}
+                hideSkillStatusDescription
+                embedded
+                hideSkillStatus
+              />
+            </div>
 
-        <div className="space-y-8 px-4 pb-12 pt-6">
-          <WhyThisTypeSection summaryOverride={detail?.judgementReason} hideCoreLabel />
+            <div className="px-5 py-6">
+              <ShareSection
+                otherTypes={getOtherTypesForCompare(result.resultType)}
+                typeImageMap={typeImageMap}
+                typeNameJaByResultType={typeNameJaByResultType}
+                copy={shareCompareCopy}
+                onShare={() => setShareOpen(true)}
+                source={isLight(result) ? "light" : "deep"}
+                onDeeperDiagnosis={handleGoDeeper}
+                embedded
+              />
+            </div>
 
-          <TypeAnalysisSection
-            copy={typeAnalysisCopy}
-            hideIntro
-            hideGrowth
-            hideTierLabel
-            unifyItemTitleTone
-            openRiskPointByDefault
-            hideRiskPointClosedPreview
-          />
+            {/* 認知バナーは外枠に近づけつつ安全余白は残す */}
+            <div className="px-2 py-6 sm:px-3">
+              <LineMeritBannerSection />
+            </div>
 
-          <NextActionSection
-            title={detail?.nextActionTitle ?? "AI活用の際に意識するべきこと"}
-            riskPoint={pickString(detail?.riskPoint, typeData.riskPoint)}
-            growth={pickString(detail?.growth, typeData.description.growth)}
-            lead={pickString(detail?.nextActionLead, typeData.nextActionLead)}
-            bodyOverride={detail?.nextActionBody}
-            immediateActionOverride={detail?.nextActionImmediateAction}
-            nextActions={
-              detail?.nextActions
-                ? Array.from(detail.nextActions)
-                : typeData.nextActions && typeData.nextActions.length > 0
-                  ? typeData.nextActions
-                  : undefined
-            }
-          />
-
-          <DeeperGuideSection
-            copy={deeperGuideCopy}
-            lineUrl={LINE_ADD_FRIEND_URL}
-            onLineCtaClick={() =>
-              (() => {
-                trackEvent("click_line_deeper_guide", {
-                  type_id: result.resultType,
-                  result_type: result.resultType,
-                  title: typeData.nameJa,
-                  source_section: "deeper_guide",
-                  source,
-                });
-                const lastLightId = getLastLightResponseId();
-                if (lastLightId) {
-                  markLightResponseClickedLine(lastLightId);
-                  void markLightResponseClickedLineSupabase(lastLightId);
+            <div className="px-5 py-7">
+              <WhyThisTypeSection summaryOverride={detail?.judgementReason} hideCoreLabel embedded />
+            </div>
+            <div className="px-5 py-6">
+              <TypeAnalysisSection
+                copy={typeAnalysisCopy}
+                hideIntro
+                hideGrowth
+                hideTierLabel
+                unifyItemTitleTone
+                openRiskPointByDefault
+                hideRiskPointClosedPreview
+                embedded
+              />
+            </div>
+            <div className="px-5 py-7">
+              <NextActionSection
+                title={detail?.nextActionTitle ?? "AI活用の際に意識するべきこと"}
+                riskPoint={pickString(detail?.riskPoint, typeData.riskPoint)}
+                growth={pickString(detail?.growth, typeData.description.growth)}
+                lead={pickString(detail?.nextActionLead, typeData.nextActionLead)}
+                bodyOverride={detail?.nextActionBody}
+                immediateActionOverride={detail?.nextActionImmediateAction}
+                nextActions={
+                  detail?.nextActions
+                    ? Array.from(detail.nextActions)
+                    : typeData.nextActions && typeData.nextActions.length > 0
+                      ? typeData.nextActions
+                      : undefined
                 }
-              })()
-            }
-          />
+                embedded
+              />
+            </div>
+            <div className="px-5 py-7">
+              <LockedGuidePreviewSection embedded lineUrl={LINE_ADD_FRIEND_URL} />
+            </div>
+            {/* 本命CTAはプレート内で横幅を少し広げる（安全余白は残す） */}
+            <div className="px-3 py-7 sm:px-4">
+              <LineCtaBannerSection
+                lineUrl={LINE_ADD_FRIEND_URL}
+                onClick={() =>
+                  (() => {
+                    trackEvent("click_line_banner_cta", {
+                      type_id: result.resultType,
+                      result_type: result.resultType,
+                      title: typeData.nameJa,
+                      source_section: "line_banner_cta",
+                      source,
+                    });
+                    const lastLightId = getLastLightResponseId();
+                    if (lastLightId) {
+                      markLightResponseClickedLine(lastLightId);
+                      void markLightResponseClickedLineSupabase(lastLightId);
+                    }
+                  })()
+                }
+              />
+            </div>
+          </ResultPlateSection>
 
-          <ShareSection
-            otherTypes={getOtherTypesForCompare(result.resultType)}
-            typeImageMap={typeImageMap}
-            typeNameJaByResultType={typeNameJaByResultType}
-            copy={shareCompareCopy}
-            onInviteFriends={handleInviteFriends}
+          <ShareModal
+            open={shareOpen}
+            onClose={() => setShareOpen(false)}
+            preview={{
+              typeNameJa: typeData.nameJa,
+              typeNameEn: typeData.nameEn,
+              imageSrc,
+              tagline: pickString(detail?.tagline, typeData.tagline),
+            }}
             onShareX={handleShareX}
-            onRerun={handleRerun}
-            source={isLight(result) ? "light" : "deep"}
-            onDeeperDiagnosis={handleGoDeeper}
+            onCopyLink={handleCopyLink}
+            onSaveImage={handleSaveShareImage}
           />
 
           {searchParams.get("export") === "1" ? (

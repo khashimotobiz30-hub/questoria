@@ -5,6 +5,7 @@ export const ORIGIN_TYPE_DETAIL = {
   title: "村人",
   englishName: "THE ORIGIN",
   tagline: "すべての始まりは、ここにある。\nここから、力は育っていく。",
+  taglineOg: "すべての始まりは、ここにある。",
   shortSummary: "まだ自分なりの型はない。だからこそ、ここからの伸びしろが大きいタイプ。",
 
   overallComment:
@@ -86,6 +87,7 @@ export const PIONEER_TYPE_DETAIL = {
   englishName: "PIONEER",
   tagline:
     "正解が見えなくても、先へ進める。\nその一歩が、まだない道をつくっていく。",
+  taglineOg: "正解が見えなくても、先へ進める。",
 
   shortSummary:
     "動き出す覚悟はある。あとは、その一歩を成果につなげる精度を育てる段階。",
@@ -169,6 +171,7 @@ export const WIZARD_TYPE_DETAIL = {
   englishName: "WIZARD",
   tagline:
     "複雑なものほど、道筋は美しく描ける。\nその設計が、難しい課題を進めやすい形に変えていく。",
+  taglineOg: "複雑なものほど、道筋は美しく描ける。",
 
   shortSummary:
     "進め方を整える力は強い。あとは問いの精度と決断が加われば、一気に完成度が上がるタイプ。",
@@ -252,6 +255,7 @@ export const ARTISAN_TYPE_DETAIL = {
   englishName: "ARTISAN",
   tagline:
     "形にする力は、すでにある。\nその手で、成果を現実へと鍛え上げていける。",
+  taglineOg: "形にする力は、すでにある。",
 
   shortSummary:
     "作る力も、決める力もある。次に必要なのは、問いの精度を上げること。",
@@ -335,6 +339,7 @@ export const PROPHET_TYPE_DETAIL = {
   englishName: "PROPHET",
   tagline:
     "見えていない論点に、先に気づける。\nその洞察が、新しい問いを生み出していく。",
+  taglineOg: "見えていない論点に、先に気づける。",
 
   shortSummary:
     "問いの鋭さはある。あとは進め方と決断が加われば、洞察が成果に変わるタイプ。",
@@ -418,6 +423,7 @@ export const HUNTER_TYPE_DETAIL = {
   englishName: "HUNTER",
   tagline:
     "狙うべきものは見えている。\nその踏み込みが、停滞を切り開いていく。",
+  taglineOg: "狙うべきものは見えている。",
 
   shortSummary:
     "問いも決断も強い。次に必要なのは、勢いを構造へ変えること。",
@@ -501,6 +507,7 @@ export const SAGE_TYPE_DETAIL = {
   englishName: "SAGE",
   tagline:
     "問いを見抜き、道筋も描ける。\nその思考が、勝ち筋を照らしていく。",
+  taglineOg: "問いを見抜き、道筋も描ける。",
 
   shortSummary:
     "見立ても設計も強い。次に必要なのは、判断を他に預けず、自分で閉じること。",
@@ -584,6 +591,7 @@ export const HERO_TYPE_DETAIL = {
   englishName: "HERO",
   tagline:
     "何を成すべきかを定め、道を描き、自ら決めて進む。\nその一歩には、もう確かな意図がある。",
+  taglineOg: "何を成すべきかを定め、道を描き、自ら決めて進む。",
 
   shortSummary:
     "問い・設計・判断が揃っている。高い精度で前に進める完成度の高いタイプ。",
@@ -666,6 +674,8 @@ export type TypeDetail = {
   title: string;
   englishName: string;
   tagline: string;
+  /** OG用（1行想定）。長い場合は自動短縮より、ここで短縮版を持つ */
+  taglineOg?: string;
   shortSummary: string;
   overallComment: string;
   judgementReason: string;

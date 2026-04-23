@@ -102,6 +102,22 @@ body {
   100% { transform: translateX(700%); }
 }
 
+/* Result: subtle floating for locked plate */
+@keyframes questoriaLockedFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.questoria-locked-float {
+  animation: questoriaLockedFloat 4.8s ease-in-out infinite;
+  will-change: transform;
+}
+
 /* Home top: scroll cue (Screen 1 & 2) */
 @keyframes questoriaScrollCuePulse {
   0%,

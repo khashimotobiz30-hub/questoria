@@ -19,6 +19,10 @@ type Props = {
   overallComment?: string;
   disableOverallClamp?: boolean;
   hideSkillStatusDescription?: boolean;
+  /** 結果プレート内に埋め込む（外枠カードを弱める） */
+  embedded?: boolean;
+  /** SKILL STATUS を非表示にする（ロジックは保持） */
+  hideSkillStatus?: boolean;
 };
 
 function SkillBar({
@@ -106,15 +110,21 @@ export function ResultHeroSection({
   overallComment,
   disableOverallClamp,
   hideSkillStatusDescription,
+  embedded,
+  hideSkillStatus: hideSkillStatusProp,
 }: Props) {
   const tint = `${colors.primary}18`;
   const modeLabel = source === "light" ? "LIGHT" : (mode ?? "work") === "life" ? "LIFE" : "WORK";
-  const hideSkillStatus = source === "light";
+  const hideSkillStatus = source === "light" || Boolean(hideSkillStatusProp);
 
   return (
-    <section className="px-4 pt-4">
+    <section className={embedded ? "" : "px-4 pt-4"}>
       <div
-        className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent shadow-[0_0_60px_rgba(0,229,255,0.06)]"
+        className={
+          embedded
+            ? "relative overflow-hidden bg-gradient-to-b from-white/5 to-transparent"
+            : "relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent shadow-[0_0_60px_rgba(0,229,255,0.06)]"
+        }
         style={{ backgroundColor: tint }}
       >
         <div className="relative h-[44svh] w-full">
@@ -196,32 +206,76 @@ export function ResultHeroSection({
         {/* 横は控えめに詰め、SKILL STATUS カードをヒーロー内で広く（下セクションのカード幅に近づける） */}
         {!hideSkillStatus && (
           <div className="space-y-4 px-1.5 pb-5 pt-5 sm:px-2">
-            <div className={resultCardShellClass("default")}>
-              <ResultCardDecor withRail />
-              <div className="relative z-[1] p-4">
-                <p className={sectionLabelClass}>
-                  <span className="mr-2 text-cyan-300 drop-shadow-[0_0_10px_rgba(0,229,255,0.22)]" aria-hidden>
-                    ◆
-                  </span>
-                  SKILL STATUS
-                </p>
-                <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
-                  <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
-                  <SkillBar label="設計力" score={scores.design} level={levels.design} />
-                  <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
-                </div>
+            {embedded ? (
+              <div className="px-2 pb-1 pt-2">
+                <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.06] via-white/[0.03] to-black/[0.24] shadow-[0_0_18px_rgba(255,215,0,0.04),0_0_20px_rgba(0,229,255,0.05)] backdrop-blur-sm">
+                  <div
+                    className="pointer-events-none absolute inset-x-0 top-0 h-7 opacity-[0.5]"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, rgba(255,215,0,0.07), rgba(0,229,255,0.035), transparent)",
+                    }}
+                    aria-hidden="true"
+                  />
+                  <div className="relative z-[1] p-4">
+                    <p className={sectionLabelClass}>
+                      <span
+                        className="mr-2 text-[0.9em] text-cyan-200/95 drop-shadow-[0_0_14px_rgba(0,229,255,0.16)]"
+                        aria-hidden
+                      >
+                        ◆
+                      </span>
+                      SKILL STATUS
+                    </p>
+                    <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
+                      <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
+                      <SkillBar label="設計力" score={scores.design} level={levels.design} />
+                      <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
+                    </div>
 
-                {!hideSkillStatusDescription && (
-                  <p
-                    className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
-                      disableOverallClamp ? "pb-0.5" : "line-clamp-4"
-                    }`}
-                  >
-                    {overallComment ?? "TODO: overallComment を他タイプにも追加"}
-                  </p>
-                )}
+                    {!hideSkillStatusDescription && (
+                      <p
+                        className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
+                          disableOverallClamp ? "pb-0.5" : "line-clamp-4"
+                        }`}
+                      >
+                        {overallComment ?? "TODO: overallComment を他タイプにも追加"}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={resultCardShellClass("default")}>
+                <ResultCardDecor withRail />
+                <div className="relative z-[1] p-4">
+                  <p className={sectionLabelClass}>
+                    <span
+                      className="mr-2 text-[0.9em] text-cyan-200/95 drop-shadow-[0_0_14px_rgba(0,229,255,0.16)]"
+                      aria-hidden
+                    >
+                      ◆
+                    </span>
+                    SKILL STATUS
+                  </p>
+                  <div className="mt-3 space-y-4 border-t border-white/10 pt-4">
+                    <SkillBar label="目的定義力" score={scores.purpose} level={levels.purpose} />
+                    <SkillBar label="設計力" score={scores.design} level={levels.design} />
+                    <SkillBar label="自律判断力" score={scores.decision} level={levels.decision} />
+                  </div>
+
+                  {!hideSkillStatusDescription && (
+                    <p
+                      className={`mt-4 border-t border-white/10 pt-4 whitespace-pre-line text-sm leading-relaxed text-white/65 ${
+                        disableOverallClamp ? "pb-0.5" : "line-clamp-4"
+                      }`}
+                    >
+                      {overallComment ?? "TODO: overallComment を他タイプにも追加"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
