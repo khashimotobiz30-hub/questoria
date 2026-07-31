@@ -37,7 +37,7 @@ export function ThinkingProfileSection({
       <div className="px-0.5">
         <p className={sectionLabelClass}>YOUR THINKING PROFILE</p>
         <h2 className="mt-2 font-orbitron text-lg font-bold tracking-wide text-white">
-          なぜこのタイプなのか
+          3軸スコアの読み方
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-white/70">
           3つの軸スコアが、あなたの思考のクセを形作っています。
@@ -98,13 +98,7 @@ export function ThinkingProfileSection({
             {profileSummary}
           </p>
         </div>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-4">
-          <p className="text-sm text-white/60">
-            ここは各タイプごとの要約が入ります。（TODO: profileSummary を他タイプにも追加）
-          </p>
-        </div>
-      )}
+      ) : null}
     </section>
   );
 }

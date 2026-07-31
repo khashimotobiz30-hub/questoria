@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -12,7 +12,6 @@ import {
 
 import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
-import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
 import type { ResultType } from "@/types";
 
 /** ローディング演出 phase 0/1/2 で表示する画像（固定） */
@@ -44,20 +43,17 @@ type Stage = "random" | "reveal" | "done";
 
 type LoadingSessionData = {
   resultType: ResultType;
-  source: "deep" | "light";
 };
 
-function readLoadingSession(source: "deep" | "light"): LoadingSessionData | null {
+function readLoadingSession(): LoadingSessionData | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const diagnosis =
-      source === "light" ? readStoredLightDiagnosisResult() : readStoredDiagnosisResult();
+    const diagnosis = readStoredDiagnosisResult();
     if (!diagnosis) return null;
 
     return {
       resultType: diagnosis.resultType,
-      source,
     };
   } catch {
     return null;
@@ -66,9 +62,6 @@ function readLoadingSession(source: "deep" | "light"): LoadingSessionData | null
 
 export default function LoadingClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const src = searchParams.get("src");
-  const source: "deep" | "light" = src === "light" ? "light" : "deep";
 
   const [sessionData, setSessionData] = useState<LoadingSessionData | null>(null);
   const [hasResolvedSession, setHasResolvedSession] = useState(false);
@@ -121,7 +114,7 @@ export default function LoadingClient() {
 
     const tryRead = () => {
       if (cancelled) return;
-      const next = readLoadingSession(source);
+      const next = readLoadingSession();
       if (next) {
         setSessionData(next);
         setHasResolvedSession(true);
@@ -144,7 +137,7 @@ export default function LoadingClient() {
       cancelled = true;
       timers.forEach((t) => window.clearTimeout(t));
     };
-  }, [source]);
+  }, []);
 
   useEffect(() => {
     if (!hasResolvedSession) return;
@@ -342,9 +335,9 @@ export default function LoadingClient() {
 
     addTimer(() => {
       setStage("done");
-      router.replace(source === "light" ? "/result?src=light" : "/result");
+      router.replace("/result");
     }, 2400);
-  }, [addTimer, router, source]);
+  }, [addTimer, router]);
 
   useEffect(() => {
     if (!isReady || !imagesReady) return;

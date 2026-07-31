@@ -33,13 +33,11 @@ export function TryAgainSection({
   typeImageMap,
   typeNameJaByResultType,
   onRerun,
-  source,
 }: {
   otherTypes: ResultType[];
   typeImageMap: Record<ResultType, string>;
   typeNameJaByResultType: Record<ResultType, string>;
   onRerun: () => void;
-  source?: "deep" | "light";
 }) {
   const [typeListOpen, setTypeListOpen] = useState(false);
 
@@ -91,8 +89,7 @@ export function TryAgainSection({
     </span>
   );
 
-  // light は「他タイプを見る」よりも、まず再診断が主導線になりがちなので控えめにする
-  const showOtherTypes = source !== "light";
+  const showOtherTypes = true;
 
   return (
     <section className="space-y-5">

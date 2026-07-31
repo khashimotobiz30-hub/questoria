@@ -7,8 +7,6 @@ import { QuestoriaBackground } from "@/components/questoria/QuestoriaBackground"
 import { questionMaster, questionMasterV2 } from "@/data/questionMaster";
 import { trackEvent } from "@/lib/analytics";
 import { isDebugLogEnabled, syncDebugLogFromQueryParam } from "@/lib/debugLog";
-import { getLastLightResponseId, markLightResponseWentToDeep } from "@/lib/lightResponseLog";
-import { markLightResponseWentToDeepSupabase } from "@/lib/lightResponseLogSupabase";
 import { AXIS_HIGH_THRESHOLD, AXIS_MID_THRESHOLD } from "@/lib/diagnosisConstants";
 import {
   clearStoredDiagnosisResult,
@@ -496,19 +494,6 @@ export default function PlayClient() {
     setHasStarted(true);
 
     trackEvent("start_diagnosis", { mode });
-    // If user came from LIGHT, attach deep start to the latest LIGHT response log (best-effort).
-    const lastLightId = getLastLightResponseId();
-    if (lastLightId) {
-      if (isDebugLog) {
-        // eslint-disable-next-line no-console
-        console.log("[Questoria] deep start: lastLightId/mode", { lastLightId, mode });
-      }
-      markLightResponseWentToDeep(lastLightId, mode);
-      void markLightResponseWentToDeepSupabase(lastLightId, mode);
-    } else if (isDebugLog) {
-      // eslint-disable-next-line no-console
-      console.log("[Questoria] deep start: lastLightId is null", { mode });
-    }
   };
 
   const commitSelectOption = (option: DisplayChoice) => {
@@ -694,13 +679,6 @@ export default function PlayClient() {
                     className="w-full rounded-xl border border-cyan-300/[0.66] bg-cyan-400/[0.12] px-4 py-3.5 font-mono text-sm font-medium tracking-wide text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.065),0_0_34px_rgba(0,229,255,0.24)] transition hover:bg-cyan-400/15 active:scale-[0.99]"
                   >
                     ▶ WORKモードで診断を始める
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/light?fresh=1")}
-                    className="w-full rounded-xl border border-cyan-400/35 bg-slate-900/35 px-4 py-3 font-mono text-[13px] font-medium leading-snug tracking-wide text-white/80 shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_16px_rgba(0,229,255,0.06),inset_0_1px_0_rgba(255,255,255,0.06),0_10px_26px_rgba(0,0,0,0.35)] backdrop-blur-2xl opacity-80 transition hover:border-cyan-300/60 hover:bg-slate-900/40 hover:text-white/90 hover:shadow-[0_0_10px_rgba(255,255,255,0.05),0_0_24px_rgba(0,229,255,0.14),0_10px_26px_rgba(0,0,0,0.35)] hover:opacity-100 active:scale-[0.99]"
-                  >
-                    ▶ 初回診断（LIGHT）をやり直す
                   </button>
                 </div>
                 </div>

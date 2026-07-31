@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Questoria: diagnosis flow notes
 
+フロー: **Top → `/play`（WORK / LIFE）→ 設問 → `/loading` → `/result`（点数付きフルFB）**
+
 ### Storage keys (browser)
 
 - **`questoria_result`**: latest completed diagnosis result. Saved to both `sessionStorage` and `localStorage` (used by `/result` and the Top “前回の結果を見る” CTA).

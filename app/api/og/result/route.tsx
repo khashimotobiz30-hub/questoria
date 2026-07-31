@@ -23,10 +23,9 @@ function pickType(v: string | null): ResultType {
   return "hero";
 }
 
-function pickMode(v: string | null): "WORK" | "LIFE" | "LIGHT" {
+function pickMode(v: string | null): "WORK" | "LIFE" {
   const s = (v ?? "").trim().toUpperCase();
   if (s === "LIFE") return "LIFE";
-  if (s === "LIGHT") return "LIGHT";
   return "WORK";
 }
 

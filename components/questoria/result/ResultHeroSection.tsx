@@ -15,7 +15,6 @@ type Props = {
   scores: { purpose: number; design: number; decision: number };
   levels: { purpose: Level; design: Level; decision: Level };
   mode?: DiagnosisMode;
-  source?: "deep" | "light";
   overallComment?: string;
   disableOverallClamp?: boolean;
   hideSkillStatusDescription?: boolean;
@@ -106,7 +105,6 @@ export function ResultHeroSection({
   scores,
   levels,
   mode,
-  source,
   overallComment,
   disableOverallClamp,
   hideSkillStatusDescription,
@@ -114,8 +112,8 @@ export function ResultHeroSection({
   hideSkillStatus: hideSkillStatusProp,
 }: Props) {
   const tint = `${colors.primary}18`;
-  const modeLabel = source === "light" ? "LIGHT" : (mode ?? "work") === "life" ? "LIFE" : "WORK";
-  const hideSkillStatus = source === "light" || Boolean(hideSkillStatusProp);
+  const modeLabel = (mode ?? "work") === "life" ? "LIFE" : "WORK";
+  const hideSkillStatus = Boolean(hideSkillStatusProp);
 
   return (
     <section className={embedded ? "" : "px-4 pt-4"}>

@@ -1,11 +1,8 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { LineCtaBannerSection } from "@/components/questoria/result/LineCtaBannerSection";
-import { LineMeritBannerSection } from "@/components/questoria/result/LineMeritBannerSection";
-import { LockedGuidePreviewSection } from "@/components/questoria/result/LockedGuidePreviewSection";
 import { NextActionSection } from "@/components/questoria/result/NextActionSection";
 import { ResultPlateSection } from "@/components/questoria/result/ResultPlateSection";
 import { ResultHeroSection } from "@/components/questoria/result/ResultHeroSection";
@@ -13,19 +10,12 @@ import { ShareSection } from "@/components/questoria/result/ShareSection";
 import { ShareModal } from "@/components/questoria/result/ShareModal";
 import { TypeAnalysisSection } from "@/components/questoria/result/TypeAnalysisSection";
 import { WhyThisTypeSection } from "@/components/questoria/result/WhyThisTypeSection";
-import { LINE_ADD_FRIEND_URL } from "@/data/lineAddFriendUrl";
 import { typeDetailMaster } from "@/data/typeDetailMaster";
 import { typeMaster } from "@/data/typeMaster";
 import { trackEvent } from "@/lib/analytics";
-import { getLastLightResponseId, markLightResponseClickedLine } from "@/lib/lightResponseLog";
-import { downloadLightResponseLogsCsv } from "@/lib/lightResponseLog";
-import { markLightResponseClickedLineSupabase } from "@/lib/lightResponseLogSupabase";
-import { clearStoredQuestoriaAnswers } from "@/lib/questoriaStorage";
 import { readStoredDiagnosisResult } from "@/lib/readStoredDiagnosisResult";
-import { readStoredLightDiagnosisResult } from "@/lib/readStoredLightDiagnosisResult";
 import type {
-  LightDiagnosisResult,
-  StoredDiagnosisResult,
+  DeepDiagnosisResult,
   ResultType,
   ShareCompareCopy,
   TypeAnalysisCopy,
@@ -137,21 +127,24 @@ const typeImageMap: Record<ResultType, string> = {
   origin: "/top/origin.jpg",
 };
 
-function readResultSession(source: "deep" | "light"): StoredDiagnosisResult | null {
-  if (typeof window === "undefined") return null;
-  return source === "light" ? readStoredLightDiagnosisResult() : readStoredDiagnosisResult();
+function isDeepResult(result: unknown): result is DeepDiagnosisResult {
+  if (!result || typeof result !== "object") return false;
+  const r = result as Record<string, unknown>;
+  return (
+    typeof r.resultType === "string" &&
+    typeof r.mode === "string" &&
+    Boolean(r.normalizedScores) &&
+    Boolean(r.levels)
+  );
 }
 
 export default function ResultClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const src = searchParams.get("src");
-  const source: "deep" | "light" = src === "light" ? "light" : "deep";
 
   // Hydration-safe: keep SSR and first client render identical.
   const [mounted, setMounted] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [result, setResult] = useState<StoredDiagnosisResult | null>(null);
+  const [result, setResult] = useState<DeepDiagnosisResult | null>(null);
   const isReady = mounted && loaded && result !== null;
 
   const [glitchClearing, setGlitchClearing] = useState(true);
@@ -162,12 +155,12 @@ export default function ResultClient() {
     // Avoid synchronous setState in effect (lint) and keep hydration stable.
     const t = window.setTimeout(() => {
       setMounted(true);
-      const next = readResultSession(source);
-      setResult(next);
+      const next = readStoredDiagnosisResult();
+      setResult(isDeepResult(next) ? next : null);
       setLoaded(true);
     }, 0);
     return () => window.clearTimeout(t);
-  }, [source]);
+  }, []);
 
   useEffect(() => {
     if (!mounted || !loaded) return;
@@ -206,9 +199,9 @@ export default function ResultClient() {
       type_id: rt,
       result_type: rt,
       title: pickString(det?.title, td.nameJa),
-      source,
+      source: "deep",
     });
-  }, [mounted, loaded, result, source]);
+  }, [mounted, loaded, result]);
 
   // Keep first render stable (server/client). Only render after client has loaded session.
   if (!mounted || !loaded) return null;
@@ -216,14 +209,7 @@ export default function ResultClient() {
 
   const typeData = typeMaster[result.resultType];
   const imageSrc = typeImageMap[result.resultType] ?? "/top/hero.jpg";
-  const rootUrl = `${window.location.origin}/`;
-  const isLight = (r: StoredDiagnosisResult): r is LightDiagnosisResult =>
-    (r as LightDiagnosisResult).source === "light";
-  const shareModeLabel = isLight(result)
-    ? "LIGHT"
-    : (result.mode ?? "work") === "life"
-      ? "LIFE"
-      : "WORK";
+  const shareModeLabel = (result.mode ?? "work") === "life" ? "LIFE" : "WORK";
   const shareLandingUrl = `${window.location.origin}/share?type=${encodeURIComponent(
     result.resultType,
   )}&mode=${encodeURIComponent(shareModeLabel)}`;
@@ -241,57 +227,12 @@ export default function ResultClient() {
     {} as Record<ResultType, string>,
   );
 
-  const displayScores = isLight(result)
-    ? {
-        purpose: result.normalizedScores.purpose,
-        design: result.normalizedScores.design,
-        decision: result.normalizedScores.judgment,
-      }
-    : result.normalizedScores;
-
-  const displayLevels = isLight(result)
-    ? {
-        purpose: result.levels.purpose,
-        design: result.levels.design,
-        decision: result.levels.judgment,
-      }
-    : result.levels;
-
-  const handleInviteFriends = () => {
-    trackEvent("click_invite_friend", {
-      type_id: result.resultType,
-      result_type: result.resultType,
-      title: typeData.nameJa,
-      source,
-    });
-    const url = shareLandingUrl;
-    void (async () => {
-      try {
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: "QUESTORIA",
-              text: shareText,
-              url,
-            });
-            return;
-          } catch (e) {
-            if ((e as Error).name === "AbortError") return;
-          }
-        }
-        await navigator.clipboard.writeText(shareCopyText);
-      } catch {
-        /* noop */
-      }
-    })();
-  };
-
   const handleShareX = () => {
     trackEvent("click_share_x", {
       type_id: result.resultType,
       result_type: result.resultType,
       title: typeData.nameJa,
-      source,
+      source: "deep",
     });
     const url = shareLandingUrl;
     const text = shareText;
@@ -310,7 +251,7 @@ export default function ResultClient() {
       result_type: result.resultType,
       title: typeData.nameJa,
       source_section: "share_modal",
-      source,
+      source: "deep",
     });
     const url = shareLandingUrl;
     try {
@@ -327,7 +268,7 @@ export default function ResultClient() {
       result_type: result.resultType,
       title: typeData.nameJa,
       source_section: "share_modal",
-      source,
+      source: "deep",
     });
 
     try {
@@ -356,10 +297,6 @@ export default function ResultClient() {
       a.click();
       a.remove();
     }
-  };
-
-  const handleGoDeeper = () => {
-    router.push("/play?fresh=1");
   };
 
   return (
@@ -404,59 +341,36 @@ export default function ResultClient() {
                 tagline={pickString(detail?.tagline, typeData.tagline)}
                 imageSrc={imageSrc}
                 colors={typeData.colors}
-                scores={displayScores}
-                levels={displayLevels}
-                mode={isLight(result) ? undefined : result.mode ?? "work"}
-                source={isLight(result) ? "light" : "deep"}
+                scores={result.normalizedScores}
+                levels={result.levels}
+                mode={result.mode ?? "work"}
                 overallComment={detail?.overallComment ?? typeData.overallComment}
                 disableOverallClamp={detail != null}
-                hideSkillStatusDescription
-                embedded
-                hideSkillStatus
-              />
-            </div>
-
-            <div className="px-5 py-6">
-              <ShareSection
-                otherTypes={getOtherTypesForCompare(result.resultType)}
-                typeImageMap={typeImageMap}
-                typeNameJaByResultType={typeNameJaByResultType}
-                copy={shareCompareCopy}
-                onShare={() => setShareOpen(true)}
-                source={isLight(result) ? "light" : "deep"}
-                onDeeperDiagnosis={handleGoDeeper}
                 embedded
               />
-            </div>
-
-            {/* 認知バナーは外枠に近づけつつ安全余白は残す */}
-            <div className="px-2 py-6 sm:px-3">
-              <LineMeritBannerSection />
             </div>
 
             <div className="px-5 py-7">
-              <WhyThisTypeSection summaryOverride={detail?.judgementReason} hideCoreLabel embedded />
-            </div>
-            <div className="px-5 py-6">
-              <TypeAnalysisSection
-                copy={typeAnalysisCopy}
-                hideIntro
-                hideGrowth
-                hideTierLabel
-                unifyItemTitleTone
-                openRiskPointByDefault
-                hideRiskPointClosedPreview
+              <WhyThisTypeSection
+                judgementReason={detail?.judgementReason}
+                combinationInsight={detail?.combinationInsight}
                 embedded
               />
             </div>
+
+            <div className="px-5 py-6">
+              <TypeAnalysisSection copy={typeAnalysisCopy} embedded />
+            </div>
+
             <div className="px-5 py-7">
               <NextActionSection
-                title={detail?.nextActionTitle ?? "AI活用の際に意識するべきこと"}
+                title="これからどうするか"
                 riskPoint={pickString(detail?.riskPoint, typeData.riskPoint)}
                 growth={pickString(detail?.growth, typeData.description.growth)}
                 lead={pickString(detail?.nextActionLead, typeData.nextActionLead)}
                 bodyOverride={detail?.nextActionBody}
                 immediateActionOverride={detail?.nextActionImmediateAction}
+                note={detail?.nextActionNote}
                 nextActions={
                   detail?.nextActions
                     ? Array.from(detail.nextActions)
@@ -467,29 +381,15 @@ export default function ResultClient() {
                 embedded
               />
             </div>
-            <div className="px-5 py-7">
-              <LockedGuidePreviewSection embedded lineUrl={LINE_ADD_FRIEND_URL} />
-            </div>
-            {/* 本命CTAはプレート内で横幅を少し広げる（安全余白は残す） */}
-            <div className="px-3 py-7 sm:px-4">
-              <LineCtaBannerSection
-                lineUrl={LINE_ADD_FRIEND_URL}
-                onClick={() =>
-                  (() => {
-                    trackEvent("click_line_banner_cta", {
-                      type_id: result.resultType,
-                      result_type: result.resultType,
-                      title: typeData.nameJa,
-                      source_section: "line_banner_cta",
-                      source,
-                    });
-                    const lastLightId = getLastLightResponseId();
-                    if (lastLightId) {
-                      markLightResponseClickedLine(lastLightId);
-                      void markLightResponseClickedLineSupabase(lastLightId);
-                    }
-                  })()
-                }
+
+            <div className="px-5 py-6">
+              <ShareSection
+                otherTypes={getOtherTypesForCompare(result.resultType)}
+                typeImageMap={typeImageMap}
+                typeNameJaByResultType={typeNameJaByResultType}
+                copy={shareCompareCopy}
+                onShare={() => setShareOpen(true)}
+                embedded
               />
             </div>
           </ResultPlateSection>
@@ -507,21 +407,8 @@ export default function ResultClient() {
             onCopyLink={handleCopyLink}
             onSaveImage={handleSaveShareImage}
           />
-
-          {searchParams.get("export") === "1" ? (
-            <div className="pt-2">
-              <button
-                type="button"
-                className="w-full rounded-xl border border-white/18 bg-black/22 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-sm transition hover:border-white/24 hover:bg-black/28 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35"
-                onClick={() => downloadLightResponseLogsCsv()}
-              >
-                診断ログをダウンロード（CSV）
-              </button>
-            </div>
-          ) : null}
         </div>
       </div>
     </main>
   );
 }
-

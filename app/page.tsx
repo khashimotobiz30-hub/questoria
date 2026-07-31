@@ -204,7 +204,7 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mb-6 mt-8 flex justify-center sm:mb-7 sm:mt-10">
-              <QuestStartCta variant="primary" showResultLinks={false}>
+              <QuestStartCta variant="primary">
                 <QuestStartCtaLabel />
               </QuestStartCta>
             </div>
@@ -243,7 +243,7 @@ export default function Home() {
             </HomeResultStyleCard>
 
             <div className="mt-10 flex justify-center sm:mt-12">
-              <QuestStartCta variant="primary" showResultLinks={false}>
+              <QuestStartCta variant="primary">
                 <QuestStartCtaLabel />
               </QuestStartCta>
             </div>

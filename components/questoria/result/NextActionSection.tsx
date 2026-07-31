@@ -18,6 +18,7 @@ export function NextActionSection({
   nextActions,
   bodyOverride,
   immediateActionOverride,
+  note,
   /** レポート本文に埋め込む（外枠カードを外す） */
   embedded,
 }: {
@@ -28,24 +29,32 @@ export function NextActionSection({
   nextActions?: readonly string[];
   bodyOverride?: string;
   immediateActionOverride?: string;
+  note?: string;
   embedded?: boolean;
 }) {
+  const actions = useMemo(
+    () => (nextActions ?? []).map((x) => x.trim()).filter(Boolean),
+    [nextActions],
+  );
+
   const prescription = useMemo(() => {
     const body = bodyOverride?.trim();
     const immediateAction = immediateActionOverride?.trim();
     if (body || immediateAction) {
       return {
         body: body ?? "",
-        immediateAction: immediateAction ?? "",
+        immediateAction:
+          immediateAction ||
+          (actions[0] ? (actions[0].endsWith("。") ? actions[0] : `${actions[0].replace(/[。．]+$/, "")}。`) : ""),
       };
     }
     return buildNextActionPrescription({
       riskPoint,
       growth,
       nextActionLead: lead,
-      nextActions,
+      nextActions: actions,
     });
-  }, [bodyOverride, immediateActionOverride, riskPoint, growth, lead, nextActions]);
+  }, [bodyOverride, immediateActionOverride, riskPoint, growth, lead, actions]);
 
   const header = (
     <header className={embedded ? "space-y-0" : ""}>
@@ -57,7 +66,7 @@ export function NextActionSection({
           >
             ◆
           </span>
-          {title ?? "今から意識するべきこと"}
+          {title ?? "これからどうするか"}
         </span>
       </h2>
       <div
@@ -68,29 +77,74 @@ export function NextActionSection({
         }}
         aria-hidden="true"
       />
+      <p className={`mx-auto mt-2.5 max-w-prose text-center text-[13px] leading-relaxed ${reportMutedTextClass}`}>
+        傾向を踏まえて、次にやるとよいことをまとめました。
+      </p>
     </header>
   );
 
   const body = (
-    <div className="pt-4">
+    <div className="space-y-5 pt-4">
       {prescription ? (
-        <div className="space-y-4">
-          <p className={`mx-auto max-w-prose whitespace-pre-line text-[15px] leading-[1.9] sm:text-[15px] ${reportBodyTextClass}`}>
-            {prescription.body}
-          </p>
+        <>
+          {prescription.body ? (
+            <p
+              className={`mx-auto max-w-prose whitespace-pre-line text-[15px] leading-[1.9] sm:text-[15px] ${reportBodyTextClass}`}
+            >
+              {prescription.body}
+            </p>
+          ) : null}
 
-          <div className="rounded-xl border border-[#FFD700]/24 bg-[#FFD700]/[0.055] px-3.5 py-3.5 shadow-[inset_0_1px_0_rgba(255,215,0,0.06)] sm:px-4 sm:py-4">
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${reportLabelGoldClass}`}>
-              今から始める NEXT ACTION は…
+          {prescription.immediateAction ? (
+            <div className="rounded-xl border border-[#FFD700]/24 bg-[#FFD700]/[0.055] px-3.5 py-3.5 shadow-[inset_0_1px_0_rgba(255,215,0,0.06)] sm:px-4 sm:py-4">
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.14em] ${reportLabelGoldClass}`}>
+                まずはこれだけ
+              </p>
+              <p
+                className={`mt-2.5 whitespace-pre-line text-[15px] font-medium leading-[1.85] tracking-[0.01em] sm:text-[15px] ${reportBodyTextClass}`}
+              >
+                {prescription.immediateAction}
+              </p>
+            </div>
+          ) : null}
+
+          {growth?.trim() ? (
+            <div className="space-y-2 border-t border-white/10 pt-4">
+              <p className={`text-[13px] font-bold tracking-wide ${reportLabelGoldClass}`}>
+                こう変わっていく
+              </p>
+              <p
+                className={`mx-auto max-w-prose whitespace-pre-line text-[15px] leading-[1.85] ${reportBodyTextClass}`}
+              >
+                {growth.trim()}
+              </p>
+            </div>
+          ) : null}
+
+          {actions.length > 0 ? (
+            <div className="space-y-2.5">
+              <p className={`text-[13px] font-bold tracking-wide ${reportLabelGoldClass}`}>
+                実践ステップ
+              </p>
+              <ol className="mx-auto max-w-prose list-decimal space-y-2 pl-5">
+                {actions.map((action, i) => (
+                  <li key={i} className={`text-[15px] leading-[1.8] ${reportBodyTextClass}`}>
+                    {action}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+
+          {note?.trim() ? (
+            <p className={`mx-auto max-w-prose text-sm leading-relaxed ${reportMutedTextClass}`}>
+              {note.trim()}
             </p>
-            <p className={`mt-2.5 whitespace-pre-line text-[15px] font-medium leading-[1.85] tracking-[0.01em] sm:text-[15px] ${reportBodyTextClass}`}>
-              {prescription.immediateAction}
-            </p>
-          </div>
-        </div>
+          ) : null}
+        </>
       ) : (
         <div className="rounded-xl border border-dashed border-white/14 bg-black/25 p-4">
-          <p className={`text-sm ${reportMutedTextClass}`}>TODO: nextActions を他タイプにも追加</p>
+          <p className={`text-sm ${reportMutedTextClass}`}>今後の行動テキストは準備中です。</p>
         </div>
       )}
     </div>

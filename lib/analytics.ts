@@ -14,7 +14,7 @@ export function isGaEnabled(): boolean {
 function isGaDebugMode(): boolean {
   if (typeof window === "undefined") return false;
   // Allow forcing DebugView in any env via query param.
-  // Example: https://.../light?ga_debug=1
+  // Example: https://.../play?ga_debug=1
   try {
     const q = window.location?.search ?? "";
     if (q.includes("ga_debug=1")) return true;
